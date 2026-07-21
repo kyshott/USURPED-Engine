@@ -1,0 +1,5 @@
+This file is just to help others understand what the asset definitions for items are (what the values are).
+
+Weapons:
+
+type >> name >> damage >> speed >> lifespan >> rarity

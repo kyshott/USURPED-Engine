@@ -1,0 +1,59 @@
+Font orbitron ./assets/fonts/Orbitron.ttf
+Texture BLACK ./assets/textures/Black.png
+Texture DEKUTREE ./assets/textures/DekuTree.png
+Texture GRAVE ./assets/textures/Grave.png
+Texture LEEVER ./assets/textures/Leever.png
+Texture LINKSTANDD ./assets/textures/LinkStandD.png
+Texture LINKSTANDR ./assets/textures/LinkStandR.png
+Texture LINKSTANDU ./assets/textures/LinkStandU.png
+Texture LINKUSED ./assets/textures/LinkUseD.png
+Texture LINKUSER ./assets/textures/LinkUseR.png
+Texture LINKUSEU ./assets/textures/LinkUseU.png
+Texture LINKWALKD ./assets/textures/LinkWalkD.png
+Texture LINKWALKR ./assets/textures/LinkWalkR.png
+Texture LINKWALKU ./assets/textures/LinkWalkU.png
+Texture POND ./assets/textures/Pond.png
+Texture ROCKC ./assets/textures/RockC.png
+Texture ROCKDL ./assets/textures/RockDL.png
+Texture ROCKDR ./assets/textures/RockDR.png
+Texture ROCKU ./assets/textures/RockU.png
+Texture ROCKUL ./assets/textures/RockUL.png
+Texture ROCKUR ./assets/textures/RockUR.png
+Texture STATUE ./assets/textures/Statue.png
+Texture SWORD ./assets/textures/Sword.png
+Texture TEKTITE ./assets/textures/Tektite.png
+Texture TREESMALL ./assets/textures/TreeSmall.png
+Texture HEART ./assets/textures/Heart.png
+Animation BLACK BLACK 1 1 4
+Animation DEKUTREE DEKUTREE 1 1 8
+Animation GRAVE GRAVE 1 1 4
+Animation LEEVER LEEVER 2 10 4
+Animation LINKSTANDD LINKSTANDD 1 1 4
+Animation LINKSTANDR LINKSTANDR 1 1 4
+Animation LINKSTANDU LINKSTANDU 1 1 4
+Animation LINKUSED LINKUSED 1 1 4
+Animation LINKUSER LINKUSER 1 1 4
+Animation LINKUSEU LINKUSEU 1 1 4
+Animation LINKWALKD LINKWALKD 2 5 4
+Animation LINKWALKR LINKWALKR 2 5 4
+Animation LINKWALKU LINKWALKU 2 5 4
+Animation POND POND 1 1 4
+Animation ROCKC ROCKC 1 1 4
+Animation ROCKDL ROCKDL 1 1 4
+Animation ROCKDR ROCKDR 1 1 4
+Animation ROCKU ROCKU 1 1 4
+Animation ROCKUL ROCKUL 1 1 4
+Animation ROCKUR ROCKUR 1 1 4
+Animation STATUE STATUE 1 1 4
+Animation SWORD SWORD 1 1 4
+Animation TEKTITE TEKTITE 2 15 4
+Animation TREESMALL TREESMALL 1 1 4
+Animation HEART HEART 1 1 4
+Music BGMUSIC ./assets/sounds/music.wav
+Sound ENEMYHIT ./assets/sounds/EnemyHit.wav
+Sound HEART ./assets/sounds/HeartPickup.wav
+Sound ENEMYKILL ./assets/sounds/EnemyKill.wav
+Sound LINKDIE ./assets/sounds/LinkDie.wav
+Sound LINKHURT ./assets/sounds/LinkHurt.wav
+Sound LINKSWING ./assets/sounds/LinkSwordSwing.wav
+Sound LINKYELP ./assets/sounds/LinkYelp.wav
