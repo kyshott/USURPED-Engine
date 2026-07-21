@@ -1,3 +1,4 @@
 WINDOW Assignment4Soln 1280 768
 WORLD 20 12
 ASSETS ./assets.txt
+ITEMS ./items.txt

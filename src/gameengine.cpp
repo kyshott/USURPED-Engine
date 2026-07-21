@@ -39,6 +39,7 @@ void GameEngine::init(const std::string path){
     std::string str;
     std::string assetPath;
     std::string windowName;
+    std::string itempath;
     while (file.good()) {
         file >> str;
         if(str=="WINDOW"){
@@ -49,6 +50,9 @@ void GameEngine::init(const std::string path){
         }
         if(str=="WORLD"){
             file>>tilesX>>tilesY;
+        }
+        if (str == "ITEMS") {
+            file >> itempath;
         }
     }
     file.close();
@@ -62,6 +66,8 @@ void GameEngine::init(const std::string path){
     SetTargetFPS(60);
     //init assets
     assets.load(assetPath);
+    //init items
+    assets.loadItems(itempath);
     //change scene to starting scene
     changeScene("MENU",std::make_shared<SceneMenu>(this));
     

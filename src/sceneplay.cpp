@@ -45,7 +45,7 @@ void ScenePlay::init(const std::string& levelPath){
     registerAction(KEY_S, "DOWN");
     registerAction(KEY_A, "LEFT");
     registerAction(KEY_D, "RIGHT");
-    registerAction(MOUSE_BUTTON_LEFT, "ATTACK");
+    registerAction(KEY_M, "ATTACK");
     registerAction(MOUSE_BUTTON_RIGHT, "SECONDARY");
     registerAction(KEY_SPACE, "DODGE");
     registerAction(KEY_E, "INTERACT");
@@ -253,7 +253,7 @@ void ScenePlay::sWeapons() {
 
 
     if (input.attack && !state.isAttacking) {
-        // attack relative to mouse cursor location
+		usePrimaryWeapon(player, entityManager, gameEngine);
     }
 
 }
@@ -803,7 +803,7 @@ void ScenePlay::sDoAction(const Action& action){
             if (!state.isAttacking) {
                 input.attack = true;
                 state.isAttacking = true;
-                spawnSword();
+                //spawnSword();
             }
         }
     }
@@ -867,6 +867,9 @@ void ScenePlay::spawnPlayer(){
     player->addComponent<CBoundingBox>(Vec2(playerConfig.BX,playerConfig.BY));
     Vec2 pos = gridToMidPixel(playerConfig.X,playerConfig.Y,player);
     player->addComponent<CTransform>(Vec2(pos.x,pos.y), Vec2(0.0f,0.0f), 0.0f);
+    std::map<std::string, std::string> items;
+    items["PRIMARY"] = "ANCIENTSWORD";
+	player->addComponent<CEquipment>(items);
 }
 
 /**
@@ -987,7 +990,7 @@ void ScenePlay::sLifespan() {
         if (e->hasComponent<CLifespan>()) {
             e->getComponent<CLifespan>().remaining--;
             if (e->getComponent<CLifespan>().remaining <= 0) {
-                if (e->getID() == "SWORD") {
+                if (e->getID() == "ANCIENTSWORD") {
                     player->getComponent<CState>().isAttacking = false;
                 }
                 e->destroy();
@@ -1003,6 +1006,7 @@ void ScenePlay::update(){
     entityManager.update();
 
     sMovement();
+    sWeapons();
     sAnimation();
     sCollision();
     sLifespan();

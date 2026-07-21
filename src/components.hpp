@@ -5,6 +5,7 @@
 #include <raylib.h>
 #include "vec2.hpp"
 #include "animation.hpp"
+#include <map>
 
 /**
  * Base class for all Component objects

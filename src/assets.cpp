@@ -5,7 +5,6 @@
 #include <raylib.h>
 #include "animation.hpp"
 
-
 Assets::Assets()=default;
 Assets::~Assets(){
     //unload fonts
@@ -29,7 +28,7 @@ Assets::~Assets(){
 }
 
 /**
- * Loads the game textures, fonts, animation, sound, and music definitions from the asset definition file
+ * Loads the game textures, fonts, animation, sound, item, enemy and music definitions from the asset definition file
  * 
  * @param path string that contains the path to the asset definition file
  */
@@ -67,6 +66,22 @@ void Assets::load(const std::string path){
     file.close();
 }
 
+void Assets::loadItems(const std::string path) {
+    std::ifstream file(path);
+    std::string type;
+    std::string name;
+
+	int damage, cost, manacost, rarity, lifespan;
+    float speed;
+
+    while (file.good()) {
+		file >> type >> name >> damage >> speed >> cost >> manacost >> rarity >> lifespan;
+        std::cout << name;
+		addItem(type, name, damage, speed, cost, manacost, rarity, lifespan);
+    }
+    file.close();
+}
+
 /**
  * Gets the raylib texture based based on name
  * 
@@ -81,7 +96,7 @@ const Texture2D& Assets::getTexture(const std::string& name) const{
 * 
 * @param name Item name
 */
-const itemSpec& Assets::getItem(const std::string& name) const {
+const ItemSpec& Assets::getItem(const std::string& name) const {
 	return itemMap.at(name);
 }
 
@@ -192,8 +207,8 @@ void Assets::addMusic(const std::string& name, const std::string& path){
 * @param manacost Item mana cost
 * @param rarity Item rarity
 */
-void Assets::addItem(const std::string& type, const std::string& name, int damage, float speed, int cost, int manacost, int rarity, int lifespan) {
-	itemSpec item;
+void Assets::addItem(const std::string& type, const std::string& name, int damage, int speed, int cost, int manacost, int rarity, int lifespan) {
+	ItemSpec item;
 
     if (type == "WEAPON") {
         item.type = type;
