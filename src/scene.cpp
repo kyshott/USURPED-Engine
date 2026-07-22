@@ -75,6 +75,7 @@ void Scene::renderTex(){
     renderType("TILE");
     renderType("DYNAMIC");
     renderType("DEC");
+    renderType("WEAPON");
 }
 
 /**

@@ -2,4 +2,4 @@ This file is just to help others understand what the asset definitions for items
 
 Weapons:
 
-type >> name >> damage >> speed >> lifespan >> rarity
+type >> name >> damage >> speed >> cost >> manacost >> rarity >> lifespan

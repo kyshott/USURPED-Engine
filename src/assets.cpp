@@ -76,7 +76,7 @@ void Assets::loadItems(const std::string path) {
 
     while (file.good()) {
 		file >> type >> name >> damage >> speed >> cost >> manacost >> rarity >> lifespan;
-        std::cout << name;
+		//std::cout << name << " Damage: " << damage << " Speed: " << speed << " Cost: " << cost << " ManaCost: " << manacost << " Rarity: " << rarity << " Lifespan: " << lifespan << std::endl;
 		addItem(type, name, damage, speed, cost, manacost, rarity, lifespan);
     }
     file.close();
@@ -218,6 +218,7 @@ void Assets::addItem(const std::string& type, const std::string& name, int damag
         item.cost = cost;
         item.manacost = manacost;
         item.rarity = rarity;
+        item.lifespan = lifespan;
     }
 
 	itemMap[name] = item;

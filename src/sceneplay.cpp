@@ -45,9 +45,8 @@ void ScenePlay::init(const std::string& levelPath){
     registerAction(KEY_S, "DOWN");
     registerAction(KEY_A, "LEFT");
     registerAction(KEY_D, "RIGHT");
-    registerAction(KEY_M, "ATTACK");
+    registerAction(KEY_SPACE, "ATTACK");
     registerAction(MOUSE_BUTTON_RIGHT, "SECONDARY");
-    registerAction(KEY_SPACE, "DODGE");
     registerAction(KEY_E, "INTERACT");
     registerAction(KEY_R, "ACTIVE_ITEM");
     
@@ -188,72 +187,91 @@ void ScenePlay::loadLevel(const std::string& levelPath){
  * For other entities: Updates the animation via the CAnimation component.
  *
  */
-void ScenePlay::sAnimation(){
-    //TODO: Based on the current state and user input, change the animation of the player
-
+void ScenePlay::sAnimation() {
     CState& playerState = player->getComponent<CState>();
     CAnimation& playerAnim = player->getComponent<CAnimation>();
     CTransform& transf = player->getComponent<CTransform>();
-    CInput& input = player->getComponent<CInput>();
+
+    const bool isMoving =
+        std::abs(transf.velocity.x) > 0.05f ||
+        std::abs(transf.velocity.y) > 0.05f;
+
+    std::string nextAnimation = playerAnim.animation.getName();
 
     if (playerState.isAttacking) {
-        if (transf.facing.y == 1 && playerAnim.animation.getName() != "LINKUSER") {
-            playerAnim.animation = gameEngine->getAssets().getAnimation("LINKUSEU");
+        if (transf.facing.y == 1) {
+            nextAnimation = "LINKUSEU";
         }
-        else if (transf.facing.y == -1 && playerAnim.animation.getName() != "LINKUSED") {
-            playerAnim.animation = gameEngine->getAssets().getAnimation("LINKUSED");
+        else if (transf.facing.y == -1) {
+            nextAnimation = "LINKUSED";
         }
-        else if (transf.facing.x == -1 && playerAnim.animation.getName() != "LINKUSER") {
-            playerAnim.animation = gameEngine->getAssets().getAnimation("LINKUSER");
-        }
-        else if (transf.facing.x == 1 && playerAnim.animation.getName() != "LINKUSER") {
-            playerAnim.animation = gameEngine->getAssets().getAnimation("LINKUSER");
+        else if (transf.facing.x == -1 || transf.facing.x == 1) {
+            nextAnimation = "LINKUSER";
         }
     }
     else {
-        if (transf.facing.y == 1 && playerAnim.animation.getName() != "LINKWALKU" && input.up) {
-            playerAnim.animation = gameEngine->getAssets().getAnimation("LINKWALKU");
+        if (transf.facing.y == 1) {
+            nextAnimation = isMoving ? "LINKWALKU" : "LINKSTANDU";
         }
-        else if (transf.facing.y == 1 && !input.up) {
-            playerAnim.animation = gameEngine->getAssets().getAnimation("LINKSTANDU");
+        else if (transf.facing.y == -1) {
+            nextAnimation = isMoving ? "LINKWALKD" : "LINKSTANDD";
         }
-        else if (transf.facing.y == -1 && playerAnim.animation.getName() != "LINKWALKD" && input.down) {
-            playerAnim.animation = gameEngine->getAssets().getAnimation("LINKWALKD");
-        }
-        else if (transf.facing.y == -1 && !input.down) {
-            playerAnim.animation = gameEngine->getAssets().getAnimation("LINKSTANDD");
-        }
-        else if (transf.facing.x == -1 && playerAnim.animation.getName() != "LINKWALKR" && input.left) {
-            playerAnim.animation = gameEngine->getAssets().getAnimation("LINKWALKR");
-        }
-        else if (transf.facing.x == -1 && !input.left) {
-            playerAnim.animation = gameEngine->getAssets().getAnimation("LINKSTANDR");
-        }
-        else if (transf.facing.x == 1 && playerAnim.animation.getName() != "LINKWALKR" && input.right) {
-            playerAnim.animation = gameEngine->getAssets().getAnimation("LINKWALKR");
-        }
-        else if (transf.facing.x == 1 && !input.right) {
-            playerAnim.animation = gameEngine->getAssets().getAnimation("LINKSTANDR");
+        else if (transf.facing.x == -1 || transf.facing.x == 1) {
+            nextAnimation = isMoving ? "LINKWALKR" : "LINKSTANDR";
         }
     }
 
-    //Update all the animation frames
-    for(auto& e : entityManager.getEntities()){
-        if(e->hasComponent<CAnimation>()){
+    if (nextAnimation != playerAnim.animation.getName()) {
+        playerAnim.animation = gameEngine->getAssets().getAnimation(nextAnimation);
+    }
+
+    for (auto& e : entityManager.getEntities()) {
+        if (e->hasComponent<CAnimation>()) {
             e->getComponent<CAnimation>().animation.update();
         }
     }
 }
 
 void ScenePlay::sWeapons() {
-	CInput& input = player->getComponent<CInput>();
-	CTransform& transf = player->getComponent<CTransform>();
-    CState& state = player->getComponent<CState>();
-	input.mouseLocation = Vec2(GetMousePosition().x - transf.position.x, GetMousePosition().y - transf.position.y);
+    for (auto& e : entityManager.getEntities("WEAPON")) {
+        if (!e->hasComponent<CTransform>() || !e->hasComponent<CLifespan>()) {
+            continue;
+        }
 
+        CTransform& playerTransform = player->getComponent<CTransform>();
+        CTransform& weaponTransform = e->getComponent<CTransform>();
+        CLifespan& life = e->getComponent<CLifespan>();
 
-    if (input.attack && !state.isAttacking) {
-		usePrimaryWeapon(player, entityManager, gameEngine);
+        float progress = 1.0f - (static_cast<float>(life.remaining) / static_cast<float>(life.total));
+        float radius = static_cast<float>(gameEngine->getTileSizeX());
+
+        float startAngle = 0.0f;
+        float endAngle = 0.0f;
+
+        if (playerTransform.facing.y == 1) {
+            startAngle = 225.0f;
+            endAngle = 315.0f;
+        }
+        else if (playerTransform.facing.x == 1) {
+            startAngle = -45.0f;
+            endAngle = 45.0f;
+        }
+        else if (playerTransform.facing.y == -1) {
+            startAngle = 45.0f;
+            endAngle = 135.0f;
+        }
+        else if (playerTransform.facing.x == -1) {
+            startAngle = 135.0f;
+            endAngle = 225.0f;
+        }
+
+        float angle = startAngle + (endAngle - startAngle) * progress;
+        float radians = angle * DEG2RAD;
+
+        weaponTransform.prevPosition = weaponTransform.position;
+        weaponTransform.position.x = playerTransform.position.x + std::cos(radians) * radius;
+        weaponTransform.position.y = playerTransform.position.y + std::sin(radians) * radius;
+        weaponTransform.angle = angle + 90.0f;
     }
 
 }
@@ -267,32 +285,56 @@ void ScenePlay::sWeapons() {
 void ScenePlay::sMovement() {
     for (auto& e : entityManager.getEntities("DYNAMIC")) {
 
-        // --- Player movement ---
         if (e->hasComponent<CInput>()) {
             CInput& inp = e->getComponent<CInput>();
             CTransform& transf = e->getComponent<CTransform>();
-            CState& eState = e->getComponent<CState>();
+            CState& state = e->getComponent<CState>();
 
-            if (!eState.isAttacking && !inp.attack) {
-                // Set velocity based on input
-                const float ACCEL = 0.5f; // Acceleration rate
-                const float DECEL = 0.3f; // Deceleration rate
+            const float ACCEL = 0.35f;
+            const float DRAG = 0.84f;
+            const float MAX_SPEED = playerConfig.SPEED;
 
-                Vec2 desired(0.0f, 0.0f);
-                if (inp.left)  desired.x -= 1.0f;
-                if (inp.right) desired.x += 1.0f;
-                if (inp.up)    desired.y -= 1.0f;
-                if (inp.down)  desired.y += 1.0f;
+            if (!state.isAttacking) {
 
-                if (desired.length() > 0.0f) {
-                    desired = desired.normalized() * playerConfig.SPEED;
-                    transf.velocity.x += (desired.x - transf.velocity.x) * ACCEL;
-                    transf.velocity.y += (desired.y - transf.velocity.y) * ACCEL;
+                Vec2 inputDir(0.0f, 0.0f);
+                if (inp.left)  inputDir.x -= 1.0f;
+                if (inp.right) inputDir.x += 1.0f;
+                if (inp.up)    inputDir.y -= 1.0f;
+                if (inp.down)  inputDir.y += 1.0f;
+
+                if (inputDir.length() > 0.0f) {
+                    if (std::abs(inputDir.x) >= std::abs(inputDir.y)) {
+                        transf.facing.x = (inputDir.x > 0.0f) ? 1.0f : -1.0f;
+                        transf.facing.y = 0.0f;
+                    }
+                    else {
+                        transf.facing.x = 0.0f;
+                        transf.facing.y = (inputDir.y > 0.0f) ? -1.0f : 1.0f;
+                    }
+                }
+
+                if (inputDir.length() > 0.0f) {
+                    inputDir = inputDir.normalized();
+                    Vec2 targetVelocity = inputDir * MAX_SPEED;
+
+                    transf.velocity.x += (targetVelocity.x - transf.velocity.x) * ACCEL;
+                    transf.velocity.y += (targetVelocity.y - transf.velocity.y) * ACCEL;
                 }
                 else {
-                    transf.velocity.x *= (1.0f - DECEL);
-                    transf.velocity.y *= (1.0f - DECEL);
+                    transf.velocity.x *= DRAG;
+                    transf.velocity.y *= DRAG;
+
+                    if (std::abs(transf.velocity.x) < 0.05f) {
+                        transf.velocity.x = 0.0f;
+                    }
+                    if (std::abs(transf.velocity.y) < 0.05f) {
+                        transf.velocity.y = 0.0f;
+                    }
                 }
+            }
+            else {
+                transf.velocity.x = 0.0f;
+                transf.velocity.y = 0.0f;
             }
 
             room = Vec2(
@@ -302,7 +344,6 @@ void ScenePlay::sMovement() {
         }
 
         if (e->hasComponent<CFollowPlayer>()) {
-            
             CFollowPlayer& follow = e->getComponent<CFollowPlayer>();
             CTransform& transf = e->getComponent<CTransform>();
             CTransform& playerPos = player->getComponent<CTransform>();
@@ -312,22 +353,22 @@ void ScenePlay::sMovement() {
             for (auto& e2 : entityManager.getEntities()) {
                 if (e2->getComponent<CBoundingBox>().blocksVision) {
                     if (e == e2) continue;
-					if (e2->getID() == "PLAYER") continue;
-					if (e2->getID() == "ENEMY") continue;
-					if (e2->getID() == "SWORD") continue;
+                    if (e2->getID() == "PLAYER") continue;
+                    if (e2->getID() == "ENEMY") continue;
+                    if (e2->getID() == "SWORD") continue;
 
                     if (Physics::entityIntersect(transf.position, playerPos.position, e2)) {
                         blocked = true;
                         break;
-					}
+                    }
                 }
-			}
-     
+            }
+
             Vec2 delta = follow.home - transf.position;
             float dist = delta.length();
 
             if (dist > 0.0f && !blocked) {
-                transf.velocity =  delta.normalized() * follow.speed;
+                transf.velocity = delta.normalized() * follow.speed;
             }
             else {
                 transf.velocity.x = 0.0f;
@@ -370,7 +411,12 @@ void ScenePlay::sMovement() {
             }
         }
     }
+
+    for (auto& e : entityManager.getEntities("WEAPON")) {
+        weaponSwing(e, player, entityManager, gameEngine);
+	}
 }
+
 
 void ScenePlay::sCollision() {
     for (auto& de : entityManager.getEntities("DYNAMIC")) {
@@ -389,6 +435,7 @@ void ScenePlay::sCollision() {
 
         for (auto& e : entityManager.getEntities()) {
             if (de == e) continue;
+            if (de->getTag() == "WEAPON" || e->getTag() == "WEAPON") skipPos = true;
 			if (de->getID() == "SWORD" || de->getID() == "HEART" || e->getID() == "SWORD" || e->getID() == "HEART") if (de->getID() != "PLAYER" && e->getID() != "PLAYER") skipPos = true;
             if (e->getTag() == "DEC") continue;
 
@@ -415,16 +462,17 @@ void ScenePlay::sCollision() {
                     teleport(e);
                 }
 
-                if (de->getID() == "SWORD" && e->getID() == "ENEMY" || de->getID() == "ENEMY" && e->getID() == "SWORD") {
-                    auto sword = (de->getID() == "SWORD") ? de : e;
+                if (de->getTag() == "WEAPON" && e->getID() == "ENEMY" || de->getID() == "ENEMY" && e->getTag() == "WEAPON") {
+                    auto sword = (de->getTag() == "WEAPON") ? de : e;
                     auto entity = (de->getID() == "ENEMY") ? de : e;
-                    if (sword->getComponent<CState>().state == "NOHIT") {
-                        sword->getComponent<CState>().state = "HIT";
+                    if (!entity->hasComponent<CInvincibility>()) {
                         entity->getComponent<CHealth>().current -= de->getComponent<CDamage>().damage;
+                        entity->addComponent<CInvincibility>(30);
+                        entity->getComponent<CInvincibility>().remaining = 30;
                         gameEngine->playSound("ENEMYHIT");
                         if (entity->getComponent<CHealth>().current <= 0) {
                             gameEngine->playSound("ENEMYKILL");
-							spawnHeart(entity->getComponent<CTransform>().position);
+                            spawnHeart(entity->getComponent<CTransform>().position);
                             entity->destroy();
                         }
                     }
@@ -751,64 +799,55 @@ void ScenePlay::renderAIDebug(){
  * 
  * @param action action sent from the gameEngine that contains type and name
  */
-void ScenePlay::sDoAction(const Action& action){
-
-    //TODO: Add in the results of the additional actions
-    //that you register in the init() function: LEFT, RIGHT, UP, DOWN, and ATTACK
-    //also add in what happens when you RELEASE the button (if anything)
-
+void ScenePlay::sDoAction(const Action& action) {
     CInput& input = player->getComponent<CInput>();
     CState& state = player->getComponent<CState>();
-    if((action.getType()=="PRESS")){
 
-        if(action.getName()=="BB"){
-            renderBoundingBox=!renderBoundingBox;
+    if ((action.getType() == "PRESS")) {
+        if (action.getName() == "BB") {
+            renderBoundingBox = !renderBoundingBox;
         }
-        if(action.getName()=="GRID"){
-            renderGridLines=!renderGridLines;
+        if (action.getName() == "GRID") {
+            renderGridLines = !renderGridLines;
         }
-        if(action.getName()=="TEX"){
-            renderTextures=!renderTextures;
+        if (action.getName() == "TEX") {
+            renderTextures = !renderTextures;
         }
-        if(action.getName()=="HEALTH"){
-            renderHealth=!renderHealth;
+        if (action.getName() == "HEALTH") {
+            renderHealth = !renderHealth;
         }
-        if(action.getName()=="VISION"){
-            renderVisionDebug=!renderVisionDebug;
+        if (action.getName() == "VISION") {
+            renderVisionDebug = !renderVisionDebug;
         }
-        if(action.getName()=="QUIT"){
-            gameEngine->changeScene("MENU",std::make_shared<SceneMenu>(gameEngine));
+        if (action.getName() == "QUIT") {
+            gameEngine->changeScene("MENU", std::make_shared<SceneMenu>(gameEngine));
         }
-        if(action.getName()=="RELOAD"){
-            reload=true;
+        if (action.getName() == "RELOAD") {
+            reload = true;
         }
-        // Player controls
+
         if (action.getName() == "UP") {
             input.up = true;
-            //state.state = "UP";
         }
         if (action.getName() == "DOWN") {
             input.down = true;
-            //state.state = "DOWN";
         }
         if (action.getName() == "LEFT") {
             input.left = true;
-            //state.state = "LEFT";
         }
         if (action.getName() == "RIGHT") {
             input.right = true;
-            //state.state = "RIGHT";
         }
-        if (action.getName() == "ATTACK") {
-            if (!state.isAttacking) {
+        if (action.getName() == "ATTACK" || action.getName() == "MOUSE_LEFT") {
+            if (!state.isAttacking) {           
                 input.attack = true;
                 state.isAttacking = true;
-                //spawnSword();
+                usePrimaryWeapon(player, entityManager, gameEngine);
             }
         }
     }
-    if((action.getType()=="RELEASE")){
-        // Player controls
+
+    if ((action.getType() == "RELEASE")) {
         if (action.getName() == "UP") {
             input.up = false;
         }
@@ -824,7 +863,10 @@ void ScenePlay::sDoAction(const Action& action){
         if (action.getName() == "ATTACK") {
             input.attack = false;
         }
+    }
 
+    if (action.getType() == "MOUSE_MOVE") {
+        input.mouseLocation = action.getPosition();
     }
 }
 
@@ -868,7 +910,7 @@ void ScenePlay::spawnPlayer(){
     Vec2 pos = gridToMidPixel(playerConfig.X,playerConfig.Y,player);
     player->addComponent<CTransform>(Vec2(pos.x,pos.y), Vec2(0.0f,0.0f), 0.0f);
     std::map<std::string, std::string> items;
-    items["PRIMARY"] = "ANCIENTSWORD";
+    items["PRIMARY"] = "SWORD";
 	player->addComponent<CEquipment>(items);
 }
 
@@ -980,6 +1022,15 @@ Vec2 ScenePlay::getPosition(int rx, int ry, int tx, int ty) {
 }
 
 /**
+* Converts mouse position in window coordinates to world coordinates
+*/
+Vec2 ScenePlay::mouseToWorld(Vec2 windowPos) {
+    //convert to world
+    Vector2 worldMouse = GetScreenToWorld2D(Vector2(windowPos.x, windowPos.y), mainCamera);
+    return { worldMouse.x,worldMouse.y };
+}
+
+/**
 * Lifespan system 
 * 
 * Checks entities' lifespans and removes them if needed.
@@ -990,7 +1041,7 @@ void ScenePlay::sLifespan() {
         if (e->hasComponent<CLifespan>()) {
             e->getComponent<CLifespan>().remaining--;
             if (e->getComponent<CLifespan>().remaining <= 0) {
-                if (e->getID() == "ANCIENTSWORD") {
+                if (e->getID() == "SWORD") {
                     player->getComponent<CState>().isAttacking = false;
                 }
                 e->destroy();

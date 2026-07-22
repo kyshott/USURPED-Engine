@@ -43,6 +43,7 @@ class ScenePlay : public Scene{
         void loadLevel(const std::string& levelPath);
         void reloadScene();
         Vec2 getPosition(int rx, int ry, int tx, int ty);
+		Vec2 mouseToWorld(Vec2 windowPos);
         void renderHealthBar();
         void renderAIDebug();
     public:

@@ -142,6 +142,31 @@ void GameEngine::sUserInput(){
         Action a = Action(currentScene()->getActionMap().at(key),"RELEASE");
         currentScene()->doAction(a);
     }
+
+    Vector2 mousePos = GetMousePosition();
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        Action a = Action("MOUSE_LEFT", "PRESS", { mousePos.x,mousePos.y });
+        currentScene()->doAction(a);
+    }
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        Action a = Action("MOUSE_LEFT", "RELEASE", { mousePos.x,mousePos.y });
+        currentScene()->doAction(a);
+    }
+    if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+        Action a = Action("MOUSE_RIGHT", "PRESS", { mousePos.x,mousePos.y });
+        currentScene()->doAction(a);
+    }
+    if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT)) {
+        Action a = Action("MOUSE_RIGHT", "RELEASE", { mousePos.x,mousePos.y });
+        currentScene()->doAction(a);
+    }
+
+    Vector2 delta = GetMouseDelta();
+    if (abs(delta.x) > 0.01 || abs(delta.y) > 0.01) {
+        //mouse has moved
+        Action a = Action("MOUSE_MOVE", Vec2(mousePos.x, mousePos.y));
+        currentScene()->doAction(a);
+    }
 }
 
 /**

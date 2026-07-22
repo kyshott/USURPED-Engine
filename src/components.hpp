@@ -47,6 +47,13 @@ class CLifespan : public Component{
         CLifespan(int total);
 };
 
+class CSwing : public Component{
+    public:
+        int remaining = 0;  /* Remaining frames that the entity is swinging */
+        int total = 0;      /* Total number of frames the entity can swing */
+        CSwing(int total);
+};
+
 /**
  * Input Component
  * 
