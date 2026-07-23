@@ -10,6 +10,15 @@ Texture LINKUSED ./assets/textures/LinkUseD.png
 Texture LINKUSER ./assets/textures/LinkUseR.png
 Texture LINKUSEU ./assets/textures/LinkUseU.png
 Texture LINKWALKD ./assets/textures/LinkWalkD.png
+Texture OLWALKD ./assets/textures/OLWALKD.png
+Texture OLWALKU ./assets/textures/OLWALKU.png
+Texture OLWALKR ./assets/textures/OLWALKR.png
+Texture OLSTANDD ./assets/textures/OLSTANDD.png
+Texture OLSTANDU ./assets/textures/OLSTANDU.png
+Texture OLSTANDR ./assets/textures/OLSTANDR.png
+Texture OLUSED ./assets/textures/OLUSED.png
+Texture OLUSEU ./assets/textures/OLUSEU.png
+Texture OLUSER ./assets/textures/OLUSER.png
 Texture LINKWALKR ./assets/textures/LinkWalkR.png
 Texture LINKWALKU ./assets/textures/LinkWalkU.png
 Texture POND ./assets/textures/Pond.png
@@ -21,6 +30,7 @@ Texture ROCKUL ./assets/textures/RockUL.png
 Texture ROCKUR ./assets/textures/RockUR.png
 Texture STATUE ./assets/textures/Statue.png
 Texture SWORD ./assets/textures/Sword.png
+Texture ANCIENTBLADE ./assets/textures/ANCIENTBLADE.png
 Texture TEKTITE ./assets/textures/Tektite.png
 Texture TREESMALL ./assets/textures/TreeSmall.png
 Texture HEART ./assets/textures/Heart.png
@@ -35,6 +45,15 @@ Animation LINKUSED LINKUSED 1 1 4
 Animation LINKUSER LINKUSER 1 1 4
 Animation LINKUSEU LINKUSEU 1 1 4
 Animation LINKWALKD LINKWALKD 2 5 4
+Animation OLWALKD OLWALKD 2 8 4
+Animation OLWALKU OLWALKU 2 8 4
+Animation OLWALKR OLWALKR 2 8 4
+Animation OLSTANDD OLSTANDD 1 1 4
+Animation OLSTANDU OLSTANDU 1 1 4
+Animation OLSTANDR OLSTANDR 1 1 4
+Animation OLUSED OLUSED 1 1 4
+Animation OLUSEU OLUSEU 1 1 4
+Animation OLUSER OLUSER 1 1 4
 Animation LINKWALKR LINKWALKR 2 5 4
 Animation LINKWALKU LINKWALKU 2 5 4
 Animation POND POND 1 1 4
@@ -46,7 +65,7 @@ Animation ROCKUL ROCKUL 1 1 4
 Animation ROCKUR ROCKUR 1 1 4
 Animation STATUE STATUE 1 1 4
 Animation SWORD SWORD 1 1 4
-Animation ANCIENTBLADE SWORD 1 1 4
+Animation ANCIENTBLADE ANCIENTBLADE 1 1 5
 Animation TEKTITE TEKTITE 2 15 4
 Animation TREESMALL TREESMALL 1 1 4
 Animation HEART HEART 1 1 4

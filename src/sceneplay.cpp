@@ -200,24 +200,24 @@ void ScenePlay::sAnimation() {
 
     if (playerState.isAttacking) {
         if (transf.facing.y == 1) {
-            nextAnimation = "LINKUSEU";
+            nextAnimation = "OLUSEU";
         }
         else if (transf.facing.y == -1) {
-            nextAnimation = "LINKUSED";
+            nextAnimation = "OLUSED";
         }
         else if (transf.facing.x == -1 || transf.facing.x == 1) {
-            nextAnimation = "LINKUSER";
+            nextAnimation = "OLUSER";
         }
     }
     else {
         if (transf.facing.y == 1) {
-            nextAnimation = isMoving ? "LINKWALKU" : "LINKSTANDU";
+            nextAnimation = isMoving ? "OLWALKU" : "OLSTANDU";
         }
         else if (transf.facing.y == -1) {
-            nextAnimation = isMoving ? "LINKWALKD" : "LINKSTANDD";
+            nextAnimation = isMoving ? "OLWALKD" : "OLSTANDD";
         }
         else if (transf.facing.x == -1 || transf.facing.x == 1) {
-            nextAnimation = isMoving ? "LINKWALKR" : "LINKSTANDR";
+            nextAnimation = isMoving ? "OLWALKR" : "OLSTANDR";
         }
     }
 
@@ -489,7 +489,7 @@ void ScenePlay::sCollision() {
                         playerEntity->addComponent<CInvincibility>(45);
                         playerEntity->getComponent<CInvincibility>().remaining = 45;
                         playerEntity->getComponent<CHealth>().current -= enemyEntity->getComponent<CDamage>().damage;
-                        gameEngine->playSound("LINKHURT");
+                        gameEngine->playSound("ENEMYHIT");
 
                         if (playerEntity->getComponent<CHealth>().current <= 0) {
                             gameEngine->playSound("LINKDIE");
@@ -682,7 +682,7 @@ void ScenePlay::sRender(){
 void ScenePlay::sGUI(){
     rlImGuiBegin();
     ImGui::SetNextWindowSize(ImVec2(400, 350));
-        ImGui::Begin("Zelda 0.5",NULL,ImGuiWindowFlags_NoResize);
+        ImGui::Begin("Debug",NULL,ImGuiWindowFlags_NoResize);
             ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
             if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
             {
@@ -903,14 +903,14 @@ void ScenePlay::spawnPlayer(){
     player->addComponent<CState>("DOWN");
     player->addComponent<CInput>();
     player->addComponent<CHealth>(playerConfig.HEALTH, playerConfig.HEALTH);
-    player->addComponent<CAnimation>(gameEngine->getAssets().getAnimation("LINKSTANDD"),true);
+    player->addComponent<CAnimation>(gameEngine->getAssets().getAnimation("OLSTANDD"),true);
     int scaledHeight=player->getComponent<CAnimation>().animation.getScaledSize().y;
-    int scaledWidth=player->getComponent<CAnimation>().animation.getScaledSize().y;
-    player->addComponent<CBoundingBox>(Vec2(playerConfig.BX,playerConfig.BY));
+    int scaledWidth=player->getComponent<CAnimation>().animation.getScaledSize().x - 30;
+    player->addComponent<CBoundingBox>(Vec2(scaledWidth,scaledHeight));
     Vec2 pos = gridToMidPixel(playerConfig.X,playerConfig.Y,player);
     player->addComponent<CTransform>(Vec2(pos.x,pos.y), Vec2(0.0f,0.0f), 0.0f);
-    std::map<std::string, std::string> items;
-    items["PRIMARY"] = "SWORD";
+    std::map<std::string, std::string> items;                                           
+    items["PRIMARY"] = "ANCIENTBLADE";
 	player->addComponent<CEquipment>(items);
 }
 
@@ -1041,7 +1041,7 @@ void ScenePlay::sLifespan() {
         if (e->hasComponent<CLifespan>()) {
             e->getComponent<CLifespan>().remaining--;
             if (e->getComponent<CLifespan>().remaining <= 0) {
-                if (e->getID() == "SWORD") {
+                if (e->getID() == "ANCIENTBLADE") {
                     player->getComponent<CState>().isAttacking = false;
                 }
                 e->destroy();
@@ -1057,7 +1057,7 @@ void ScenePlay::update(){
     entityManager.update();
 
     sMovement();
-    sWeapons();
+    //sWeapons();
     sAnimation();
     sCollision();
     sLifespan();

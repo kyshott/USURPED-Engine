@@ -20,7 +20,7 @@ void weaponSwing(std::shared_ptr<Entity> e, std::shared_ptr<Entity> player, Enti
     CLifespan& life = e->getComponent<CLifespan>();
 
     float progress = 1.0f - (static_cast<float>(life.remaining) / static_cast<float>(life.total));
-    float radius = static_cast<float>(engine->getTileSizeX());
+    float radius = static_cast<float>(engine->getTileSizeX() + 15.0f);
 
     float startAngle = 0.0f;
     float endAngle = 0.0f;
@@ -69,7 +69,7 @@ void usePrimaryWeapon(std::shared_ptr<Entity> player, EntityManager& manager, Ga
 	e->addComponent<CAnimation>(engine->getAssets().getAnimation(name), true);
 	e->addComponent<CLifespan>(engine->getAssets().getItem(name).lifespan);
 	e->getComponent<CLifespan>().remaining = engine->getAssets().getItem(name).lifespan;
-	e->addComponent<CDamage>(engine->getAssets().getItem(name).damage);
+    e->addComponent<CDamage>(engine->getAssets().getItem(name).damage);
 
     float bboxSizeX = engine->getAssets().getAnimation(name).getScaledSize().x;
     float bboxSizeY = engine->getAssets().getAnimation(name).getScaledSize().y;
@@ -91,26 +91,28 @@ void usePrimaryWeapon(std::shared_ptr<Entity> player, EntityManager& manager, Ga
         e->addComponent<CBoundingBox>(Vec2(bboxSizeX, bboxSizeY));
         transf.position.x = px;
         transf.prevPosition.x = px;
-        transf.position.y = py + engine->getTileSizeY() - 4;
+        transf.position.y = py + engine->getTileSizeY();
         transf.prevPosition.y = py + engine->getTileSizeY();
         transf.angle = 180.0f;
     }
     else if (ptsf.facing.x == 1) {
         e->addComponent<CBoundingBox>(Vec2(bboxSizeY, bboxSizeX));
-        transf.position.x = px + engine->getTileSizeX() - 4;
-        transf.prevPosition.x = px + engine->getTileSizeX() - 4;
+        transf.position.x = px + engine->getTileSizeX();
+        transf.prevPosition.x = px + engine->getTileSizeX();
         transf.position.y = py;
         transf.prevPosition.y = py;
         transf.angle = 90.0f;
     }
     else if (ptsf.facing.x == -1) {
         e->addComponent<CBoundingBox>(Vec2(bboxSizeY, bboxSizeX));
-        transf.position.x = px - engine->getTileSizeX() + 4;
-        transf.prevPosition.x = px - engine->getTileSizeX() + 4;
+        transf.position.x = px - engine->getTileSizeX();
+        transf.prevPosition.x = px - engine->getTileSizeX();
         transf.position.y = py;
         transf.prevPosition.y = py;
         transf.angle = 270.0f;
     }
+
+    e->getComponent<CBoundingBox>().blocksVision = false;
 
 }
 

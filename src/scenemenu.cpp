@@ -11,7 +11,7 @@ SceneMenu::SceneMenu(GameEngine* gameEngine) : Scene(gameEngine){
  * Initializes actions and sets strings for level paths and menu items
  */
 void SceneMenu::init(){
-    title="Usurped!";
+    title="Idk";
     menuStrings.push_back("Level 1");
     menuStrings.push_back("Test Room");
     menuStrings.push_back("Level 3");
