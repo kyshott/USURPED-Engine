@@ -1,0 +1,11 @@
+{
+    "FOOTSOLDIER": {
+        "name": "Foot Soldier",
+        "health": 10,
+        "damage": 3,
+        "speed": 2,
+        "rarity": 1,
+        "maxgroup": 2,
+        "description": "The lowest ranking soldiers of the empire. A pity they've found themselves in your way."
+    }
+}

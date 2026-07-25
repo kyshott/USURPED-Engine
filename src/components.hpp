@@ -6,6 +6,7 @@
 #include "vec2.hpp"
 #include "animation.hpp"
 #include <map>
+#include "items.hpp"
 
 /**
  * Base class for all Component objects
@@ -47,13 +48,6 @@ class CLifespan : public Component{
         CLifespan(int total);
 };
 
-class CSwing : public Component{
-    public:
-        int remaining = 0;  /* Remaining frames that the entity is swinging */
-        int total = 0;      /* Total number of frames the entity can swing */
-        CSwing(int total);
-};
-
 /**
  * Input Component
  * 
@@ -82,9 +76,6 @@ class CHealth : public Component{
         int max;      /* Maximum entity health */
         int current;  /* Current entity health */
 
-        int maxMana; /* Maximum entity mana */   
-		int currentMana; /* Current entity mana */
-
         CHealth();
         CHealth(int m, int c);
 };
@@ -92,15 +83,17 @@ class CHealth : public Component{
 /**
 * Equipment Component
 * 
-* Defines the equipment that the entity (player) has equipped.
+* Defines the equipment that the entity has available. This includes weapons, magic, items, etc.
 */
 class CEquipment : public Component {
     public:
-		std::map<std::string, std::string> items; /* Map of equipment items, where the key is the item name and the value is the item type */
-		int gold = 0; /* Amount of gold the entity has */
+        std::vector<WeaponSpec> weapons;
+		std::vector<ItemSpec> items;
+		std::vector<MagicSpec> magic;
+
+		WeaponSpec currentWeapon;
 
 		CEquipment();
-		CEquipment(std::map<std::string, std::string> items);
 };
 
 /**
@@ -158,6 +151,25 @@ class CDamage : public Component{
         CDamage();
         CDamage(int damage);
 };
+
+/*
+* Speed Component
+* 
+* Defines the speed of the entity, used in combat priority
+*/
+class CSpeed : public Component{
+    public:
+        int speed=0;  /* Speed variable, used in combat priority */
+        CSpeed();
+        CSpeed(int speed);
+};
+
+class CGroup : public Component {
+    public:
+        int maxgroup; /* Maximum number of this entity that can spawn. Can be a random value. */
+        CGroup();
+        CGroup(int maxgroup);
+};;
 
 /**
  * Invincibility Component

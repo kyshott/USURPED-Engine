@@ -63,13 +63,11 @@ void weaponSwing(std::shared_ptr<Entity> e, std::shared_ptr<Entity> player, Enti
 void usePrimaryWeapon(std::shared_ptr<Entity> player, EntityManager& manager, GameEngine* engine) {
     engine->playSound("LINKSWING");
 	CEquipment& equipment = player->getComponent<CEquipment>();
-	std::string name = equipment.items["PRIMARY"];
+	std::string name = equipment.weapons[0].name;
 
 	auto e = manager.addEntity("WEAPON", name);
 	e->addComponent<CAnimation>(engine->getAssets().getAnimation(name), true);
-	e->addComponent<CLifespan>(engine->getAssets().getItem(name).lifespan);
-	e->getComponent<CLifespan>().remaining = engine->getAssets().getItem(name).lifespan;
-    e->addComponent<CDamage>(engine->getAssets().getItem(name).damage);
+    e->addComponent<CDamage>(equipment.weapons[0].damage);
 
     float bboxSizeX = engine->getAssets().getAnimation(name).getScaledSize().x;
     float bboxSizeY = engine->getAssets().getAnimation(name).getScaledSize().y;

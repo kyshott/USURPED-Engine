@@ -4,6 +4,9 @@
 #include <iostream>
 #include <raylib.h>
 #include "animation.hpp"
+#include "json.hpp"
+
+using nlohmann::json;
 
 Assets::Assets()=default;
 Assets::~Assets(){
@@ -64,23 +67,11 @@ void Assets::load(const std::string path){
         }   
     }
     file.close();
+
+	weapons = json::parse(std::ifstream("items/weapons.json"));
+
 }
 
-void Assets::loadItems(const std::string path) {
-    std::ifstream file(path);
-    std::string type;
-    std::string name;
-
-	int damage, cost, manacost, rarity, lifespan;
-    float speed;
-
-    while (file.good()) {
-		file >> type >> name >> damage >> speed >> cost >> manacost >> rarity >> lifespan;
-		//std::cout << name << " Damage: " << damage << " Speed: " << speed << " Cost: " << cost << " ManaCost: " << manacost << " Rarity: " << rarity << " Lifespan: " << lifespan << std::endl;
-		addItem(type, name, damage, speed, cost, manacost, rarity, lifespan);
-    }
-    file.close();
-}
 
 /**
  * Gets the raylib texture based based on name
@@ -91,14 +82,6 @@ const Texture2D& Assets::getTexture(const std::string& name) const{
     return textureMap.at(name);
 }
 
-/**
-* Gets the itemSpec object based on name
-* 
-* @param name Item name
-*/
-const ItemSpec& Assets::getItem(const std::string& name) const {
-	return itemMap.at(name);
-}
 
 /**
  * Gets the raylib font asset based on name
@@ -196,31 +179,30 @@ void Assets::addMusic(const std::string& name, const std::string& path){
     musicMap[name]=music;
 }
 
-/*
-* Loads the item information into the item map data structure
-* 
-* @param type Item type (e.g. weapon, armor, consumable)
-* @param name Item name
-* @param damage Item damage
-* @param speed Item speed
-* @param cost Item cost
-* @param manacost Item mana cost
-* @param rarity Item rarity
-*/
-void Assets::addItem(const std::string& type, const std::string& name, int damage, int speed, int cost, int manacost, int rarity, int lifespan) {
-	ItemSpec item;
 
-    if (type == "WEAPON") {
-        item.type = type;
-        item.name = name;
-        item.damage = damage;
-        item.speed = speed;
-        item.cost = cost;
-        item.manacost = manacost;
-        item.rarity = rarity;
-        item.lifespan = lifespan;
+/*
+* Gets the weapon information from the pre-parsed weapons.json file.
+* 
+* @param name Weapon name, as it appears as a key in the weapons.json file
+* @return WeaponSpec struct containing the weapon information
+*/
+WeaponSpec Assets::getWeapon(std::string name) const {
+    if (!weapons.contains(name)) {
+        throw std::runtime_error("Weapon key not found in weapons.json: " + name);
     }
 
-	itemMap[name] = item;
-}
+    const auto& data = weapons.at(name);
 
+    WeaponSpec weapon;
+	weapon.id = data.value("id", name);
+    weapon.name = data.value("name", name);
+    weapon.damage = data.value("damage", 0);
+    weapon.cost = data.value("cost", 0);
+    weapon.type = data.value("type", "");
+    weapon.description = data.value("description", "");
+    weapon.effect.type = data.value("statuseffect", "none");
+    weapon.effect.duration = 0;
+    weapon.effect.magnitude = 0;
+
+    return weapon;
+}

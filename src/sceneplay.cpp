@@ -6,6 +6,7 @@
 #include "physics.hpp"
 #include <string>
 #include <print>
+#include "scenebattle.hpp"
 
 /**
  * Constructor for the Play Scene
@@ -48,7 +49,7 @@ void ScenePlay::init(const std::string& levelPath){
     registerAction(KEY_SPACE, "ATTACK");
     registerAction(MOUSE_BUTTON_RIGHT, "SECONDARY");
     registerAction(KEY_E, "INTERACT");
-    registerAction(KEY_R, "ACTIVE_ITEM");
+    registerAction(KEY_L, "BATTLE_TEST");
     
     mainCamera=Camera2D({gameEngine->getWidth()/2.0f*GetWindowScaleDPI().x,gameEngine->getHeight()/2.0f*GetWindowScaleDPI().y},{gameEngine->getWidth()/2.0f,gameEngine->getHeight()/2.0f},0,GetWindowScaleDPI().x);
 
@@ -485,22 +486,12 @@ void ScenePlay::sCollision() {
                     auto playerEntity = (de->getID() == "PLAYER") ? de : e;
                     auto enemyEntity = (de->getID() == "ENEMY") ? de : e;
 
-                    if (!playerEntity->hasComponent<CInvincibility>()) {
-                        playerEntity->addComponent<CInvincibility>(45);
-                        playerEntity->getComponent<CInvincibility>().remaining = 45;
-                        playerEntity->getComponent<CHealth>().current -= enemyEntity->getComponent<CDamage>().damage;
-                        gameEngine->playSound("ENEMYHIT");
-
-                        if (playerEntity->getComponent<CHealth>().current <= 0) {
-                            gameEngine->playSound("LINKDIE");
-                            reload = true;
-                        }
-                    }
-
                     // Allow enemies to push player, not the other way around.
                     if (de->getID() == "ENEMY") {
                         continue;
                     }
+
+                    gameEngine->changeScene("BATTLE", std::make_shared<SceneBattle>(gameEngine, playerEntity, enemyEntity, shared_from_this()));
                 }
 
                 // -------------------- POSITIONAL RESOLUTIONS --------------------
@@ -840,10 +831,16 @@ void ScenePlay::sDoAction(const Action& action) {
         }
         if (action.getName() == "ATTACK" || action.getName() == "MOUSE_LEFT") {
             if (!state.isAttacking) {           
+                /*
                 input.attack = true;
                 state.isAttacking = true;
                 usePrimaryWeapon(player, entityManager, gameEngine);
+                */
             }
+        }
+        if (action.getName() == "BATTLE_TEST") {
+			gameEngine->changeScene("BATTLE", std::make_shared<SceneBattle>(gameEngine, player, player, shared_from_this()));
+            //gameEngine->stopMusic("TITLEMUSIC");
         }
     }
 
@@ -906,12 +903,12 @@ void ScenePlay::spawnPlayer(){
     player->addComponent<CAnimation>(gameEngine->getAssets().getAnimation("OLSTANDD"),true);
     int scaledHeight=player->getComponent<CAnimation>().animation.getScaledSize().y;
     int scaledWidth=player->getComponent<CAnimation>().animation.getScaledSize().x - 30;
-    player->addComponent<CBoundingBox>(Vec2(scaledWidth,scaledHeight));
+    player->addComponent<CBoundingBox>(Vec2(gameEngine->getTileSizeX(), gameEngine->getTileSizeY()));
     Vec2 pos = gridToMidPixel(playerConfig.X,playerConfig.Y,player);
     player->addComponent<CTransform>(Vec2(pos.x,pos.y), Vec2(0.0f,0.0f), 0.0f);
-    std::map<std::string, std::string> items;                                           
-    items["PRIMARY"] = "ANCIENTBLADE";
-	player->addComponent<CEquipment>(items);
+    player->addComponent<CEquipment>();
+    player->getComponent<CEquipment>().weapons.push_back(gameEngine->getAssets().getWeapon("ANCIENTBLADE"));
+	player->getComponent<CEquipment>().currentWeapon = player->getComponent<CEquipment>().weapons[0];
 }
 
 /**

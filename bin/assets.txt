@@ -22,6 +22,7 @@ Texture OLUSER ./assets/textures/OLUSER.png
 Texture LINKWALKR ./assets/textures/LinkWalkR.png
 Texture LINKWALKU ./assets/textures/LinkWalkU.png
 Texture POND ./assets/textures/Pond.png
+Texture BATTLEROOM ./assets/textures/BATTLEROOM1.png
 Texture ROCKC ./assets/textures/RockC.png
 Texture ROCKDL ./assets/textures/RockDL.png
 Texture ROCKDR ./assets/textures/RockDR.png
@@ -70,10 +71,14 @@ Animation TEKTITE TEKTITE 2 15 4
 Animation TREESMALL TREESMALL 1 1 4
 Animation HEART HEART 1 1 4
 Music BGMUSIC ./assets/sounds/music.wav
+Music BATTLEMUSIC ./assets/sounds/music2.wav
+Music TITLEMUSIC ./assets/sounds/dungeon.wav
+SOUND MENUSELECT ./assets/sounds/blip.wav
 Sound ENEMYHIT ./assets/sounds/EnemyHit.wav
 Sound HEART ./assets/sounds/HeartPickup.wav
 Sound ENEMYKILL ./assets/sounds/EnemyKill.wav
 Sound LINKDIE ./assets/sounds/LinkDie.wav
 Sound LINKHURT ./assets/sounds/LinkHurt.wav
+Sound OLHURT ./assets/sounds/olhurt.wav
 Sound LINKSWING ./assets/sounds/LinkSwordSwing.wav
 Sound LINKYELP ./assets/sounds/LinkYelp.wav

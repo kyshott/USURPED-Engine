@@ -4,8 +4,11 @@
 #include <map>
 #include "animation.hpp"
 #include "items.hpp"
+#include "json.hpp"
 
 struct ItemSpec;
+
+using nlohmann::json;
 
 /**
  * Contains the ascii code for the first letter of the asset type
@@ -25,8 +28,11 @@ class Assets{
         std::map<std::string, Font> fontMap;           /* Map from string font name to raylib Font struct */
         std::map<std::string, Animation> animationMap; /* Map from string animation name to Animation object */
         std::map<std::string, Sound> soundMap;         /* Map from string sound effect name to raylib Sound object */
-		std::map<std::string, ItemSpec> itemMap;         /* Map from string item name to itemSpec object */
-        // map for enemies goes here
+        
+        json weapons;
+        json items;
+        json magic;
+        json statusEffects;
 
     public:
         std::map<std::string, Music> musicMap;         /* Map from string name to raylib Music object */
@@ -34,18 +40,19 @@ class Assets{
         Assets();
         ~Assets();
         void load(const std::string path);
-        void loadItems(const std::string path);
         const Texture2D& getTexture(const std::string& name) const;
-		const ItemSpec& getItem(const std::string& name) const;
         const Font& getFont(const std::string& name) const;
         const Animation& getAnimation(const std::string& name) const;
         const Sound& getSound(const std::string& name) const;
         const Music& getMusic(const std::string& name) const;
 
-        void addItem(const std::string& type, const std::string& name, int damage, int speed, int cost, int manacost, int rarity, int lifespan);
         void addFont(const std::string& name, const std::string& path);
         void addTexture(const std::string& name, const std::string& path);
         void addAnimation(const std::string& name, const std::string& texture, int frameCount, int speed, int scaleFactor);
         void addSound(const std::string& name, const std::string& path);
         void addMusic(const std::string& name, const std::string& path);
+
+        WeaponSpec getWeapon(std::string name) const;
+        ItemSpec getItem();
+        MagicSpec getMagic();
 };

@@ -67,7 +67,6 @@ void GameEngine::init(const std::string path){
     //init assets
     assets.load(assetPath);
     //init items
-    assets.loadItems(itempath);
     //change scene to starting scene
     changeScene("MENU",std::make_shared<SceneMenu>(this));
     

@@ -48,6 +48,10 @@ std::shared_ptr<Entity> EntityManager::addEntity(std::string tag, std::string id
     return e;
 }
 
+void EntityManager::addExistingEntity(std::shared_ptr<Entity> e){
+    toAdd.push_back(e);
+}
+
 /**
  * Gets structure of all entities
  * 

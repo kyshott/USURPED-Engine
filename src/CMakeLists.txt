@@ -13,6 +13,7 @@ set(SOURCES
         scene.cpp
         scenemenu.cpp
         sceneplay.cpp
+        scenebattle.cpp
         vec2.cpp
         items.cpp
 )

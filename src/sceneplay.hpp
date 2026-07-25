@@ -15,7 +15,7 @@ struct PlayerConfig{float X,Y,BX,BY,SPEED,HEALTH; std::string WEAPON;};
 /**
  * Scene that contains all logic and information for playing a loaded level
  */
-class ScenePlay : public Scene{
+class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
     private:
         PlayerConfig playerConfig;      /* Information about the properties of the player for this level */
         std::string levelPath;          /* Relative path to the level definition file from exe */

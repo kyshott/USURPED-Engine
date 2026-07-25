@@ -25,7 +25,6 @@ CHealth::CHealth(){}
 CHealth::CHealth(int m, int c): max(m), current(c){}
 
 CEquipment::CEquipment() {};
-CEquipment::CEquipment(std::map<std::string, std::string> items) : items(items) {}
 
 CBoundingBox::CBoundingBox()=default;
 CBoundingBox::CBoundingBox(const Vec2& s) : size(s){}
@@ -35,6 +34,12 @@ CState::CState(std::string state) : state(state) {}
 
 CDamage::CDamage(){}
 CDamage::CDamage(int damage) : damage(damage){}
+
+CSpeed::CSpeed() {}
+CSpeed::CSpeed(int speed) : speed(speed) {}
+
+CGroup::CGroup() {}
+CGroup::CGroup(int maxgroup) : maxgroup(maxgroup) {}
 
 CInvincibility::CInvincibility(){}
 CInvincibility::CInvincibility(int frames) : iframes(frames){}
