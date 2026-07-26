@@ -171,6 +171,18 @@ class CGroup : public Component {
         CGroup(int maxgroup);
 };;
 
+class CFlash : public Component {
+    public:
+
+};
+
+class CDefense : public Component {
+    public:
+        int defense=0; /* Amount of damage that is blocked when this entity is hit */
+        CDefense();
+        CDefense(int defense);
+};
+
 /**
  * Invincibility Component
  * 

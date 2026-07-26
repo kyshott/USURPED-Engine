@@ -4,52 +4,6 @@
 #include <fstream>
 #include "gameengine.hpp"
 
-/**
-* Swings weapon entity in an arc based on the player's direction.
-*
-* Definitive behavior for all melee weapons. The longer the weapons lifespan, the longer the swing takes.
-* 
-* @param e shared pointer to the weapon entity
-* @param player shared pointer to the player entity
-* @param manager reference to the entity manager
-* @param engine raw pointer to the game engine
-*/
-void weaponSwing(std::shared_ptr<Entity> e, std::shared_ptr<Entity> player, EntityManager& manager, GameEngine* engine) {
-    CTransform& playerTransform = player->getComponent<CTransform>();
-    CTransform& weaponTransform = e->getComponent<CTransform>();
-    CLifespan& life = e->getComponent<CLifespan>();
-
-    float progress = 1.0f - (static_cast<float>(life.remaining) / static_cast<float>(life.total));
-    float radius = static_cast<float>(engine->getTileSizeX() + 15.0f);
-
-    float startAngle = 0.0f;
-    float endAngle = 0.0f;
-
-    if (playerTransform.facing.y == 1) {
-        startAngle = 225.0f;
-        endAngle = 315.0f;
-    }
-    else if (playerTransform.facing.x == 1) {
-        startAngle = -45.0f;
-        endAngle = 45.0f;
-    }
-    else if (playerTransform.facing.y == -1) {
-        startAngle = 45.0f;
-        endAngle = 135.0f;
-    }
-    else if (playerTransform.facing.x == -1) {
-        startAngle = 135.0f;
-        endAngle = 225.0f;
-    }
-
-    float angle = startAngle + (endAngle - startAngle) * progress;
-    float radians = angle * DEG2RAD;
-
-    weaponTransform.prevPosition = weaponTransform.position;
-    weaponTransform.position.x = playerTransform.position.x + std::cos(radians) * radius;
-    weaponTransform.position.y = playerTransform.position.y + std::sin(radians) * radius;
-    weaponTransform.angle = angle + 90.0f;
-}
 
 /**
 * Spawns/uses the entity's primary weapon

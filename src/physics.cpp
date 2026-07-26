@@ -79,11 +79,7 @@ Intersect Physics::lineIntersect(const Vec2& a, const Vec2& b, const Vec2& c, co
  * @param e  entity to check intersection
  * @return boolean that stores if the line segment ab intersects the bounding box of e
  */
-bool Physics::entityIntersect(const Vec2& a, const Vec2& b, std::shared_ptr<Entity> e){
-    //TODO: Implement based on lectures slides
-    //1. Get each line segment from the entity bounding box (there should be 4 points/lines)
-    //2. Call lineIntersect for ab and each line segment from the entity bounding box (4 calls total)
-    //3. If any of the lineIntersect calls result in an intersection, this function should return true
+bool Physics::entityIntersect(const Vec2& a, const Vec2& b, std::shared_ptr<Entity> e) {
 
 	CTransform& transf = e->getComponent<CTransform>();
 	Vec2 p1 = { transf.position.x - e->getComponent<CBoundingBox>().size.x / 2.0f, transf.position.y - e->getComponent<CBoundingBox>().size.y / 2.0f }; // top left

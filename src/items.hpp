@@ -55,10 +55,6 @@ struct MagicSpec {
 	StatusEffect effect;
 };
 
-// Item behavior
-void weaponSwing(std::shared_ptr<Entity> e, std::shared_ptr<Entity> player, EntityManager& manager, GameEngine* engine);
-
-
 // Weapon/item usage functions
 void usePrimaryWeapon(std::shared_ptr<Entity> player, EntityManager& manager, GameEngine* engine);
 void useSecondaryWeapon(std::shared_ptr<Entity> e);

@@ -38,6 +38,9 @@ CDamage::CDamage(int damage) : damage(damage){}
 CSpeed::CSpeed() {}
 CSpeed::CSpeed(int speed) : speed(speed) {}
 
+CDefense::CDefense() {}
+CDefense::CDefense(int defense) : defense(defense) {}
+
 CGroup::CGroup() {}
 CGroup::CGroup(int maxgroup) : maxgroup(maxgroup) {}
 

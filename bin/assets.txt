@@ -10,6 +10,7 @@ Texture LINKUSED ./assets/textures/LinkUseD.png
 Texture LINKUSER ./assets/textures/LinkUseR.png
 Texture LINKUSEU ./assets/textures/LinkUseU.png
 Texture LINKWALKD ./assets/textures/LinkWalkD.png
+Texture MENUBOX ./assets/textures/MENUBOX.png
 Texture OLWALKD ./assets/textures/OLWALKD.png
 Texture OLWALKU ./assets/textures/OLWALKU.png
 Texture OLWALKR ./assets/textures/OLWALKR.png
@@ -73,7 +74,8 @@ Animation HEART HEART 1 1 4
 Music BGMUSIC ./assets/sounds/music.wav
 Music BATTLEMUSIC ./assets/sounds/music2.wav
 Music TITLEMUSIC ./assets/sounds/dungeon.wav
-SOUND MENUSELECT ./assets/sounds/blip.wav
+Sound MENUSELECT ./assets/sounds/blip.wav
+Sound ENEMYDIE ./assets/sounds/enemydie.wav
 Sound ENEMYHIT ./assets/sounds/EnemyHit.wav
 Sound HEART ./assets/sounds/HeartPickup.wav
 Sound ENEMYKILL ./assets/sounds/EnemyKill.wav

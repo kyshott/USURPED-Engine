@@ -3,9 +3,13 @@
         "name": "Foot Soldier",
         "health": 10,
         "damage": 3,
+        "defense": 1,
         "speed": 2,
         "rarity": 1,
         "maxgroup": 2,
+        "spells": [],
+        "loot": [],
+        "gold": 3,
         "description": "The lowest ranking soldiers of the empire. A pity they've found themselves in your way."
     }
 }

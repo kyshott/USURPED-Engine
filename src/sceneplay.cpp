@@ -150,6 +150,8 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->addComponent<CPatrol>(patrolPoints, speed);
                 e->getComponent<CPatrol>().currentPosition = 0;
                 e->addComponent<CHealth>(health, health);
+                e->addComponent<CSpeed>(2);
+                e->addComponent<CDefense>(1);
             }
             else if (ai == "FOLLOW") {
                 file >> roomX >> roomY >> x >> y >> speed >> health;
@@ -175,6 +177,8 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->addComponent<CDamage>(1);
                 e->addComponent<CFollowPlayer>(Vec2(0.0f, 0.0f), speed);
                 e->addComponent<CHealth>(health, health);
+                e->addComponent<CSpeed>(10);
+                e->addComponent<CDefense>(1);
 
             }
         }
@@ -414,7 +418,7 @@ void ScenePlay::sMovement() {
     }
 
     for (auto& e : entityManager.getEntities("WEAPON")) {
-        weaponSwing(e, player, entityManager, gameEngine);
+        //weaponSwing(e, player, entityManager, gameEngine);
 	}
 }
 
@@ -491,7 +495,10 @@ void ScenePlay::sCollision() {
                         continue;
                     }
 
-                    gameEngine->changeScene("BATTLE", std::make_shared<SceneBattle>(gameEngine, playerEntity, enemyEntity, shared_from_this()));
+                    if (battlecooldown <= 0) {
+                        gameEngine->changeScene("BATTLE", std::make_shared<SceneBattle>(gameEngine, playerEntity, enemyEntity, shared_from_this()));
+                    }
+                    battlecooldown = 100;
                 }
 
                 // -------------------- POSITIONAL RESOLUTIONS --------------------
@@ -888,6 +895,12 @@ void ScenePlay::sCamera(){
     }
 }
 
+void ScenePlay::battleReturn(std::shared_ptr<Entity> e) {
+    e->destroy();
+    player->getComponent<CTransform>().velocity = Vec2(0.0f, 0.0f);
+	player->addComponent<CInvincibility>(100);
+}
+
 /**
  * Spawns Player
  * 
@@ -909,6 +922,8 @@ void ScenePlay::spawnPlayer(){
     player->addComponent<CEquipment>();
     player->getComponent<CEquipment>().weapons.push_back(gameEngine->getAssets().getWeapon("ANCIENTBLADE"));
 	player->getComponent<CEquipment>().currentWeapon = player->getComponent<CEquipment>().weapons[0];
+    player->addComponent<CDefense>(3);
+    player->addComponent<CSpeed>(5);
 }
 
 /**
@@ -1052,6 +1067,15 @@ void ScenePlay::sLifespan() {
  */
 void ScenePlay::update(){
     entityManager.update();
+
+    if (battlecooldown > 0) {
+        if (battlecooldown == 0) {
+            battlecooldown = 0;
+        }
+        else {
+            battlecooldown--;
+        }
+    }
 
     sMovement();
     //sWeapons();
