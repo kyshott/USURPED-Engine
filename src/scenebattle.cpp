@@ -156,15 +156,14 @@ void SceneBattle::sDoAction(const Action& action) {
 			else if (selectedMenuItem == 3) {
 				gameEngine->playSound("MENUSELECT");
 				menu = 1;
+				selectedMenuItem = 0;
 			}
 		}
 		if (action.getName() == "QUIT") {
 			gameEngine->changeScene("PLAY", previousScene);
 		}
 	}
-
-	if (action.getType() == "PRESS" && menu == 1) {
-		selectedMenuItem = 0;
+	else if (action.getType() == "PRESS" && menu == 1) {
 		std::vector<ItemSpec> uniqueItems;
 		std::vector<int> itemCounts;
 		const auto& inventory = player->getComponent<CEquipment>().items;
@@ -204,6 +203,7 @@ void SceneBattle::sDoAction(const Action& action) {
 			}
 		}
 		if (action.getName() == "SELECT" && !uniqueItems.empty()) {
+			gameEngine->playSound("MENUSELECT");
 			playerAction = "ITEM";
 			itemUsed = uniqueItems[selectedMenuItem];
 		}
@@ -421,10 +421,25 @@ void SceneBattle::renderUI() {
 	DrawTextEx(font, damageNumber.text.c_str(), Vector2(textX, textY), 40, spacing, tint);
 }
 
-void SceneBattle::enemyDie(std::shared_ptr<Entity> e) {
-	e->addComponent<CLifespan>(30);
-	e->getComponent<CLifespan>().remaining = 30;
-	battleState = BattleState::VICTORY;
+void SceneBattle::useItem() {
+	if (itemUsed.effect.type == "RESTORE") {
+		CHealth& health = player->getComponent<CHealth>();
+		health.current += itemUsed.effect.magnitude;
+		if (health.current > health.max) {
+			health.current = health.max;
+		}
+		drawDamageNumber(true, -itemUsed.effect.magnitude);
+		gameEngine->playSound("HEAL");
+	}
+	else if (itemUsed.effect.type == "RESTOREM") {
+		if (player->hasComponent<CHealth>()) {
+			CHealth& health = player->getComponent<CHealth>();
+			health.current -= itemUsed.effect.magnitude;
+			if (health.current < 0) {
+				health.current = 0;
+			}
+		}
+	}
 }
 
 void SceneBattle::battleWeaponSwing(std::shared_ptr<Entity> e) {
@@ -616,7 +631,8 @@ void SceneBattle::playerTurnState() {
 		drawDamageNumber(false, 1);
 
 		if (enemyHealth.current <= 0) {
-			enemyDie(enemy);
+			enemy->addComponent<CLifespan>(30);
+			enemy->getComponent<CLifespan>().remaining = 30;
 			gameEngine->stopMusic("BATTLEMUSIC");
 			gameEngine->playSound("ENEMYDIE");
 			queueMessage("Victory! Enemy defeated!", BattleState::VICTORY, 200);
@@ -626,18 +642,37 @@ void SceneBattle::playerTurnState() {
 			if (player->getComponent<CSpeed>().speed < enemy->getComponent<CSpeed>().speed) {
 				battleState = BattleState::PLAYER_INPUT;
 				waitTimer = 80;
-				return;
 			}
-			battleState = BattleState::ENEMY_INPUT;
-			waitTimer = 80;
+			else {
+				battleState = BattleState::ENEMY_INPUT;
+				waitTimer = 80;
+			}
 		}
 	}
 	if (playerAction == "ITEM") {
-		playerAction = "";
-		useItem(itemUsed, *this, player);
 		menu = 0;
-		battleState = BattleState::ENEMY_INPUT;
-		waitTimer = 80;
+		playerAction = "";
+		
+		useItem();
+
+		auto& items = player->getComponent<CEquipment>().items;
+
+		// Remove item
+		auto it = std::find_if(items.begin(), items.end(), [&](const ItemSpec& item) {
+			return item.id == itemUsed.id;
+			});
+
+		if (it != items.end()) {
+			items.erase(it);
+		}
+		if (player->getComponent<CSpeed>().speed < enemy->getComponent<CSpeed>().speed) {
+			battleState = BattleState::PLAYER_INPUT;
+			waitTimer = 80;
+		}
+		else {
+			battleState = BattleState::ENEMY_INPUT;
+			waitTimer = 80;
+		}
 	}
 }
 

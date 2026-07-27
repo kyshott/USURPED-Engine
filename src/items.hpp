@@ -5,6 +5,7 @@
 
 class SceneBattle;
 class Entity;
+class GameEngine;
 
 /**
 * Contains information about an item. Loaded into the gameEngine's item map.
@@ -62,7 +63,7 @@ struct MagicSpec {
 	Effect effect;
 };
 
-void useItem(ItemSpec& item, SceneBattle& scene, std::shared_ptr<Entity> e);
+void useItem(ItemSpec& item, SceneBattle& scene, std::shared_ptr<Entity> e, GameEngine* engine);
 
 
 

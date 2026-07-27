@@ -62,17 +62,16 @@ class SceneBattle : public Scene {
 	// State control
 	void playerInputState();
 	void enemyInputState();
-	void damageState();
 	void playerTurnState();
 	void enemyTurnState();
 	void victoryState();
 	void defeatState();
 
 	// Helpers
+	void useItem();
 	void queueMessage(const std::string& message, BattleState nextState, int frames);
 	void renderUI();
 	void renderBattleEntity(std::shared_ptr<Entity> entity);
-	void enemyDie(std::shared_ptr<Entity> e);
 	void battleWeaponSwing(std::shared_ptr<Entity> e);
 
 public:

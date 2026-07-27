@@ -6,7 +6,7 @@
 #include "scenebattle.hpp"
 
 
-void useItem(ItemSpec& item, SceneBattle& scene, std::shared_ptr<Entity> e) {
+void useItem(ItemSpec& item, SceneBattle& scene, std::shared_ptr<Entity> e, GameEngine* engine) {
     if (item.effect.type == "RESTORE") {
         if (e->hasComponent<CHealth>()) {
             CHealth& health = e->getComponent<CHealth>();
@@ -15,6 +15,7 @@ void useItem(ItemSpec& item, SceneBattle& scene, std::shared_ptr<Entity> e) {
                 health.current = health.max;
             }
 			scene.drawDamageNumber(true, -item.effect.magnitude);
+            engine->playSound("HEAL");
         }
     }
     else if (item.effect.type == "RESTOREM") {
