@@ -4,7 +4,7 @@
 #include <string>
 #include "components.hpp"
 
-typedef std::tuple<CTransform, CLifespan, CInput, CBoundingBox, CAnimation, CState, CHealth, CDamage, CInvincibility, CFollowPlayer, CPatrol, CEquipment, CSpeed, CDefense> ComponentsTuple;
+typedef std::tuple<CTransform, CLifespan, CInput, CBoundingBox, CAnimation, CState, CHealth, CDamage, CInvincibility, CFollowPlayer, CPatrol, CEquipment, CSpeed, CDefense, CName> ComponentsTuple;
 
 
 /**
@@ -24,7 +24,8 @@ class Entity{
         //constructor
         Entity(std::string& tag, std::string& id);
 
-        ComponentsTuple components=std::make_tuple(CTransform(), CLifespan(5), CInput(), CBoundingBox(), CAnimation(), CState(), CHealth(), CDamage(), CInvincibility(), CFollowPlayer(), CPatrol(), CEquipment(), CSpeed(), CDefense());
+        ComponentsTuple components=std::make_tuple(CTransform(), CLifespan(5), CInput(), CBoundingBox(), CAnimation(), CState(), CHealth(), CDamage(), CInvincibility(), CFollowPlayer(), CPatrol(), CEquipment(), CSpeed(), CDefense(), CName());
+    
     public:
         
 

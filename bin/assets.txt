@@ -1,4 +1,5 @@
 Font orbitron ./assets/fonts/Orbitron.ttf
+Font alagard ./assets/fonts/alagard.ttf
 Texture BLACK ./assets/textures/Black.png
 Texture DEKUTREE ./assets/textures/DekuTree.png
 Texture GRAVE ./assets/textures/Grave.png

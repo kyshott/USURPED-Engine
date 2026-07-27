@@ -6,7 +6,7 @@
         "damage": 5,
         "cost": 0,
         "manacost": 0,
-        "statuseffect": "none",
+        "effect": {},
         "description": "Your old blade - Once imbued with dark sorcery, now powerless."
     }
 }

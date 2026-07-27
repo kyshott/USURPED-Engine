@@ -1,20 +1,26 @@
 {
-    "SREMEDY": {
-        "id": "SREMEDY",
-        "name": "Remedy Vial",
-        "description": "A highly portable but nigh effective vial of medicinal liquid. Restores a small amount of HP.",
+    "SHEAL": {
+        "id": "SHEAL",
+        "name": "Heal Vial",
+        "description": "Restores a small amount of HP.",
         "effect": {
-            "type": "heal",
-            "value": 25
-        }
+            "id": "HEAL",
+            "type":  "RESTORE",
+            "magnitude": 25
+        },
+        "cost": 5,
+        "rarity": 1
     },
-    "SPHILTER": {
-        "id": "SPHILTER",
-        "name": "Philter Vial",
-        "description": "A vial of magical essence, once carried by an equally magical being. Restores a small amount of MP.",
+    "SMANA": {
+        "id": "SMANA",
+        "name": "Mana Vial",
+        "description": "Restores a small amount of MP.",
         "effect": {
-            "type": "restoremana",
-            "value": 10
-        }
+            "id": "HEALM",
+            "type": "RESTOREM",
+            "magnitude": 10
+        },
+        "cost": 10,
+        "rarity":  1
     }
 }

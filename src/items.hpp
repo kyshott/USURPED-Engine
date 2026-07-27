@@ -3,8 +3,7 @@
 #include <memory>
 #include <string>
 
-class GameEngine; // for circular dependency
-class EntityManager;
+class SceneBattle;
 class Entity;
 
 /**
@@ -13,11 +12,23 @@ class Entity;
 * This is to avoid having to repeatedly load item information from disk every time an item is created.
 */
 
-struct StatusEffect {
+struct Effect {
 	std::string id;
 	std::string type;
-	int duration = 0;
 	int magnitude = 0;
+};
+
+struct RingSpec {
+	std::string id;
+	std::string type;
+	std::string name;
+	std::string description;
+	int hp = 0;
+	int mp = 0;
+	int speed = 0;
+	int defense = 0;
+	int cost = 0;
+	int rarity = 0;
 };
 
 struct ItemSpec {
@@ -25,13 +36,9 @@ struct ItemSpec {
 	std::string type;
 	std::string name;
 	std::string description;
-	int damage = 0;
-	int speed = 0;
+	Effect effect;
 	int rarity = 0;
 	int cost = 0;
-	int manacost = 0;
-	int knockback = 0;
-	int lifespan = 0;
 };
 
 struct WeaponSpec {
@@ -41,7 +48,7 @@ struct WeaponSpec {
 	std::string description;
 	int damage = 0;
 	int cost = 0;
-	StatusEffect effect;
+	Effect effect;
 };
 
 struct MagicSpec {
@@ -52,13 +59,10 @@ struct MagicSpec {
 	int damage = 0;
 	int cost = 0;
 	int manacost = 0;
-	StatusEffect effect;
+	Effect effect;
 };
 
-// Weapon/item usage functions
-void usePrimaryWeapon(std::shared_ptr<Entity> player, EntityManager& manager, GameEngine* engine);
-void useSecondaryWeapon(std::shared_ptr<Entity> e);
-void useActiveItem(std::shared_ptr<Entity> e);
+void useItem(ItemSpec& item, SceneBattle& scene, std::shared_ptr<Entity> e);
 
 
 

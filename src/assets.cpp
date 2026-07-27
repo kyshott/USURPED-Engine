@@ -69,6 +69,7 @@ void Assets::load(const std::string path){
     file.close();
 
 	weapons = json::parse(std::ifstream("items/weapons.json"));
+    items = json::parse(std::ifstream("items/items.json"));
 
 }
 
@@ -200,9 +201,36 @@ WeaponSpec Assets::getWeapon(std::string name) const {
     weapon.cost = data.value("cost", 0);
     weapon.type = data.value("type", "");
     weapon.description = data.value("description", "");
-    weapon.effect.type = data.value("statuseffect", "none");
-    weapon.effect.duration = 0;
-    weapon.effect.magnitude = 0;
+
+    if (data.contains("effect") && data["effect"].is_object()) {
+        const auto& effect = data["effect"];
+        weapon.effect.id = effect.value("id", "none");
+        weapon.effect.type = effect.value("type", "none");
+        weapon.effect.magnitude = effect.value("magnitude", 0);
+    }
 
     return weapon;
+}
+
+ItemSpec Assets::getItem(std::string name) const {
+    if (!items.contains(name)) {
+        throw std::runtime_error("Item key not found in items.json: " + name);
+    }
+    const auto& data = items.at(name);
+    ItemSpec item;
+
+    item.id = data.value("id", name);
+    item.name = data.value("name", name);
+    item.description = data.value("description", "");
+    item.rarity = data.value("rarity", 0);
+    item.cost = data.value("cost", 0);
+
+    if (data.contains("effect") && data["effect"].is_object()) {
+        const auto& effect = data["effect"];
+        item.effect.id = effect.value("id", "none");
+        item.effect.type = effect.value("type", "none");
+        item.effect.magnitude = effect.value("magnitude", 0);
+    }
+
+    return item;
 }

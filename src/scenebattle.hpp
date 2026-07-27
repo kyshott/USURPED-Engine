@@ -17,7 +17,18 @@ enum class BattleState {
 	DEFEAT
 };
 
+struct DamageNumber {
+	std::string text;
+	Vec2 position;
+	Vec2 velocity;
+	int remaining = 0;
+	int total = 0;
+	Color color = WHITE;
+};
+
 class SceneBattle : public Scene {
+
+	std::string playername;
 
 	std::random_device rd;
 	
@@ -29,9 +40,13 @@ class SceneBattle : public Scene {
 	std::shared_ptr<ScenePlay> previousScene; /* Pointer to the previous scene */
 	std::string menuText;                 /* Other menu text */
 	int selectedMenuItem = 0;               /* Currently selected menu item */
+	int menu = 0;
 	BattleState battleState = BattleState::PLAYER_INPUT; /* Current state of the battle */
 	BattleState nextBattleState;
+	DamageNumber damageNumber;
 	std::string playerAction = "";
+	ItemSpec itemUsed;
+	MagicSpec magicUsed;
 	std::string enemyAction = "";
 	std::string battleMessage = "";
 	int waitTimer = 0;                       /* Buffer for waiting between actions so everything isnt instant */
@@ -59,10 +74,10 @@ class SceneBattle : public Scene {
 	void renderBattleEntity(std::shared_ptr<Entity> entity);
 	void enemyDie(std::shared_ptr<Entity> e);
 	void battleWeaponSwing(std::shared_ptr<Entity> e);
-	void drawDamageNumber(bool player, int damage);
 
 public:
 	SceneBattle(GameEngine* gameEngine, std::shared_ptr<Entity> player, std::shared_ptr<Entity> enemy, std::shared_ptr<ScenePlay> previousScene);
+	void drawDamageNumber(bool player, int damage);
 	void update() override;
 
 };

@@ -3,6 +3,9 @@
 
 //All of our component implementations
 
+CName::CName() = default;
+CName::CName(std::string name) : name(name) {}
+
 CTransform::CTransform(){ 
     position=Vec2(0.0f,0.0f);
     velocity=Vec2(0.0f,0.0f);

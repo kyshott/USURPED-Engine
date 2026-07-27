@@ -897,8 +897,10 @@ void ScenePlay::sCamera(){
 
 void ScenePlay::battleReturn(std::shared_ptr<Entity> e) {
     e->destroy();
+	gameEngine->playMusic("TITLEMUSIC");
     player->getComponent<CTransform>().velocity = Vec2(0.0f, 0.0f);
 	player->addComponent<CInvincibility>(100);
+    player->getComponent<CInvincibility>().remaining = 100;
 }
 
 /**
@@ -908,7 +910,6 @@ void ScenePlay::battleReturn(std::shared_ptr<Entity> e) {
  * 
  */
 void ScenePlay::spawnPlayer(){
-    //TODO: Sample player spawning, you will need to update this once you have some more mechanics finished
     player=entityManager.addEntity("DYNAMIC", "PLAYER");
     player->addComponent<CState>("DOWN");
     player->addComponent<CInput>();
@@ -924,6 +925,10 @@ void ScenePlay::spawnPlayer(){
 	player->getComponent<CEquipment>().currentWeapon = player->getComponent<CEquipment>().weapons[0];
     player->addComponent<CDefense>(3);
     player->addComponent<CSpeed>(5);
+	player->getComponent<CEquipment>().items.push_back(gameEngine->getAssets().getItem("SHEAL"));
+    player->getComponent<CEquipment>().items.push_back(gameEngine->getAssets().getItem("SHEAL"));
+    player->getComponent<CEquipment>().items.push_back(gameEngine->getAssets().getItem("SMANA"));
+    player->addComponent<CName>("Player");
 }
 
 /**

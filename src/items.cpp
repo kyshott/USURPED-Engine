@@ -3,7 +3,30 @@
 #include "entityManager.hpp"
 #include <fstream>
 #include "gameengine.hpp"
+#include "scenebattle.hpp"
 
+
+void useItem(ItemSpec& item, SceneBattle& scene, std::shared_ptr<Entity> e) {
+    if (item.effect.type == "RESTORE") {
+        if (e->hasComponent<CHealth>()) {
+            CHealth& health = e->getComponent<CHealth>();
+            health.current += item.effect.magnitude;
+            if (health.current > health.max) {
+                health.current = health.max;
+            }
+			scene.drawDamageNumber(true, -item.effect.magnitude);
+        }
+    }
+    else if (item.effect.type == "RESTOREM") {
+        if (e->hasComponent<CHealth>()) {
+            CHealth& health = e->getComponent<CHealth>();
+            health.current -= item.effect.magnitude;
+            if (health.current < 0) {
+                health.current = 0;
+            }
+        }
+	}
+}
 
 /**
 * Spawns/uses the entity's primary weapon

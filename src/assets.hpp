@@ -53,6 +53,6 @@ class Assets{
         void addMusic(const std::string& name, const std::string& path);
 
         WeaponSpec getWeapon(std::string name) const;
-        ItemSpec getItem();
-        MagicSpec getMagic();
+        ItemSpec getItem(std::string name) const;
+        MagicSpec getMagic(std::string name) const;
 };

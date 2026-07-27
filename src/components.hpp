@@ -16,6 +16,13 @@ class Component{
     bool has=false; /* Boolean if the object has this component */
 };
 
+class CName : public Component{
+    public:
+        std::string name; /* Name of the entity */
+        CName();
+        CName(std::string name);
+};
+
 /**
  * Transform Component
  * 
@@ -75,6 +82,8 @@ class CHealth : public Component{
     public:
         int max;      /* Maximum entity health */
         int current;  /* Current entity health */
+        int maxMana;  /* Maximum entity mana */
+        int currentMana;  /* Current entity mana */
 
         CHealth();
         CHealth(int m, int c);
@@ -90,6 +99,7 @@ class CEquipment : public Component {
         std::vector<WeaponSpec> weapons;
 		std::vector<ItemSpec> items;
 		std::vector<MagicSpec> magic;
+        std::vector<RingSpec> rings;
 
 		WeaponSpec currentWeapon;
 
