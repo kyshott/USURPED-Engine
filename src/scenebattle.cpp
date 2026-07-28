@@ -282,11 +282,20 @@ void SceneBattle::enemyInputState() {
 void SceneBattle::playerTurnState() {
 	if (playerAction == "ATTACK") {
 		player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLUSEU");
-		gameEngine->playSound("LINKSWING");
+		
 
 		spawnWeapon();
 
 		applyDamage(player, enemy, true);
+
+		if (enemy->getComponent<CHealth>().current <= 0) {
+			enemy->addComponent<CLifespan>(30);
+			enemy->getComponent<CLifespan>().remaining = 30;
+			gameEngine->stopMusic("BATTLEMUSIC");
+			gameEngine->playSound("ENEMYDIE");
+			queueMessage("Victory! Enemy defeated!", BattleState::VICTORY);
+			return;
+		}
 
 		playerAction = "";
 		if (enemyFaster) {
@@ -312,20 +321,18 @@ void SceneBattle::playerTurnState() {
 		}
 	}
 
-	// Death evaluation
 
-	if (enemy->getComponent<CHealth>().current <= 0) {
-		enemy->addComponent<CLifespan>(30);
-		enemy->getComponent<CLifespan>().remaining = 30;
-		gameEngine->stopMusic("BATTLEMUSIC");
-		gameEngine->playSound("ENEMYDIE");
-		queueMessage("Victory! Enemy defeated!", BattleState::VICTORY);
-	}
 }
 
 void SceneBattle::enemyTurnState() {
 	if (enemyAction == "ATTACK") {
 		applyDamage(enemy, player, false);
+
+		if (player->getComponent<CHealth>().current <= 0) {
+			battleState = BattleState::DEFEAT;
+			waitTimer = 200;
+		}
+
 		if (enemyFaster) {
 			if (playerAction == "ATTACK") {
 				queueMessage(playername + " attacks!", BattleState::PLAYER_TURN);
@@ -362,12 +369,6 @@ void SceneBattle::enemyTurnState() {
 		}
 	}
 
-	// Death evaluation
-
-	if (player->getComponent<CHealth>().current <= 0) {
-		battleState = BattleState::DEFEAT;
-		waitTimer = 200;
-	}
 }
 
 void SceneBattle::victoryState() {
@@ -748,6 +749,19 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 		WeaponSpec& pWeapon = attacker->getComponent<CEquipment>().currentWeapon;
 		std::vector<std::string>& weaknesses = defender->getComponent<CEnemy>().weaknesses;
 		std::vector<std::string>& resistances = defender->getComponent<CEnemy>().resistances;
+
+		if (pWeapon.effect.id == "SLASH") {
+			gameEngine->playSound("SLASH");
+		}
+		else if (pWeapon.effect.id == "PIERCE") {
+			gameEngine->playSound("PIERCE");
+		}
+		else if (pWeapon.effect.id == "SMASH") {
+			gameEngine->playSound("SMASH");
+		}
+		else {
+			gameEngine->playSound("HIT");
+		}
 
 		if (std::find(weaknesses.begin(), weaknesses.end(), pWeapon.effect.id) != weaknesses.end()) {
 			multiplier = 1.25f;

@@ -3,7 +3,7 @@
         "id": "ANCIENTBLADE",
         "type": "sword",
         "name": "Ancient Blade",
-        "damage": 5,
+        "damage": 1,
         "cost": 0,
         "manacost": 0,
         "effect": {

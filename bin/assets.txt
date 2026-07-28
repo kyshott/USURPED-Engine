@@ -77,6 +77,8 @@ Music BATTLEMUSIC ./assets/sounds/music2.wav
 Music TITLEMUSIC ./assets/sounds/dungeon.wav
 Sound MENUSELECT ./assets/sounds/blip.wav
 Sound HEAL ./assets/sounds/heal.wav
+Sound SMASH ./assets/sounds/smash.wav
+Sound SLASH ./assets/sounds/slash.wav
 Sound ENEMYDIE ./assets/sounds/enemydie.wav
 Sound ENEMYHIT ./assets/sounds/EnemyHit.wav
 Sound HEART ./assets/sounds/HeartPickup.wav
