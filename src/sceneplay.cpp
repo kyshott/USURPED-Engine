@@ -150,6 +150,7 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->getComponent<CPatrol>().currentPosition = 0;
                 e->addComponent<CHealth>(health, health);
                 e->addComponent<CStats>();
+                e->addComponent<CName>("Tektite");
                 
             }
             else if (ai == "FOLLOW") {
@@ -177,6 +178,7 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->addComponent<CHealth>(health, health);
                 e->addComponent<CStats>();
                 e->getComponent<CStats>().speed = 10;
+                e->addComponent<CName>("Leever");
             }
         }
     }
@@ -905,9 +907,20 @@ void ScenePlay::spawnPlayer(){
     
     // Add stats
 
-	player->getComponent<CItems>().items.push_back(gameEngine->getAssets().getItem("SHEAL"));
-    player->getComponent<CItems>().items.push_back(gameEngine->getAssets().getItem("SHEAL"));
-    player->getComponent<CItems>().items.push_back(gameEngine->getAssets().getItem("SMANA"));
+    CItems& items = player->getComponent<CItems>();
+
+	items.items.push_back(gameEngine->getAssets().getItem("SHEAL"));
+    items.items.push_back(gameEngine->getAssets().getItem("SHEAL"));
+    items.items.push_back(gameEngine->getAssets().getItem("SMANA"));
+    items.items.push_back(gameEngine->getAssets().getItem("SMANA"));
+    items.items.push_back(gameEngine->getAssets().getItem("MMANA"));
+    items.items.push_back(gameEngine->getAssets().getItem("LMANA"));
+    items.items.push_back(gameEngine->getAssets().getItem("MHEAL"));
+    items.items.push_back(gameEngine->getAssets().getItem("LHEAL"));
+
+    player->addComponent<CMagic>();
+    CMagic& magic = player->getComponent<CMagic>();
+    magic.magic.push_back(gameEngine->getAssets().getMagic("BURN"));
     player->addComponent<CName>("Player");
 }
 

@@ -5,11 +5,35 @@
         "description": "Restores a small amount of HP.",
         "effect": {
             "id": "HEAL",
-            "type":  "RESTORE",
+            "type": "RESTORE",
             "magnitude": 25
         },
         "cost": 5,
         "rarity": 1
+    },
+    "MHEAL": {
+        "id": "MHEAL",
+        "name": "Heal Potion",
+        "description": "Restores a moderate amount of HP.",
+        "effect": {
+            "id": "MHEAL",
+            "type": "RESTORE",
+            "magnitude": 50
+        },
+        "cost": 15,
+        "rarity": 2
+    },
+    "LHEAL": {
+        "id": "LHEAL",
+        "name": "Heal Elixir",
+        "description": "Restores a large amount of HP.",
+        "effect": {
+            "id": "LHEAL",
+            "type": "RESTORE",
+            "magnitude": 100
+        },
+        "cost": 30,
+        "rarity": 3
     },
     "SMANA": {
         "id": "SMANA",
@@ -21,6 +45,31 @@
             "magnitude": 10
         },
         "cost": 10,
-        "rarity":  1
+        "rarity": 1
+    },
+    "MMANA": {
+        "id": "MMANA",
+        "name": "Magic Potion",
+        "description": "Restores a moderate amount of MP.",
+        "effect": {
+            "id": "MHEALM",
+            "type": "RESTOREM",
+            "magnitude": 25
+        },
+        "cost": 20,
+        "rarity": 2
+    },
+    "LMANA": {
+        "id": "LMANA",
+        "name": "Magic Elixir",
+        "description": "Restores a large amount of MP.",
+        "effect": {
+            "id": "LHEALM",
+            "type": "RESTOREM",
+            "magnitude": 50
+        },
+        "cost": 40,
+        "rarity": 3
     }
+
 }

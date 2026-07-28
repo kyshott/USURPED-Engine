@@ -32,6 +32,7 @@ void SceneBattle::init() {
 	gameEngine->playMusic("BATTLEMUSIC");
 	player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLSTANDU");
 	playername = player->getComponent<CName>().name;
+	enemyname = enemy->getComponent<CName>().name;
 }
 
 // ------------ SYSTEM FUNCTIONS ----------------------------------------------------------------------------------------------
@@ -161,7 +162,8 @@ void SceneBattle::sDoAction(const Action& action) {
 			}
 			else if (selectedMenuItem == 2) {
 				gameEngine->playSound("MENUSELECT");
-				// Implement magic logic here
+				menu = 2;
+				selectedMenuItem = 0;
 			}
 			else if (selectedMenuItem == 3) {
 				gameEngine->playSound("MENUSELECT");
@@ -173,6 +175,8 @@ void SceneBattle::sDoAction(const Action& action) {
 			gameEngine->changeScene("PLAY", previousScene);
 		}
 	}
+
+	// ITEM MENU
 	else if (action.getType() == "PRESS" && menu == 1) {
 		std::vector<ItemSpec> uniqueItems;
 		std::vector<int> itemCounts;
@@ -216,6 +220,36 @@ void SceneBattle::sDoAction(const Action& action) {
 			gameEngine->playSound("MENUSELECT");
 			playerAction = "ITEM";
 			itemUsed = uniqueItems[selectedMenuItem];
+		}
+	}
+
+	// MAGIC MENU
+	else if (action.getType() == "PRESS" && menu == 2) {
+		const auto& spells = player->getComponent<CMagic>().magic;
+
+		if (action.getName() == "BACK") {
+			menu = 0;
+			selectedMenuItem = 2;
+		}
+		if (spells.empty()) {
+			return;
+		}
+		if (action.getName() == "UP") {
+			gameEngine->playSound("MENUSELECT");
+			if (selectedMenuItem > 0) {
+				selectedMenuItem--;
+			}
+		}
+		if (action.getName() == "DOWN") {
+			gameEngine->playSound("MENUSELECT");
+			if (selectedMenuItem + 1 < spells.size()) {
+				selectedMenuItem++;
+			}
+		}
+		if (action.getName() == "SELECT" && !spells.empty()) {
+			gameEngine->playSound("MENUSELECT");
+			playerAction = "MAGIC";
+			magicUsed = spells[selectedMenuItem];
 		}
 	}
 }
@@ -275,7 +309,7 @@ void SceneBattle::enemyInputState() {
 	}
 	else {
 		enemyAction = "ATTACK";
-		queueMessage("Enemy attacks!", BattleState::ENEMY_TURN);
+		queueMessage(enemyname + " attacks!", BattleState::ENEMY_TURN);
 	}
 }
 
@@ -459,9 +493,31 @@ void SceneBattle::renderUI() {
 		BLACK
 	);
 
+	// SELECTION TIP PANEL
+	if (battleState == BattleState::PLAYER_INPUT && waitTimer <= 0 && (menu == 1 || menu == 2)) {
+		DrawTexturePro(
+			menuBox,
+			Rectangle{ 0.0f, 0.0f, static_cast<float>(menuBox.width), static_cast<float>(menuBox.height) },
+			Rectangle{ leftPanelX, panelY - 40, panelWidth, panelHeight },
+			Vector2{ 0.0f, 0.0f },
+			0.0f,
+			WHITE
+		);
+
+		DrawTextEx(
+			font,
+			selectTip.c_str(),
+			Vector2(leftPanelX + textPaddingX, panelY - 40 + textPaddingY),
+			15.0f,
+			spacing,
+			BLACK
+		);
+	}
+
 	// SELECTION MENU
 
 	if (battleState == BattleState::PLAYER_INPUT && waitTimer <= 0 && menu == 0) {
+
 		DrawTexturePro(
 			menuBox,
 			Rectangle{ 0.0f, 0.0f, static_cast<float>(menuBox.width), static_cast<float>(menuBox.height) },
@@ -525,7 +581,7 @@ void SceneBattle::renderUI() {
 		const float rowHeight = panelHeight / 4.0f;
 		const float rowStartY = panelY + 15.0f;
 		const float nameX = leftPanelX + 18.0f;
-		const int itemsPerPage = 4;
+		const int itemsPerPage = 3;
 
 		if (uniqueItems.empty()) {
 			DrawTextEx(font, "No items", Vector2(nameX, panelY + 50.0f), itemFontSize, spacing, BLACK);
@@ -541,6 +597,8 @@ void SceneBattle::renderUI() {
 				const int row = i - startIndex;
 				const float textY = rowStartY + row * rowHeight;
 				Color textColor = (i == selectedMenuItem) ? RED : BLACK;
+
+				selectTip = uniqueItems[selectedMenuItem].description;
 
 				DrawTextEx(
 					font,
@@ -558,6 +616,67 @@ void SceneBattle::renderUI() {
 				DrawTextEx(
 					font,
 					countText.c_str(),
+					Vector2(countX, textY),
+					itemFontSize,
+					spacing,
+					textColor
+				);
+			}
+		}
+	}
+
+	// MAGIC MENU
+
+	if (battleState == BattleState::PLAYER_INPUT && waitTimer <= 0 && menu == 2) {
+		DrawTexturePro(
+			menuBox,
+			Rectangle{ 0.0f, 0.0f, static_cast<float>(menuBox.width), static_cast<float>(menuBox.height) },
+			Rectangle{ leftPanelX, panelY, panelWidth, panelHeight },
+			Vector2{ 0.0f, 0.0f },
+			0.0f,
+			WHITE
+		);
+		const auto& spells = player->getComponent<CMagic>().magic;
+
+		const float itemFontSize = 20.0f;
+		const float rowHeight = panelHeight / 4.0f;
+		const float rowStartY = panelY + 15.0f;
+		const float nameX = leftPanelX + 18.0f;
+		const int itemsPerPage = 3;
+
+		if (spells.empty()) {
+			DrawTextEx(font, "No items", Vector2(nameX, panelY + 50.0f), itemFontSize, spacing, BLACK);
+		}
+		else {
+			const int startIndex = (selectedMenuItem / itemsPerPage) * itemsPerPage;
+			int endIndex = startIndex + itemsPerPage;
+			if (endIndex > spells.size()) {
+				endIndex = spells.size();
+			}
+
+			for (int i = startIndex; i < endIndex; i++) {
+				const int row = i - startIndex;
+				const float textY = rowStartY + row * rowHeight;
+				Color textColor = (i == selectedMenuItem) ? RED : BLACK;
+
+				selectTip = spells[selectedMenuItem].description;
+
+				DrawTextEx(
+					font,
+					spells[i].name.c_str(),
+					Vector2(nameX, textY),
+					itemFontSize,
+					spacing,
+					textColor
+				);
+
+				std::string costText = std::to_string(spells[i].manacost);
+				Vector2 countSize = MeasureTextEx(font, costText.c_str(), itemFontSize, spacing);
+				const float countX = leftPanelX + panelWidth - 18.0f - countSize.x;
+
+				DrawTextEx(
+					font,
+					costText.c_str(),
 					Vector2(countX, textY),
 					itemFontSize,
 					spacing,
@@ -599,6 +718,8 @@ void SceneBattle::useItem() {
 		drawDamageNumber(true, -itemUsed.effect.magnitude, BLUE);
 		gameEngine->playSound("HEAL");
 	}
+	// It will always kick back to input at some point after using the item, so reset the menu selection to the first item for next time
+	selectedMenuItem = 0;
 }
 
 void SceneBattle::collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<Entity> looted) {

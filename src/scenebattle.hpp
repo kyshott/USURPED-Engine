@@ -34,6 +34,7 @@ class SceneBattle : public Scene {
 	int battlespeed = 80;
 
 	std::string playername;
+	std::string enemyname;
 
 	std::random_device rd;
 	
@@ -44,6 +45,7 @@ class SceneBattle : public Scene {
 	std::shared_ptr<Entity> player;        /* Pointer to the player entity */
 	std::shared_ptr<ScenePlay> previousScene; /* Pointer to the previous scene */
 	std::string menuText;                 /* Other menu text */
+	std::string selectTip = "";
 	int selectedMenuItem = 0;               /* Currently selected menu item */
 	int menu = 0;
 	BattleState battleState = BattleState::PLAYER_INPUT; /* Current state of the battle */
