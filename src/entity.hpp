@@ -4,8 +4,7 @@
 #include <string>
 #include "components.hpp"
 
-typedef std::tuple<CTransform, CLifespan, CInput, CBoundingBox, CAnimation, CState, CHealth, CInvincibility, CFollowPlayer, CPatrol, CEquipment, CName, CStats, CEnemy> ComponentsTuple;
-
+typedef std::tuple<CTransform, CLifespan, CInput, CBoundingBox, CAnimation, CState, CHealth, CInvincibility, CFollowPlayer, CPatrol, CName, CStats, CWeaknesses, CResistances, CLoot, CWeapons, CItems, CMagic, CRings> ComponentsTuple;
 
 /**
  * Contains all information about an individual Entity
@@ -22,12 +21,14 @@ class Entity{
         std::string id;  /* Name of the entity, e.g. player, brick, etc... */
         bool alive=true; /* Is the entity alive (if set to false, removed at the start of the next frame)*/
         //constructor
+        
         Entity(std::string& tag, std::string& id);
 
-        ComponentsTuple components=std::make_tuple(CTransform(), CLifespan(5), CInput(), CBoundingBox(), CAnimation(), CState(), CHealth(), CInvincibility(), CFollowPlayer(), CPatrol(), CEquipment(), CName(), CStats(), CEnemy());
+        ComponentsTuple components=std::make_tuple(CTransform(), CLifespan(5), CInput(), CBoundingBox(), CAnimation(), CState(), CHealth(), CInvincibility(), CFollowPlayer(), CPatrol(), CName(), CStats(), CWeaknesses(), CResistances(), CLoot(), CWeapons(), CItems(), CMagic(), CRings());
     
     public:
         
+        Entity();
 
         std::string& getTag();
         std::string& getID();

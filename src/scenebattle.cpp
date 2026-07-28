@@ -10,7 +10,7 @@ SceneBattle::SceneBattle(GameEngine* gameEngine, std::shared_ptr<Entity> player,
 
 void SceneBattle::init() {
 
-	enemyFaster = enemy->getComponent<CEnemy>().speed > player->getComponent<CStats>().speed;
+	enemyFaster = enemy->getComponent<CStats>().speed > player->getComponent<CStats>().speed;
 
 	entityManager.addExistingEntity(player);
 	entityManager.addExistingEntity(enemy);
@@ -176,7 +176,7 @@ void SceneBattle::sDoAction(const Action& action) {
 	else if (action.getType() == "PRESS" && menu == 1) {
 		std::vector<ItemSpec> uniqueItems;
 		std::vector<int> itemCounts;
-		const auto& inventory = player->getComponent<CEquipment>().items;
+		const auto& inventory = player->getComponent<CItems>().items;
 
 		for (const auto& item : inventory) {
 			bool found = false;
@@ -264,7 +264,7 @@ void SceneBattle::playerInputState() {
 
 void SceneBattle::enemyInputState() {
 	int usemagic = 0;
-	if (enemy->getComponent<CEquipment>().magic.size() > 0) {
+	if (enemy->hasComponent<CMagic>()) {
 		std::mt19937 gen(rd());
 		std::bernoulli_distribution dist(0.75);
 		usemagic = dist(gen) ? 1 : 0;
@@ -310,8 +310,8 @@ void SceneBattle::playerTurnState() {
 		playerAction = "";
 
 		useItem();
-		CEquipment& equip = player->getComponent<CEquipment>();
-		equip.removeItem(itemUsed);
+		CItems& items = player->getComponent<CItems>();
+		items.removeItem(itemUsed);
 
 		if (enemyFaster) {
 			queueNext(BattleState::PLAYER_INPUT, battlespeed);
@@ -504,7 +504,7 @@ void SceneBattle::renderUI() {
 		);
 		std::vector<ItemSpec> uniqueItems;
 		std::vector<int> itemCounts;
-		const auto& inventory = player->getComponent<CEquipment>().items;
+		const auto& inventory = player->getComponent<CItems>().items;
 
 		for (const auto& item : inventory) {
 			bool found = false;
@@ -602,9 +602,8 @@ void SceneBattle::useItem() {
 }
 
 void SceneBattle::collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<Entity> looted) {
-	CEnemy& loot = looted->getComponent<CEnemy>();
+	CLoot& loot = looted->getComponent<CLoot>();
 	CStats& stats = looter->getComponent<CStats>();
-	CEquipment& equip = looter->getComponent<CEquipment>();
 
 	std::mt19937 gen(rd());
 	std::bernoulli_distribution dist(loot.itemDropChance);
@@ -612,18 +611,18 @@ void SceneBattle::collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<En
 	if (dist(gen)) {
 		if (loot.lootItem.first == "WEAPON") {
 			WeaponSpec weapon = gameEngine->getAssets().getWeapon(loot.lootItem.second);
-			equip.weapons.push_back(weapon);
+			looter->getComponent<CWeapons>().weapons.push_back(weapon);
 		}
 		else if (loot.lootItem.first == "MAGIC") {
-			//MagicSpec magic = gameEngine->getAssets().getMagic(loot.lootItem.second);
-			//equip.magic.push_back(magic);
+			MagicSpec magic = gameEngine->getAssets().getMagic(loot.lootItem.second);
+			looter->getComponent<CMagic>().magic.push_back(magic);
 		}
 		else if (loot.lootItem.first == "ITEM") {
 			ItemSpec item = gameEngine->getAssets().getItem(loot.lootItem.second);
-			equip.items.push_back(item);
+			looter->getComponent<CItems>().items.push_back(item);
 		}
 
-		equip.gold += loot.gold;
+		looter->getComponent<CItems>().gold += loot.gold;
 
 		// Placeholder level up
 		stats.exp += loot.exp;
@@ -638,9 +637,9 @@ void SceneBattle::collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<En
 }
 
 void SceneBattle::spawnWeapon() {
-	CEquipment& equip = player->getComponent<CEquipment>();
-	auto e = entityManager.addEntity("WEAPON", equip.currentWeapon.name);
-	e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(equip.currentWeapon.id), true);
+	CWeapons& weapons = player->getComponent<CWeapons>();
+	auto e = entityManager.addEntity("WEAPON", weapons.currentWeapon.name);
+	e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(weapons.currentWeapon.id), true);
 	e->addComponent<CLifespan>(15);
 	e->getComponent<CLifespan>().remaining = 15;
 	e->addComponent<CTransform>();
@@ -746,9 +745,7 @@ void SceneBattle::queueNext(BattleState nextState, int frames) {
 void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<Entity> defender, bool playerAttack) {
 	if (playerAttack) {
 		float multiplier = 1.0f;
-		WeaponSpec& pWeapon = attacker->getComponent<CEquipment>().currentWeapon;
-		std::vector<std::string>& weaknesses = defender->getComponent<CEnemy>().weaknesses;
-		std::vector<std::string>& resistances = defender->getComponent<CEnemy>().resistances;
+		WeaponSpec& pWeapon = attacker->getComponent<CWeapons>().currentWeapon;
 
 		if (pWeapon.effect.id == "SLASH") {
 			gameEngine->playSound("SLASH");
@@ -763,29 +760,35 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 			gameEngine->playSound("HIT");
 		}
 
-		if (std::find(weaknesses.begin(), weaknesses.end(), pWeapon.effect.id) != weaknesses.end()) {
-			multiplier = 1.25f;
+		if (defender->hasComponent<CWeaknesses>()) {
+			std::vector<std::string>& weaknesses = defender->getComponent<CWeaknesses>().weaknesses;
+			if (std::find(weaknesses.begin(), weaknesses.end(), pWeapon.effect.id) != weaknesses.end()) {
+				multiplier = 1.25f;
+			}
 		}
-		else if (std::find(resistances.begin(), resistances.end(), pWeapon.effect.id) != resistances.end()) {
-			multiplier = 0.75f;
+		if (defender->hasComponent<CResistances>()) {
+			std::vector<std::string>& resistances = defender->getComponent<CResistances>().resistances;
+			if (std::find(resistances.begin(), resistances.end(), pWeapon.effect.id) != resistances.end()) {
+				multiplier = 0.75f;
+			}
 		}
 
 		float total = 0.0f;
 
-		if (pWeapon.damage - defender->getComponent<CEnemy>().defense <= 0) {
+		if (pWeapon.damage - defender->getComponent<CStats>().defense <= 0) {
 			total = 0.0f;
 		}
 		else {
-			total = (pWeapon.damage - defender->getComponent<CEnemy>().defense) * multiplier;
+			total = (pWeapon.damage - defender->getComponent<CStats>().defense) * multiplier;
 		}
 		defender->getComponent<CHealth>().current -= total;
 		drawDamageNumber(false, static_cast<int>(total), WHITE);
 	}
 	else {
 		float multiplier = 1.0f;
-		std::string type = attacker->getComponent<CEnemy>().physicalType;
-		std::vector<std::string>& weaknesses = attacker->getComponent<CStats>().weaknesses;
-		std::vector<std::string>& resistances = attacker->getComponent<CStats>().resistances;
+		std::string type = attacker->getComponent<CStats>().baseDamageType;
+		std::vector<std::string>& weaknesses = defender->getComponent<CWeaknesses>().weaknesses;
+		std::vector<std::string>& resistances = defender->getComponent<CResistances>().resistances;
 
 		if (std::find(weaknesses.begin(), weaknesses.end(), type) != weaknesses.end()) {
 			multiplier = 1.25f;
@@ -796,11 +799,11 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 
 		float total = 0.0f;
 
-		if (attacker->getComponent<CEnemy>().physicalDamage - defender->getComponent<CEnemy>().defense <= 0) {
+		if (attacker->getComponent<CStats>().baseDamage - defender->getComponent<CStats>().defense <= 0) {
 			total = 0.0f;
 		}
 		else {
-			total = (attacker->getComponent<CEnemy>().physicalDamage - defender->getComponent<CEnemy>().defense) * multiplier;
+			total = (attacker->getComponent<CStats>().baseDamage - defender->getComponent<CStats>().defense) * multiplier;
 		}
 		defender->getComponent<CHealth>().current -= total;
 		drawDamageNumber(true, static_cast<int>(total), RED);

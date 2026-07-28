@@ -16,6 +16,7 @@ class GameEngine;
 struct Effect {
 	std::string id;
 	std::string type;
+	std::string element;
 	int magnitude = 0;
 };
 
@@ -57,7 +58,6 @@ struct MagicSpec {
 	std::string type;
 	std::string name;
 	std::string description;
-	int damage = 0;
 	int cost = 0;
 	int manacost = 0;
 	Effect effect;

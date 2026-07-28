@@ -2,11 +2,14 @@
     "FOOTSOLDIER": {
         "name": "Foot Soldier",
         "health": 10,
+        "mana": 0,
         "damage": 3,
+        "damageType":  "SLASH",
         "defense": 1,
+        "magicDefense":  0,
         "speed": 2,
         "ai":  "FOLLOW",
-        "spells": {},
+        "magic": {},
         "weakness": { "id": "SMASH" },
         "resistance": {},
         "loot": {
@@ -15,7 +18,8 @@
             "dropchance": 0.25
         },
         "gold": 3,
-        "exp":  5,
-        "description": "The lowest ranking soldiers of the empire. A pity they've found themselves in your way."
+        "exp": 5,
+        "mapspeed":  3,
+        "description": "The lowest ranking soldiers of the empire. Fodder for your wrath."
     }
 }

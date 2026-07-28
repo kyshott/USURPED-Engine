@@ -1,0 +1,24 @@
+{
+    "BURN": {
+        "name": "Burn",
+        "description": "Singes the target with conjured flame.",
+        "effect": {
+            "type": "DAMAGE",
+            "magnitude": 10,
+            "element": "FIRE"
+        },
+        "manacost": 5,
+        "cost": 0
+    },
+
+    "SMEND": {
+        "name": "Lesser Mend",
+        "description": "Heals a small amount of the user's HP.",
+        "effect": {
+            "type": "RESTORE",
+            "magnitude": 10
+        },
+        "manacost": 5,
+        "cost": 0
+    }
+}

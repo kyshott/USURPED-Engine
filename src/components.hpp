@@ -89,63 +89,117 @@ class CHealth : public Component{
         CHealth(int m, int c);
 };
 
+/*
+* Stats component
+* 
+* The fundamental component to the battle system. Stores all entity stats used in calculations.
+*/
 class CStats : public Component {
     public:
         int level = 1;
         int exp = 0;
         int nextlevel = 100;
         int speed = 5;
-        int defense = 5;
+        int defense = 0;
         int magicdefense = 0;
-
-        std::vector<std::string> weaknesses;
-        std::vector<std::string> resistances;
+        int baseDamage = 0;
+		std::string baseDamageType = "SMASH";
 
         CStats();
 };
 
-class CEnemy : public Component {
+/**
+ * Weaknesses Component
+ *
+ * Stores a list of weaknesses for the entity, used in the battle system
+ */
+class CWeaknesses : public Component {
     public:
-        int physicalDamage = 1;
-        std::string physicalType = "SLASH";
-
-        int defense = 0;
-        int magicdefense = 0;
-        int speed = 1;
-
-        // LOOT
-
-        int gold = 0;
-        int exp = 10;
-
-        float itemDropChance = 100.0f;
-
-		std::pair<std::string, std::string> lootItem; // Loot item of the form <type, id>
-
         std::vector<std::string> weaknesses;
-        std::vector<std::string> resistances;
 
-        CEnemy();
+        CWeaknesses();
 };
 
 /**
-* Equipment Component
-* 
-* Defines the equipment that the entity has available. This includes weapons, magic, items, etc.
-*/
-class CEquipment : public Component {
+ * Resistances Component
+ *
+ * Stores a list of resistances for the entity, used in the battle system
+ */
+class CResistances : public Component {
     public:
-        std::vector<WeaponSpec> weapons;
-		std::vector<ItemSpec> items;
-		std::vector<MagicSpec> magic;
-        std::vector<RingSpec> rings;
+	    std::vector<std::string> resistances;
 
+	    CResistances();
+};
+
+/*
+* Loot Component
+* 
+* Stores the loot that an entity drops when defeated, used in the battle system
+*/
+class CLoot : public Component {
+    public:
+        std::pair<std::string, std::string> lootItem; // Loot item in the form <type, id>
+        float itemDropChance = 100.0f;
+        int gold = 0;
+        int exp = 10;
+
+        CLoot();
+};
+
+/*
+* Weapons Component
+* 
+* Stores the weapons that an entity (really only used by player) has, used in the battle system
+*/
+class CWeapons : public Component {
+    public:
+	    std::vector<WeaponSpec> weapons;
+
+        WeaponSpec currentWeapon;
+
+	    CWeapons();
+};
+
+/*
+* Magic Component
+* 
+* Stores the magic spells that an entity has, used in the battle system
+*/
+class CMagic : public Component {
+    public:
+	    std::vector<MagicSpec> magic;
+
+        float castChance; // Only used by enemies
+
+	    CMagic();
+};
+
+/*
+* Items Component
+* 
+* Stores the items that an entity has, used in the battle system. Also has the amount of gold that the entity has.
+*/
+class CItems : public Component {
+    public:
+	    std::vector<ItemSpec> items;
         int gold = 0;
 
-		WeaponSpec currentWeapon;
-
-		CEquipment();
         void removeItem(ItemSpec item);
+	    CItems();
+};
+
+/*
+* Rings Component
+* 
+* Stores the rings that an entity has, used in the battle system. Rings are a special type of item that can be equipped to give the entity special abilities.
+*/
+class CRings : public Component {
+    public:
+	    std::vector<RingSpec> rings;
+
+	    CRings();
+
 };
 
 /**

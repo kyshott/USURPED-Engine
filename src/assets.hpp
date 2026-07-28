@@ -32,6 +32,7 @@ class Assets{
         json weapons;
         json items;
         json magic;
+        json enemies;
         json statusEffects;
 
     public:
@@ -55,4 +56,5 @@ class Assets{
         WeaponSpec getWeapon(std::string name) const;
         ItemSpec getItem(std::string name) const;
         MagicSpec getMagic(std::string name) const;
+        std::shared_ptr<Entity> getEnemy(std::string name) const;
 };

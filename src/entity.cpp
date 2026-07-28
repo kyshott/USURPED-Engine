@@ -1,6 +1,7 @@
 #include "entity.hpp"
 
 Entity::Entity(std::string& tag, std::string& id) : tag(tag), id(id){}
+Entity::Entity() {};
 
 /**
  * Gets the entity's tag, e.g. DYNAMIC

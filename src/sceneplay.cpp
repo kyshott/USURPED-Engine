@@ -149,7 +149,7 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->addComponent<CPatrol>(patrolPoints, speed);
                 e->getComponent<CPatrol>().currentPosition = 0;
                 e->addComponent<CHealth>(health, health);
-                e->addComponent<CEnemy>();
+                e->addComponent<CStats>();
                 
             }
             else if (ai == "FOLLOW") {
@@ -175,8 +175,8 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->getComponent<CTransform>().prevPosition.y = pos.y;
                 e->addComponent<CFollowPlayer>(Vec2(0.0f, 0.0f), speed);
                 e->addComponent<CHealth>(health, health);
-                e->addComponent<CEnemy>();
-                e->getComponent<CEnemy>().speed = 10;
+                e->addComponent<CStats>();
+                e->getComponent<CStats>().speed = 10;
             }
         }
     }
@@ -899,15 +899,15 @@ void ScenePlay::spawnPlayer(){
     player->addComponent<CBoundingBox>(Vec2(gameEngine->getTileSizeX(), gameEngine->getTileSizeY()));
     Vec2 pos = gridToMidPixel(playerConfig.X,playerConfig.Y,player);
     player->addComponent<CTransform>(Vec2(pos.x,pos.y), Vec2(0.0f,0.0f), 0.0f);
-    player->addComponent<CEquipment>();
-    player->getComponent<CEquipment>().weapons.push_back(gameEngine->getAssets().getWeapon("ANCIENTBLADE"));
-	player->getComponent<CEquipment>().currentWeapon = player->getComponent<CEquipment>().weapons[0];
+    player->addComponent<CWeapons>();
+    player->getComponent<CWeapons>().weapons.push_back(gameEngine->getAssets().getWeapon("ANCIENTBLADE"));
+	player->getComponent<CWeapons>().currentWeapon = player->getComponent<CWeapons>().weapons[0];
     
     // Add stats
 
-	player->getComponent<CEquipment>().items.push_back(gameEngine->getAssets().getItem("SHEAL"));
-    player->getComponent<CEquipment>().items.push_back(gameEngine->getAssets().getItem("SHEAL"));
-    player->getComponent<CEquipment>().items.push_back(gameEngine->getAssets().getItem("SMANA"));
+	player->getComponent<CItems>().items.push_back(gameEngine->getAssets().getItem("SHEAL"));
+    player->getComponent<CItems>().items.push_back(gameEngine->getAssets().getItem("SHEAL"));
+    player->getComponent<CItems>().items.push_back(gameEngine->getAssets().getItem("SMANA"));
     player->addComponent<CName>("Player");
 }
 

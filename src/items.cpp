@@ -40,7 +40,7 @@ void useItem(ItemSpec& item, SceneBattle& scene, std::shared_ptr<Entity> e, Game
 */
 void usePrimaryWeapon(std::shared_ptr<Entity> player, EntityManager& manager, GameEngine* engine) {
     engine->playSound("LINKSWING");
-	CEquipment& equipment = player->getComponent<CEquipment>();
+	CWeapons& equipment = player->getComponent<CWeapons>();
 	std::string name = equipment.weapons[0].name;
 
 	auto e = manager.addEntity("WEAPON", name);

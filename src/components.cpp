@@ -29,10 +29,17 @@ CHealth::CHealth(int m, int c): max(m), current(c){}
 
 CStats::CStats() {};
 
-CEnemy::CEnemy() {};
 
-CEquipment::CEquipment() {};
-void CEquipment::removeItem(ItemSpec item) {
+CWeaknesses::CWeaknesses() {};
+CResistances::CResistances() {};
+CLoot::CLoot() {};
+CWeapons::CWeapons() {};
+CMagic::CMagic() {};
+CRings::CRings() {};
+
+
+CItems::CItems() {};
+void CItems::removeItem(ItemSpec item) {
     auto it = std::find_if(items.begin(), items.end(), [&](const ItemSpec& i) {
         return i.id == item.id;
         });

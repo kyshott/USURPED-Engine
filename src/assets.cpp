@@ -5,6 +5,7 @@
 #include <raylib.h>
 #include "animation.hpp"
 #include "json.hpp"
+#include "entity.hpp"
 
 using nlohmann::json;
 
@@ -69,8 +70,9 @@ void Assets::load(const std::string path){
     file.close();
 
 	weapons = json::parse(std::ifstream("items/weapons.json"));
+	magic = json::parse(std::ifstream("items/magic.json"));
     items = json::parse(std::ifstream("items/items.json"));
-
+    enemies = json::parse(std::ifstream("enemies/enemies.json"));
 }
 
 
@@ -212,6 +214,45 @@ WeaponSpec Assets::getWeapon(std::string name) const {
     return weapon;
 }
 
+/*
+* Gets the magic information from the pre-parsed magic.json file.
+* 
+* @param name Magic name, as it appears as a key in the magic.json file
+* @return MagicSpec struct containing the magic information
+*/
+MagicSpec Assets::getMagic(std::string name) const {
+    if (!magic.contains(name)) {
+        throw std::runtime_error("Magic key not found in magic.json: " + name);
+    }
+
+    const auto& data = magic.at(name);
+
+    MagicSpec spell;
+    spell.id = data.value("id", name);
+    spell.name = data.value("name", name);
+    spell.cost = data.value("cost", 0);
+    spell.manacost = data.value("manacost", 0);
+    spell.description = data.value("description", "");
+
+    if (data.contains("effect") && data["effect"].is_object()) {
+        const auto& effect = data["effect"];
+        spell.effect.id = effect.value("id", "none");
+        spell.effect.type = effect.value("type", "none");
+        if (spell.effect.type == "DAMAGE") {
+            spell.effect.element = effect.value("element", "none");
+        }
+		spell.effect.magnitude = effect.value("magnitude", 0);
+	}
+
+    return spell;
+}
+
+/*
+* Gets the item information from the pre-parsed items.json file.
+* 
+* @param name Item name, as it appears as a key in the items.json file
+* @return ItemSpec struct containing the item information
+*/
 ItemSpec Assets::getItem(std::string name) const {
     if (!items.contains(name)) {
         throw std::runtime_error("Item key not found in items.json: " + name);
@@ -233,4 +274,79 @@ ItemSpec Assets::getItem(std::string name) const {
     }
 
     return item;
+}
+
+/*
+* Creates an enemy with all of the given specifications from the json file.
+* 
+* DOES NOT add the enemy to the scene or add any components pertaining to the sceneplay scene. Transforms, positions, etc, are not set.
+* 
+* @param name Enemy name, as it appears as a key in the enemies.json file
+*/
+
+std::shared_ptr<Entity> Assets::getEnemy(std::string name) const {
+	if (!enemies.contains(name)) {
+		throw std::runtime_error("Enemy key not found in enemies.json: " + name);
+	}
+	auto e = std::make_shared<Entity>();
+	const auto& data = enemies.at(name);
+
+    e->addComponent<CStats>();
+    e->addComponent<CItems>();
+	e->addComponent<CName>(data.value("name", name));
+
+	CStats& stats = e->getComponent<CStats>();
+    CItems& items = e->getComponent<CItems>();
+	stats.defense = data.value("defense", 0);
+	stats.exp = data.value("exp", 0);
+	items.gold = data.value("gold", 0);
+	stats.magicdefense = data.value("magicdefense", 0);
+	stats.speed = data.value("speed", 1);
+	stats.baseDamage = data.value("damage", 1);
+	stats.baseDamageType = data.value("damageType", "SLASH");
+    
+
+    if (data.contains("weakness") && data["weakness"].is_object()) {
+        e->addComponent<CWeaknesses>();
+        const auto& weakness = data["weakness"];
+        e->getComponent<CWeaknesses>().weaknesses.push_back(weakness.value("id", "none"));
+    }
+    if (data.contains("resistance") && data["resistance"].is_object()) {
+        e->addComponent<CResistances>();
+        const auto& resistance = data["resistance"];
+        e->getComponent<CResistances>().resistances.push_back(resistance.value("id", "none"));
+    }
+    if (data.contains("loot") && data["loot"].is_object()) {
+        e->addComponent<CLoot>();
+		CLoot& loot = e->getComponent<CLoot>();
+        const auto& lootObj = data["loot"];
+		loot.lootItem.first = lootObj.value("type", "none");
+		loot.lootItem.second = lootObj.value("id", "none");
+        loot.itemDropChance = lootObj.value("dropchance", 0.0f);
+    }
+    if (data.contains("magic") && data["magic"].is_object()) {
+        e->addComponent<CMagic>();
+        CMagic& magic = e->getComponent<CMagic>();
+		const auto& magicObj = data["magic"];
+		magic.castChance = magicObj.value("castChance", 0.0f);
+		magic.magic.push_back(getMagic(magicObj.value("id", "none")));
+    }
+
+    e->addComponent<CHealth>(data.value("health", 1), data.value("health", 1));
+	CHealth& h = e->getComponent<CHealth>();
+	h.maxMana = data.value("mana", 0);
+	h.currentMana = data.value("mana", 0);
+
+	if (data.value("ai", "") == "FOLLOW") {
+		e->addComponent<CFollowPlayer>();
+        e->getComponent<CFollowPlayer>().speed = data.value("mapSpeed", 0.0f);
+    }
+    else if (data.value("ai", "") == "PATROL") {
+        e->addComponent<CPatrol>();
+        e->getComponent<CPatrol>().speed = data.value("mapSpeed", 0.0f);
+
+        // Patrol points are added later in sceneplay since they are specific to the particular scene
+    }
+
+    return e;
 }
