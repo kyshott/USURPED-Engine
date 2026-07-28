@@ -5,10 +5,15 @@
         "damage": 3,
         "defense": 1,
         "speed": 2,
-        "rarity": 1,
-        "maxgroup": 2,
-        "spells": [],
-        "loot": [],
+        "ai":  "FOLLOW",
+        "spells": {},
+        "weakness": { "id": "SMASH" },
+        "resistance": {},
+        "loot": {
+            "type": "ITEM",
+            "id": "SHEAL",
+            "dropchance": 0.25
+        },
         "gold": 3,
         "exp":  5,
         "description": "The lowest ranking soldiers of the empire. A pity they've found themselves in your way."

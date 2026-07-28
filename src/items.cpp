@@ -14,7 +14,7 @@ void useItem(ItemSpec& item, SceneBattle& scene, std::shared_ptr<Entity> e, Game
             if (health.current > health.max) {
                 health.current = health.max;
             }
-			scene.drawDamageNumber(true, -item.effect.magnitude);
+			//scene.drawDamageNumber(true, -item.effect.magnitude);
             engine->playSound("HEAL");
         }
     }
@@ -45,7 +45,7 @@ void usePrimaryWeapon(std::shared_ptr<Entity> player, EntityManager& manager, Ga
 
 	auto e = manager.addEntity("WEAPON", name);
 	e->addComponent<CAnimation>(engine->getAssets().getAnimation(name), true);
-    e->addComponent<CDamage>(equipment.weapons[0].damage);
+    //e->addComponent<CDamage>(equipment.weapons[0].damage);
 
     float bboxSizeX = engine->getAssets().getAnimation(name).getScaledSize().x;
     float bboxSizeY = engine->getAssets().getAnimation(name).getScaledSize().y;

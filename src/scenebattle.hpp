@@ -12,6 +12,7 @@ enum class BattleState {
 	ENEMY_INPUT,
 	ENEMY_TURN,
 	MESSAGE,
+	NEXT,
 	EFFECTS,
 	VICTORY,
 	DEFEAT
@@ -27,6 +28,10 @@ struct DamageNumber {
 };
 
 class SceneBattle : public Scene {
+
+	bool enemyFaster = false;
+
+	int battlespeed = 80;
 
 	std::string playername;
 
@@ -68,15 +73,19 @@ class SceneBattle : public Scene {
 	void defeatState();
 
 	// Helpers
+	void applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<Entity> defender, bool playerAttack);
 	void useItem();
-	void queueMessage(const std::string& message, BattleState nextState, int frames);
+	void collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<Entity> looted);
+	void queueMessage(const std::string& message, BattleState nextState);
+	void queueNext(BattleState nextState, int frames);
+	void drawDamageNumber(bool player, int damage, Color color);
 	void renderUI();
 	void renderBattleEntity(std::shared_ptr<Entity> entity);
+	void spawnWeapon();
 	void battleWeaponSwing(std::shared_ptr<Entity> e);
 
 public:
 	SceneBattle(GameEngine* gameEngine, std::shared_ptr<Entity> player, std::shared_ptr<Entity> enemy, std::shared_ptr<ScenePlay> previousScene);
-	void drawDamageNumber(bool player, int damage);
 	void update() override;
 
 };

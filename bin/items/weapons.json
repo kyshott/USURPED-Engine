@@ -6,7 +6,11 @@
         "damage": 5,
         "cost": 0,
         "manacost": 0,
-        "effect": {},
+        "effect": {
+            "id": "SLASH",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
         "description": "Your old blade - Once imbued with dark sorcery, now powerless."
     }
 }

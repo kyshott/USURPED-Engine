@@ -13,7 +13,7 @@
     },
     "SMANA": {
         "id": "SMANA",
-        "name": "Mana Vial",
+        "name": "Magic Vial",
         "description": "Restores a small amount of MP.",
         "effect": {
             "id": "HEALM",

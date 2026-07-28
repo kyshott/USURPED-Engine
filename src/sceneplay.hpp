@@ -25,7 +25,6 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
         bool renderHealth=true;         /* If the entity health should be rendered */
         bool followCam=false;           /* If the locked follow camera should be active, false=room cam */
         Vec2 room = {0,0};              /* Current (x,y) room. (0,0) is the starting room */
-        int battlecooldown = 0;
 
         void init(const std::string& levelPath);
         void sAnimation();

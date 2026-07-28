@@ -27,25 +27,25 @@ CInput::CInput(){};
 CHealth::CHealth(){}
 CHealth::CHealth(int m, int c): max(m), current(c){}
 
-CEquipment::CEquipment() {};
+CStats::CStats() {};
 
+CEnemy::CEnemy() {};
+
+CEquipment::CEquipment() {};
+void CEquipment::removeItem(ItemSpec item) {
+    auto it = std::find_if(items.begin(), items.end(), [&](const ItemSpec& i) {
+        return i.id == item.id;
+        });
+
+    if (it != items.end()) {
+        items.erase(it);
+    }
+}
 CBoundingBox::CBoundingBox()=default;
 CBoundingBox::CBoundingBox(const Vec2& s) : size(s){}
 
 CState::CState() = default;
 CState::CState(std::string state) : state(state) {}
-
-CDamage::CDamage(){}
-CDamage::CDamage(int damage) : damage(damage){}
-
-CSpeed::CSpeed() {}
-CSpeed::CSpeed(int speed) : speed(speed) {}
-
-CDefense::CDefense() {}
-CDefense::CDefense(int defense) : defense(defense) {}
-
-CGroup::CGroup() {}
-CGroup::CGroup(int maxgroup) : maxgroup(maxgroup) {}
 
 CInvincibility::CInvincibility(){}
 CInvincibility::CInvincibility(int frames) : iframes(frames){}

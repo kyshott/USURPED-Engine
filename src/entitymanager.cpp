@@ -48,6 +48,13 @@ std::shared_ptr<Entity> EntityManager::addEntity(std::string tag, std::string id
     return e;
 }
 
+/**
+ * Adds an existing entity to the entity vector
+ * 
+ * Used when passing entities between scenes
+ * 
+ * @param e shared pointer to the entity to add
+ */ 
 void EntityManager::addExistingEntity(std::shared_ptr<Entity> e){
     toAdd.push_back(e);
 }

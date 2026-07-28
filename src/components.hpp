@@ -89,6 +89,45 @@ class CHealth : public Component{
         CHealth(int m, int c);
 };
 
+class CStats : public Component {
+    public:
+        int level = 1;
+        int exp = 0;
+        int nextlevel = 100;
+        int speed = 5;
+        int defense = 5;
+        int magicdefense = 0;
+
+        std::vector<std::string> weaknesses;
+        std::vector<std::string> resistances;
+
+        CStats();
+};
+
+class CEnemy : public Component {
+    public:
+        int physicalDamage = 1;
+        std::string physicalType = "SLASH";
+
+        int defense = 0;
+        int magicdefense = 0;
+        int speed = 1;
+
+        // LOOT
+
+        int gold = 0;
+        int exp = 10;
+
+        float itemDropChance = 100.0f;
+
+		std::pair<std::string, std::string> lootItem; // Loot item of the form <type, id>
+
+        std::vector<std::string> weaknesses;
+        std::vector<std::string> resistances;
+
+        CEnemy();
+};
+
 /**
 * Equipment Component
 * 
@@ -101,9 +140,12 @@ class CEquipment : public Component {
 		std::vector<MagicSpec> magic;
         std::vector<RingSpec> rings;
 
+        int gold = 0;
+
 		WeaponSpec currentWeapon;
 
 		CEquipment();
+        void removeItem(ItemSpec item);
 };
 
 /**
@@ -141,56 +183,12 @@ class CAnimation : public Component {
  */
 class CState : public Component {
     public:
-		int rarity = 0;         /*Rarity of the entity, used for items */
         std::string state;     /*Current state name */
         bool isGrounded=false; /*Is the entity touching the top of another entity */
         bool isAttacking = false;
 
         CState();
         CState(std::string state);
-};
-
-/**
- * Damage Component
- * 
- * Defines the amount of damage this entity does when it collides with another entity
- */
-class CDamage : public Component{
-    public:
-        int damage=1;  /*Amount of damage this entity does when in contact with another entity that contains a health component */
-        CDamage();
-        CDamage(int damage);
-};
-
-/*
-* Speed Component
-* 
-* Defines the speed of the entity, used in combat priority
-*/
-class CSpeed : public Component{
-    public:
-        int speed=0;  /* Speed variable, used in combat priority */
-        CSpeed();
-        CSpeed(int speed);
-};
-
-class CGroup : public Component {
-    public:
-        int maxgroup; /* Maximum number of this entity that can spawn. Can be a random value. */
-        CGroup();
-        CGroup(int maxgroup);
-};;
-
-class CFlash : public Component {
-    public:
-
-};
-
-class CDefense : public Component {
-    public:
-        int defense=0; /* Amount of damage that is blocked when this entity is hit */
-        CDefense();
-        CDefense(int defense);
 };
 
 /**

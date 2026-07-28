@@ -9,6 +9,9 @@ SceneBattle::SceneBattle(GameEngine* gameEngine, std::shared_ptr<Entity> player,
 }
 
 void SceneBattle::init() {
+
+	enemyFaster = enemy->getComponent<CEnemy>().speed > player->getComponent<CStats>().speed;
+
 	entityManager.addExistingEntity(player);
 	entityManager.addExistingEntity(enemy);
 
@@ -31,7 +34,8 @@ void SceneBattle::init() {
 	playername = player->getComponent<CName>().name;
 }
 
-// ------------ SYSTEM FUNCTIONS ------------
+// ------------ SYSTEM FUNCTIONS ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------------------
 
 /*
 * Battle system during the battle scene. Controls the battle loop.
@@ -52,9 +56,13 @@ void SceneBattle::sBattle() {
 		enemyInputState();
 		break;
 
-	case BattleState::MESSAGE:
+	case BattleState::NEXT:
 		battleState = nextBattleState;
+		break;
+
+	case BattleState::MESSAGE:
 		battleMessage = "";
+		queueNext(nextBattleState, 0);
 		break;
 
 	case BattleState::PLAYER_TURN:
@@ -95,21 +103,23 @@ void SceneBattle::sLifespan() {
 			}
 		}
 	}
-}
 
-void SceneBattle::sMovement() {
-	for (auto& e : entityManager.getEntities("WEAPON")) {
-		battleWeaponSwing(e);
-	}
+	// Damage number lifespan system
+	// Its a UI element... so it doesn't really count as an entity
 
-	damageNumber.position += damageNumber.velocity;
 	if (damageNumber.remaining <= 0) {
 		damageNumber.text = "";
 	}
 	else {
 		damageNumber.remaining--;
 	}
+}
 
+void SceneBattle::sMovement() {
+	for (auto& e : entityManager.getEntities("WEAPON")) {
+		battleWeaponSwing(e);
+	}
+	damageNumber.position += damageNumber.velocity;
 }
 
 void SceneBattle::sDoAction(const Action& action) {
@@ -218,7 +228,155 @@ void SceneBattle::sAnimation() {
 	}
 }
 
-// ----------- HELPER FUNCTIONS --------------
+// ----------- BATTLE STATE CONTROL FUNCTIONS ---------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------------------
+
+void SceneBattle::playerInputState() {
+	if (playerAction == "ATTACK") {
+		if (enemyFaster) {
+			battleState = BattleState::ENEMY_INPUT;
+			return;
+		}
+		queueMessage(playername + " attacks!", BattleState::PLAYER_TURN);
+	}
+	else if (playerAction == "DEFEND") {
+		if (enemyFaster) {
+			battleState = BattleState::ENEMY_INPUT;
+			return;
+		}
+		queueMessage(playername + " braces for impact!", BattleState::PLAYER_TURN);
+	}
+	else if (playerAction == "MAGIC") {
+		if (enemyFaster) {
+			battleState = BattleState::ENEMY_INPUT;
+			return;
+		}
+		queueMessage(playername + " prepares a spell!", BattleState::PLAYER_TURN);
+	}
+	else if (playerAction == "ITEM") {
+		if (enemyFaster) {
+			battleState = BattleState::ENEMY_INPUT;
+			return;
+		}
+		queueMessage(playername + " uses " + itemUsed.name + "!", BattleState::PLAYER_TURN);
+	}
+}
+
+void SceneBattle::enemyInputState() {
+	int usemagic = 0;
+	if (enemy->getComponent<CEquipment>().magic.size() > 0) {
+		std::mt19937 gen(rd());
+		std::bernoulli_distribution dist(0.75);
+		usemagic = dist(gen) ? 1 : 0;
+		if (usemagic) {
+			enemyAction = "MAGIC";
+			queueMessage("Enemy casts a spell!", BattleState::ENEMY_TURN);
+		}
+	}
+	else {
+		enemyAction = "ATTACK";
+		queueMessage("Enemy attacks!", BattleState::ENEMY_TURN);
+	}
+}
+
+void SceneBattle::playerTurnState() {
+	if (playerAction == "ATTACK") {
+		player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLUSEU");
+		gameEngine->playSound("LINKSWING");
+
+		spawnWeapon();
+
+		applyDamage(player, enemy, true);
+
+		playerAction = "";
+		if (enemyFaster) {
+			queueNext(BattleState::PLAYER_INPUT, battlespeed);
+		}
+		else {
+			queueNext(BattleState::ENEMY_INPUT, battlespeed);
+		}
+	}
+	if (playerAction == "ITEM") {
+		menu = 0;
+		playerAction = "";
+
+		useItem();
+		CEquipment& equip = player->getComponent<CEquipment>();
+		equip.removeItem(itemUsed);
+
+		if (enemyFaster) {
+			queueNext(BattleState::PLAYER_INPUT, battlespeed);
+		}
+		else {
+			queueNext(BattleState::ENEMY_INPUT, battlespeed);
+		}
+	}
+
+	// Death evaluation
+
+	if (enemy->getComponent<CHealth>().current <= 0) {
+		enemy->addComponent<CLifespan>(30);
+		enemy->getComponent<CLifespan>().remaining = 30;
+		gameEngine->stopMusic("BATTLEMUSIC");
+		gameEngine->playSound("ENEMYDIE");
+		queueMessage("Victory! Enemy defeated!", BattleState::VICTORY);
+	}
+}
+
+void SceneBattle::enemyTurnState() {
+	if (enemyAction == "ATTACK") {
+		applyDamage(enemy, player, false);
+		if (enemyFaster) {
+			if (playerAction == "ATTACK") {
+				queueMessage(playername + " attacks!", BattleState::PLAYER_TURN);
+			}
+			else if (playerAction == "DEFEND") {
+				queueMessage(playername + " braces for impact!", BattleState::PLAYER_TURN);
+			}
+			else if (playerAction == "MAGIC") {
+				queueMessage(playername + " prepares a spell!", BattleState::PLAYER_TURN);
+			}
+			else if (playerAction == "ITEM") {
+				queueMessage(playername + " uses " + itemUsed.name + "!", BattleState::PLAYER_TURN);
+			}
+		}
+		else {
+			queueNext(BattleState::PLAYER_INPUT, battlespeed);
+		}
+	}
+	else if (enemyAction == "MAGIC") {
+		gameEngine->playSound("ENEMYMAGIC");
+		player->getComponent<CHealth>().current -= 2;
+		if (player->getComponent<CHealth>().current <= 0) {
+			battleState = BattleState::DEFEAT;
+			waitTimer = 200;
+		}
+		else {
+			waitTimer = 80;
+			if (enemyFaster) {
+				queueNext(BattleState::PLAYER_TURN, battlespeed);
+			}
+			else {
+				queueNext(BattleState::PLAYER_INPUT, battlespeed);
+			}
+		}
+	}
+
+	// Death evaluation
+
+	if (player->getComponent<CHealth>().current <= 0) {
+		battleState = BattleState::DEFEAT;
+		waitTimer = 200;
+	}
+}
+
+void SceneBattle::victoryState() {
+	previousScene->battleReturn(enemy);
+	gameEngine->changeScene("PLAY", previousScene);
+}
+
+// ----------- HELPER FUNCTIONS -----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------------------
 
 void SceneBattle::renderUI() {
 	const Texture2D& background = gameEngine->getAssets().getTexture("BATTLEROOM");
@@ -268,8 +426,8 @@ void SceneBattle::renderUI() {
 
 	DrawTextEx(
 		font,
-		std::to_string(player->getComponent<CHealth>().current).c_str(),
-		Vector2(rightPanelX + textPaddingX, panelY + textPaddingY),
+		player->getComponent<CName>().name.c_str(),
+		Vector2(rightPanelX + panelWidth / 2, panelY + textPaddingY),
 		fontSize,
 		spacing,
 		BLACK
@@ -428,18 +586,63 @@ void SceneBattle::useItem() {
 		if (health.current > health.max) {
 			health.current = health.max;
 		}
-		drawDamageNumber(true, -itemUsed.effect.magnitude);
+		drawDamageNumber(true, -itemUsed.effect.magnitude, GREEN);
 		gameEngine->playSound("HEAL");
 	}
 	else if (itemUsed.effect.type == "RESTOREM") {
-		if (player->hasComponent<CHealth>()) {
-			CHealth& health = player->getComponent<CHealth>();
-			health.current -= itemUsed.effect.magnitude;
-			if (health.current < 0) {
-				health.current = 0;
-			}
+		CHealth& health = player->getComponent<CHealth>();
+		health.currentMana += itemUsed.effect.magnitude;
+		if (health.currentMana > health.maxMana) {
+			health.currentMana = health.maxMana;
+		}
+		drawDamageNumber(true, -itemUsed.effect.magnitude, BLUE);
+		gameEngine->playSound("HEAL");
+	}
+}
+
+void SceneBattle::collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<Entity> looted) {
+	CEnemy& loot = looted->getComponent<CEnemy>();
+	CStats& stats = looter->getComponent<CStats>();
+	CEquipment& equip = looter->getComponent<CEquipment>();
+
+	std::mt19937 gen(rd());
+	std::bernoulli_distribution dist(loot.itemDropChance);
+
+	if (dist(gen)) {
+		if (loot.lootItem.first == "WEAPON") {
+			WeaponSpec weapon = gameEngine->getAssets().getWeapon(loot.lootItem.second);
+			equip.weapons.push_back(weapon);
+		}
+		else if (loot.lootItem.first == "MAGIC") {
+			MagicSpec magic = gameEngine->getAssets().getMagic(loot.lootItem.second);
+			equip.magic.push_back(magic);
+		}
+		else if (loot.lootItem.first == "ITEM") {
+			ItemSpec item = gameEngine->getAssets().getItem(loot.lootItem.second);
+			equip.items.push_back(item);
+		}
+
+		equip.gold += loot.gold;
+
+		// Placeholder level up
+		stats.exp += loot.exp;
+		if (stats.exp >= stats.nextlevel) {
+			stats.level++;
+			stats.exp -= stats.nextlevel;
+			stats.nextlevel = static_cast<int>(stats.nextlevel * 1.5f);
+			stats.speed += 2;
+			stats.defense += 2;
 		}
 	}
+}
+
+void SceneBattle::spawnWeapon() {
+	CEquipment& equip = player->getComponent<CEquipment>();
+	auto e = entityManager.addEntity("WEAPON", equip.currentWeapon.name);
+	e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(equip.currentWeapon.id), true);
+	e->addComponent<CLifespan>(10);
+	e->getComponent<CLifespan>().remaining = 10;
+	e->addComponent<CTransform>();
 }
 
 void SceneBattle::battleWeaponSwing(std::shared_ptr<Entity> e) {
@@ -484,6 +687,7 @@ void SceneBattle::renderBattleEntity(std::shared_ptr<Entity> entity) {
 	Color tint = WHITE;
 
 	if (entity == enemy) {
+
 		if (entity->hasComponent<CLifespan>()) {
 			float fade = static_cast<float>(entity->getComponent<CLifespan>().remaining) / static_cast<float>(entity->getComponent<CLifespan>().total);
 			tint.a = static_cast<unsigned char>(255.0f * fade);
@@ -525,23 +729,79 @@ void SceneBattle::renderBattleEntity(std::shared_ptr<Entity> entity) {
 	DrawTexturePro(tex, src, dest, origin, transform.angle, tint);
 }
 
-void SceneBattle::queueMessage(const std::string& message, BattleState nextState, int frames) {
+void SceneBattle::queueMessage(const std::string& message, BattleState nextState) {
 	battleMessage = message;
 	nextBattleState = nextState;
-	waitTimer = frames;
+	waitTimer = battlespeed;
 	battleState = BattleState::MESSAGE;
 }
 
-void SceneBattle::drawDamageNumber(bool playerHit, int damage) {
+void SceneBattle::queueNext(BattleState nextState, int frames) {
+	nextBattleState = nextState;
+	waitTimer = frames;
+	battleState = BattleState::NEXT;
+}
+
+void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<Entity> defender, bool playerAttack) {
+	if (playerAttack) {
+		float multiplier = 1.0f;
+		WeaponSpec& pWeapon = attacker->getComponent<CEquipment>().currentWeapon;
+		std::vector<std::string>& weaknesses = defender->getComponent<CEnemy>().weaknesses;
+		std::vector<std::string>& resistances = defender->getComponent<CEnemy>().resistances;
+
+		if (std::find(weaknesses.begin(), weaknesses.end(), pWeapon.effect.id) != weaknesses.end()) {
+			multiplier = 1.25f;
+		}
+		else if (std::find(resistances.begin(), resistances.end(), pWeapon.effect.id) != resistances.end()) {
+			multiplier = 0.75f;
+		}
+
+		float total = 0.0f;
+
+		if (pWeapon.damage - defender->getComponent<CEnemy>().defense <= 0) {
+			total = 0.0f;
+		}
+		else {
+			total = (pWeapon.damage - defender->getComponent<CEnemy>().defense) * multiplier;
+		}
+		defender->getComponent<CHealth>().current -= total;
+		drawDamageNumber(false, static_cast<int>(total), WHITE);
+	}
+	else {
+		float multiplier = 1.0f;
+		std::string type = attacker->getComponent<CEnemy>().physicalType;
+		std::vector<std::string>& weaknesses = attacker->getComponent<CStats>().weaknesses;
+		std::vector<std::string>& resistances = attacker->getComponent<CStats>().resistances;
+
+		if (std::find(weaknesses.begin(), weaknesses.end(), type) != weaknesses.end()) {
+			multiplier = 1.25f;
+		}
+		else if (std::find(resistances.begin(), resistances.end(), type) != resistances.end()) {
+			multiplier = 0.75f;
+		}
+
+		float total = 0.0f;
+
+		if (attacker->getComponent<CEnemy>().physicalDamage - defender->getComponent<CEnemy>().defense <= 0) {
+			total = 0.0f;
+		}
+		else {
+			total = (attacker->getComponent<CEnemy>().physicalDamage - defender->getComponent<CEnemy>().defense) * multiplier;
+		}
+		defender->getComponent<CHealth>().current -= total;
+		drawDamageNumber(true, static_cast<int>(total), RED);
+	}
+}
+
+void SceneBattle::drawDamageNumber(bool playerHit, int damage, Color color) {
 	DamageNumber number;
 
 	number.total = 45;
 	number.remaining = 45;
 	number.velocity = Vec2(0.0f, -1.2f);
-	number.color = playerHit ? RED : WHITE;
+	number.color = color;
 	
 	if (damage < 0) {
-		number.color = GREEN;
 		damage = -damage;
 	}
 
@@ -561,171 +821,6 @@ void SceneBattle::drawDamageNumber(bool playerHit, int damage) {
 	}
 
 	damageNumber = number;
-}
-
-// ----------- BATTLE STATE CONTROL FUNCTIONS --------------
-
-void SceneBattle::playerInputState() {
-	bool enemyFaster = enemy->getComponent<CSpeed>().speed > player->getComponent<CSpeed>().speed;
-	if (playerAction == "ATTACK") {
-		if (enemyFaster) {
-			battleState = BattleState::ENEMY_INPUT;
-			return;
-		}
-		queueMessage(playername + " attacks!", BattleState::PLAYER_TURN, 80);
-	}
-	else if (playerAction == "DEFEND") {
-		if (enemyFaster) {
-			battleState = BattleState::ENEMY_INPUT;
-			return;
-		}
-		queueMessage(playername + " braces for impact!", BattleState::PLAYER_TURN, 80);
-	}
-	else if (playerAction == "MAGIC") {
-		if (enemyFaster) {
-			battleState = BattleState::ENEMY_INPUT;
-			return;
-		}
-		queueMessage(playername + " prepares a spell!", BattleState::PLAYER_TURN, 80);
-	}
-	else if (playerAction == "ITEM") {
-		if (enemyFaster) {
-			battleState = BattleState::ENEMY_INPUT;
-			return;
-		}
-		queueMessage(playername + " uses " + itemUsed.name + "!", BattleState::PLAYER_TURN, 80);
-	}
-}
-
-void SceneBattle::enemyInputState() {
-	int usemagic = 0;
-	if (enemy->getComponent<CEquipment>().magic.size() > 0) {
-		std::mt19937 gen(rd());
-		std::bernoulli_distribution dist(0.75);
-		usemagic = dist(gen) ? 1 : 0;
-		if (usemagic) {
-			enemyAction = "MAGIC";
-			queueMessage("Enemy casts a spell!", BattleState::ENEMY_TURN, 80);
-		}
-	}
-	else {
-		enemyAction = "ATTACK";
-		queueMessage("Enemy attacks!", BattleState::ENEMY_TURN, 80);
-	}
-}
-
-void SceneBattle::playerTurnState() {
-	if (playerAction == "ATTACK") {
-		player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLUSEU");
-		gameEngine->playSound("LINKSWING");
-
-		CEquipment& equip = player->getComponent<CEquipment>();
-		auto e = entityManager.addEntity("WEAPON", equip.currentWeapon.name);
-		e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(equip.currentWeapon.id), true);
-		e->addComponent<CLifespan>(10);
-		e->getComponent<CLifespan>().remaining = 10;
-		e->addComponent<CTransform>();
-
-		auto& enemyHealth = enemy->getComponent<CHealth>();
-		enemyHealth.current -= 1;
-		drawDamageNumber(false, 1);
-
-		if (enemyHealth.current <= 0) {
-			enemy->addComponent<CLifespan>(30);
-			enemy->getComponent<CLifespan>().remaining = 30;
-			gameEngine->stopMusic("BATTLEMUSIC");
-			gameEngine->playSound("ENEMYDIE");
-			queueMessage("Victory! Enemy defeated!", BattleState::VICTORY, 200);
-		}
-		else {
-			playerAction = "";
-			if (player->getComponent<CSpeed>().speed < enemy->getComponent<CSpeed>().speed) {
-				battleState = BattleState::PLAYER_INPUT;
-				waitTimer = 80;
-			}
-			else {
-				battleState = BattleState::ENEMY_INPUT;
-				waitTimer = 80;
-			}
-		}
-	}
-	if (playerAction == "ITEM") {
-		menu = 0;
-		playerAction = "";
-		
-		useItem();
-
-		auto& items = player->getComponent<CEquipment>().items;
-
-		// Remove item
-		auto it = std::find_if(items.begin(), items.end(), [&](const ItemSpec& item) {
-			return item.id == itemUsed.id;
-			});
-
-		if (it != items.end()) {
-			items.erase(it);
-		}
-		if (player->getComponent<CSpeed>().speed < enemy->getComponent<CSpeed>().speed) {
-			battleState = BattleState::PLAYER_INPUT;
-			waitTimer = 80;
-		}
-		else {
-			battleState = BattleState::ENEMY_INPUT;
-			waitTimer = 80;
-		}
-	}
-}
-
-void SceneBattle::enemyTurnState() {
-	if (enemyAction == "ATTACK") {
-		player->getComponent<CHealth>().current -= 1;
-		drawDamageNumber(true, 1);
-		if (player->getComponent<CHealth>().current <= 0) {
-			battleState = BattleState::DEFEAT;
-			waitTimer = 200;
-		}
-		else {
-			if (player->getComponent<CSpeed>().speed < enemy->getComponent<CSpeed>().speed) {
-				if (playerAction == "ATTACK") {
-					queueMessage(playername + " attacks!", BattleState::PLAYER_TURN, 80);
-				}
-				else if (playerAction == "DEFEND") {
-					queueMessage(playername + " braces for impact!", BattleState::PLAYER_TURN, 80);
-				}
-				else if (playerAction == "MAGIC") {
-					queueMessage(playername + " prepares a spell!", BattleState::PLAYER_TURN, 80);
-				}
-				else if (playerAction == "ITEM") {
-					queueMessage(playername + " uses " + itemUsed.name + "!", BattleState::PLAYER_TURN, 80);
-				}
-			}
-			else {
-				waitTimer = 80;
-				battleState = BattleState::PLAYER_INPUT;
-			}
-		}
-	}
-	else if (enemyAction == "MAGIC") {
-		gameEngine->playSound("ENEMYMAGIC");
-		player->getComponent<CHealth>().current -= 2;
-		if (player->getComponent<CHealth>().current <= 0) {
-			battleState = BattleState::DEFEAT;
-			waitTimer = 200;
-		}
-		else {
-			waitTimer = 80;
-			if (player->getComponent<CSpeed>().speed < enemy->getComponent<CSpeed>().speed) {
-				battleState = BattleState::PLAYER_INPUT;
-			} else {
-				battleState = BattleState::PLAYER_INPUT;
-			}
-		}
-	}
-}
-
-void SceneBattle::victoryState() {
-	previousScene->battleReturn(enemy);
-	gameEngine->changeScene("PLAY", previousScene);
 }
 
 void SceneBattle::update() {

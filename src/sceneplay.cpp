@@ -146,12 +146,11 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->addComponent<CTransform>(Vec2(pos.x, pos.y), Vec2(0.0f, 0.0f), 0.0f);
                 e->getComponent<CTransform>().prevPosition.x = pos.x;
                 e->getComponent<CTransform>().prevPosition.y = pos.y;
-                e->addComponent<CDamage>(1);
                 e->addComponent<CPatrol>(patrolPoints, speed);
                 e->getComponent<CPatrol>().currentPosition = 0;
                 e->addComponent<CHealth>(health, health);
-                e->addComponent<CSpeed>(2);
-                e->addComponent<CDefense>(1);
+                e->addComponent<CEnemy>();
+                
             }
             else if (ai == "FOLLOW") {
                 file >> roomX >> roomY >> x >> y >> speed >> health;
@@ -174,12 +173,10 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->addComponent<CTransform>(Vec2(pos.x, pos.y), Vec2(0.0f, 0.0f), 0.0f);
                 e->getComponent<CTransform>().prevPosition.x = pos.x;
                 e->getComponent<CTransform>().prevPosition.y = pos.y;
-                e->addComponent<CDamage>(1);
                 e->addComponent<CFollowPlayer>(Vec2(0.0f, 0.0f), speed);
                 e->addComponent<CHealth>(health, health);
-                e->addComponent<CSpeed>(10);
-                e->addComponent<CDefense>(1);
-
+                e->addComponent<CEnemy>();
+                e->getComponent<CEnemy>().speed = 10;
             }
         }
     }
@@ -416,10 +413,6 @@ void ScenePlay::sMovement() {
             }
         }
     }
-
-    for (auto& e : entityManager.getEntities("WEAPON")) {
-        //weaponSwing(e, player, entityManager, gameEngine);
-	}
 }
 
 
@@ -467,24 +460,6 @@ void ScenePlay::sCollision() {
                     teleport(e);
                 }
 
-                if (de->getTag() == "WEAPON" && e->getID() == "ENEMY" || de->getID() == "ENEMY" && e->getTag() == "WEAPON") {
-                    auto sword = (de->getTag() == "WEAPON") ? de : e;
-                    auto entity = (de->getID() == "ENEMY") ? de : e;
-                    if (!entity->hasComponent<CInvincibility>()) {
-                        entity->getComponent<CHealth>().current -= de->getComponent<CDamage>().damage;
-                        entity->addComponent<CInvincibility>(30);
-                        entity->getComponent<CInvincibility>().remaining = 30;
-                        gameEngine->playSound("ENEMYHIT");
-                        if (entity->getComponent<CHealth>().current <= 0) {
-                            gameEngine->playSound("ENEMYKILL");
-                            spawnHeart(entity->getComponent<CTransform>().position);
-                            entity->destroy();
-                        }
-                    }
-                    skipPos = true;
-                    continue;
-                }
-
                 if ((de->getID() == "PLAYER" && e->getID() == "ENEMY") ||
                     (de->getID() == "ENEMY" && e->getID() == "PLAYER")) {
                     auto playerEntity = (de->getID() == "PLAYER") ? de : e;
@@ -495,10 +470,9 @@ void ScenePlay::sCollision() {
                         continue;
                     }
 
-                    if (battlecooldown <= 0) {
+                    if (!de->hasComponent<CInvincibility>()) {
                         gameEngine->changeScene("BATTLE", std::make_shared<SceneBattle>(gameEngine, playerEntity, enemyEntity, shared_from_this()));
                     }
-                    battlecooldown = 100;
                 }
 
                 // -------------------- POSITIONAL RESOLUTIONS --------------------
@@ -897,6 +871,11 @@ void ScenePlay::sCamera(){
 
 void ScenePlay::battleReturn(std::shared_ptr<Entity> e) {
     e->destroy();
+	CInput& input = player->getComponent<CInput>();
+    input.up = false;
+    input.down = false;
+    input.left = false;
+    input.right = false;
 	gameEngine->playMusic("TITLEMUSIC");
     player->getComponent<CTransform>().velocity = Vec2(0.0f, 0.0f);
 	player->addComponent<CInvincibility>(100);
@@ -923,8 +902,9 @@ void ScenePlay::spawnPlayer(){
     player->addComponent<CEquipment>();
     player->getComponent<CEquipment>().weapons.push_back(gameEngine->getAssets().getWeapon("ANCIENTBLADE"));
 	player->getComponent<CEquipment>().currentWeapon = player->getComponent<CEquipment>().weapons[0];
-    player->addComponent<CDefense>(3);
-    player->addComponent<CSpeed>(5);
+    
+    // Add stats
+
 	player->getComponent<CEquipment>().items.push_back(gameEngine->getAssets().getItem("SHEAL"));
     player->getComponent<CEquipment>().items.push_back(gameEngine->getAssets().getItem("SHEAL"));
     player->getComponent<CEquipment>().items.push_back(gameEngine->getAssets().getItem("SMANA"));
@@ -941,7 +921,7 @@ void ScenePlay::spawnSword() {
     e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation("SWORD"), true);
     e->addComponent<CLifespan>(10);
     e->getComponent<CLifespan>().remaining = 10;
-    e->addComponent<CDamage>(1);
+    //e->addComponent<CDamage>(1);
     e->addComponent<CState>("NOHIT");
     float bboxSizeX = gameEngine->getAssets().getAnimation("SWORD").getScaledSize().x;
     float bboxSizeY = gameEngine->getAssets().getAnimation("SWORD").getScaledSize().y;
@@ -1072,15 +1052,6 @@ void ScenePlay::sLifespan() {
  */
 void ScenePlay::update(){
     entityManager.update();
-
-    if (battlecooldown > 0) {
-        if (battlecooldown == 0) {
-            battlecooldown = 0;
-        }
-        else {
-            battlecooldown--;
-        }
-    }
 
     sMovement();
     //sWeapons();
