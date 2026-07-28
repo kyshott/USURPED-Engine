@@ -614,8 +614,8 @@ void SceneBattle::collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<En
 			equip.weapons.push_back(weapon);
 		}
 		else if (loot.lootItem.first == "MAGIC") {
-			MagicSpec magic = gameEngine->getAssets().getMagic(loot.lootItem.second);
-			equip.magic.push_back(magic);
+			//MagicSpec magic = gameEngine->getAssets().getMagic(loot.lootItem.second);
+			//equip.magic.push_back(magic);
 		}
 		else if (loot.lootItem.first == "ITEM") {
 			ItemSpec item = gameEngine->getAssets().getItem(loot.lootItem.second);
@@ -640,8 +640,8 @@ void SceneBattle::spawnWeapon() {
 	CEquipment& equip = player->getComponent<CEquipment>();
 	auto e = entityManager.addEntity("WEAPON", equip.currentWeapon.name);
 	e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(equip.currentWeapon.id), true);
-	e->addComponent<CLifespan>(10);
-	e->getComponent<CLifespan>().remaining = 10;
+	e->addComponent<CLifespan>(15);
+	e->getComponent<CLifespan>().remaining = 15;
 	e->addComponent<CTransform>();
 }
 
