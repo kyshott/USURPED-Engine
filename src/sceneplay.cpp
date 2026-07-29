@@ -151,6 +151,13 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->addComponent<CHealth>(health, health);
                 e->addComponent<CStats>();
                 e->addComponent<CName>("Tektite");
+                e->addComponent<CLoot>();
+				CLoot& loot = e->getComponent<CLoot>();
+                loot.exp = 10;
+				loot.gold = 5;
+                loot.itemDropChance = 0.25f;
+				loot.lootItem.first = "ITEM";
+				loot.lootItem.second = "SHEAL";
                 
             }
             else if (ai == "FOLLOW") {

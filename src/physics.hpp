@@ -20,4 +20,8 @@ class Physics{
         static Vec2 getPreviousOverlap(std::shared_ptr<Entity> a, std::shared_ptr<Entity> b);
         static Intersect lineIntersect(const Vec2& a, const Vec2& b, const Vec2& c, const Vec2& d);
         static bool entityIntersect(const Vec2& a, const Vec2& b, std::shared_ptr<Entity> e);
+
+		static void positionalEvaluation(std::shared_ptr<Entity> a, std::shared_ptr<Entity> b);
+        static void interactionEvaluation(std::shared_ptr<Entity> a, std::shared_ptr<Entity> b);
+
 };

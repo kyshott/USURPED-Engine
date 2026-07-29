@@ -33,6 +33,7 @@ void SceneBattle::init() {
 	player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLSTANDU");
 	playername = player->getComponent<CName>().name;
 	enemyname = enemy->getComponent<CName>().name;
+
 }
 
 // ------------ SYSTEM FUNCTIONS ----------------------------------------------------------------------------------------------
@@ -49,33 +50,27 @@ void SceneBattle::sBattle() {
 	}
 
 	switch (battleState) {
-	case BattleState::PLAYER_INPUT:
-		playerInputState();
+
+	case BattleState::INPUT:
+		inputState();
 		break;
 
-	case BattleState::ENEMY_INPUT:
-		enemyInputState();
-		break;
-
-	case BattleState::NEXT:
-		battleState = nextBattleState;
+	case BattleState::ACTION:
+		actionState();
 		break;
 
 	case BattleState::MESSAGE:
-		battleMessage = "";
-		queueNext(nextBattleState, 0);
-		break;
-
-	case BattleState::PLAYER_TURN:
-		playerTurnState();
-		break;
-
-	case BattleState::ENEMY_TURN:
-		enemyTurnState();
+		battleMessage = nextMessage;
+		battleState = nextBattleState;
+		waitTimer = 80;
 		break;
 
 	case BattleState::VICTORY:
 		victoryState();
+		break;
+
+	case BattleState::RESULTS:
+		resultsState();
 		break;
 	}
 }
@@ -124,132 +119,141 @@ void SceneBattle::sMovement() {
 }
 
 void SceneBattle::sDoAction(const Action& action) {
-	if (battleState != BattleState::PLAYER_INPUT || waitTimer > 0) {
+	if (battleState != BattleState::INPUT && battleState != BattleState::RESULTS || waitTimer > 0) {
 		return;
 	}
 
-	// Selection menu
-	if ((action.getType() == "PRESS") && menu == 0) {
-		if (action.getName() == "LEFT") {
-			selectedMenuItem--;
-			gameEngine->playSound("MENUSELECT");
-			if (selectedMenuItem < 0) selectedMenuItem = menuStrings.size() - 1;
-		}
-		if (action.getName() == "RIGHT") {
-			selectedMenuItem++;
-			gameEngine->playSound("MENUSELECT");
-			if (selectedMenuItem > menuStrings.size() - 1) selectedMenuItem = 0;
-		}
-		if (action.getName() == "UP") {
-			selectedMenuItem -= 2;
-			gameEngine->playSound("MENUSELECT");
-			if (selectedMenuItem < 0) selectedMenuItem = menuStrings.size() - 1;
-		}
-		if (action.getName() == "DOWN") {
-			selectedMenuItem += 2;
-			gameEngine->playSound("MENUSELECT");
-			if (selectedMenuItem > menuStrings.size() - 1) selectedMenuItem = 0;
-		}
-		if (action.getName() == "SELECT") {
-			if (selectedMenuItem == 0) {
-				//gameEngine->playSound("ATTACK");
-				gameEngine->playSound("MENUSELECT");
-				playerAction = "ATTACK";
-			}
-			else if (selectedMenuItem == 1) {
-				gameEngine->playSound("MENUSELECT");
-				// Implement defend logic here
-			}
-			else if (selectedMenuItem == 2) {
-				gameEngine->playSound("MENUSELECT");
-				menu = 2;
-				selectedMenuItem = 0;
-			}
-			else if (selectedMenuItem == 3) {
-				gameEngine->playSound("MENUSELECT");
-				menu = 1;
-				selectedMenuItem = 0;
-			}
-		}
-		if (action.getName() == "QUIT") {
-			gameEngine->changeScene("PLAY", previousScene);
-		}
-	}
+	if (action.getType() == "PRESS") {
 
-	// ITEM MENU
-	else if (action.getType() == "PRESS" && menu == 1) {
-		std::vector<ItemSpec> uniqueItems;
-		std::vector<int> itemCounts;
-		const auto& inventory = player->getComponent<CItems>().items;
-
-		for (const auto& item : inventory) {
-			bool found = false;
-			for (int i = 0; i < uniqueItems.size(); i++) {
-				if (uniqueItems[i].id == item.id) {
-					itemCounts[i]++;
-					found = true;
-					break;
+		// Selection menu
+		if (menu == 0) {
+			if (action.getName() == "LEFT") {
+				selectedMenuItem--;
+				gameEngine->playSound("MENUSELECT");
+				if (selectedMenuItem < 0) selectedMenuItem = menuStrings.size() - 1;
+			}
+			if (action.getName() == "RIGHT") {
+				selectedMenuItem++;
+				gameEngine->playSound("MENUSELECT");
+				if (selectedMenuItem > menuStrings.size() - 1) selectedMenuItem = 0;
+			}
+			if (action.getName() == "UP") {
+				selectedMenuItem -= 2;
+				gameEngine->playSound("MENUSELECT");
+				if (selectedMenuItem < 0) selectedMenuItem = menuStrings.size() - 1;
+			}
+			if (action.getName() == "DOWN") {
+				selectedMenuItem += 2;
+				gameEngine->playSound("MENUSELECT");
+				if (selectedMenuItem > menuStrings.size() - 1) selectedMenuItem = 0;
+			}
+			if (action.getName() == "SELECT") {
+				if (selectedMenuItem == 0) {
+					//gameEngine->playSound("ATTACK");
+					gameEngine->playSound("MENUSELECT");
+					playerAction = "ATTACK";
+				}
+				else if (selectedMenuItem == 1) {
+					gameEngine->playSound("MENUSELECT");
+					// Implement defend logic here
+				}
+				else if (selectedMenuItem == 2) {
+					gameEngine->playSound("MENUSELECT");
+					menu = 2;
+					selectedMenuItem = 0;
+				}
+				else if (selectedMenuItem == 3) {
+					gameEngine->playSound("MENUSELECT");
+					menu = 1;
+					selectedMenuItem = 0;
 				}
 			}
+			if (action.getName() == "QUIT") {
+				gameEngine->changeScene("PLAY", previousScene);
+			}
+		}
 
-			if (!found) {
-				uniqueItems.push_back(item);
-				itemCounts.push_back(1);
-			}
-		}
-		if (action.getName() == "BACK") {
-			menu = 0;
-			selectedMenuItem = 3;
-		}
-		if (uniqueItems.empty()) {
-			return;
-		}
-		if (action.getName() == "UP") {
-			gameEngine->playSound("MENUSELECT");
-			if (selectedMenuItem > 0) {
-				selectedMenuItem--;
-			}
-		}
-		if (action.getName() == "DOWN") {
-			gameEngine->playSound("MENUSELECT");
-			if (selectedMenuItem + 1 < uniqueItems.size()) {
-				selectedMenuItem++;
-			}
-		}
-		if (action.getName() == "SELECT" && !uniqueItems.empty()) {
-			gameEngine->playSound("MENUSELECT");
-			playerAction = "ITEM";
-			itemUsed = uniqueItems[selectedMenuItem];
-		}
-	}
+		// ITEM MENU
+		else if (menu == 1) {
+			std::vector<ItemSpec> uniqueItems;
+			std::vector<int> itemCounts;
+			const auto& inventory = player->getComponent<CItems>().items;
 
-	// MAGIC MENU
-	else if (action.getType() == "PRESS" && menu == 2) {
-		const auto& spells = player->getComponent<CMagic>().magic;
+			for (const auto& item : inventory) {
+				bool found = false;
+				for (int i = 0; i < uniqueItems.size(); i++) {
+					if (uniqueItems[i].id == item.id) {
+						itemCounts[i]++;
+						found = true;
+						break;
+					}
+				}
 
-		if (action.getName() == "BACK") {
-			menu = 0;
-			selectedMenuItem = 2;
-		}
-		if (spells.empty()) {
-			return;
-		}
-		if (action.getName() == "UP") {
-			gameEngine->playSound("MENUSELECT");
-			if (selectedMenuItem > 0) {
-				selectedMenuItem--;
+				if (!found) {
+					uniqueItems.push_back(item);
+					itemCounts.push_back(1);
+				}
+			}
+			if (action.getName() == "BACK") {
+				menu = 0;
+				selectedMenuItem = 3;
+			}
+			if (uniqueItems.empty()) {
+				return;
+			}
+			if (action.getName() == "UP") {
+				gameEngine->playSound("MENUSELECT");
+				if (selectedMenuItem > 0) {
+					selectedMenuItem--;
+				}
+			}
+			if (action.getName() == "DOWN") {
+				gameEngine->playSound("MENUSELECT");
+				if (selectedMenuItem + 1 < uniqueItems.size()) {
+					selectedMenuItem++;
+				}
+			}
+			if (action.getName() == "SELECT" && !uniqueItems.empty()) {
+				gameEngine->playSound("MENUSELECT");
+				playerAction = "ITEM";
+				itemUsed = uniqueItems[selectedMenuItem];
 			}
 		}
-		if (action.getName() == "DOWN") {
-			gameEngine->playSound("MENUSELECT");
-			if (selectedMenuItem + 1 < spells.size()) {
-				selectedMenuItem++;
+
+		// MAGIC MENU
+		else if (menu == 2) {
+			const auto& spells = player->getComponent<CMagic>().magic;
+
+			if (action.getName() == "BACK") {
+				menu = 0;
+				selectedMenuItem = 2;
+			}
+			if (spells.empty()) {
+				return;
+			}
+			if (action.getName() == "UP") {
+				gameEngine->playSound("MENUSELECT");
+				if (selectedMenuItem > 0) {
+					selectedMenuItem--;
+				}
+			}
+			if (action.getName() == "DOWN") {
+				gameEngine->playSound("MENUSELECT");
+				if (selectedMenuItem + 1 < spells.size()) {
+					selectedMenuItem++;
+				}
+			}
+			if (action.getName() == "SELECT" && !spells.empty()) {
+				gameEngine->playSound("MENUSELECT");
+				playerAction = "MAGIC";
+				magicUsed = spells[selectedMenuItem];
 			}
 		}
-		if (action.getName() == "SELECT" && !spells.empty()) {
-			gameEngine->playSound("MENUSELECT");
-			playerAction = "MAGIC";
-			magicUsed = spells[selectedMenuItem];
+		if (battleState == BattleState::RESULTS) {
+			if (action.getName() == "SELECT") {
+				previousScene->battleReturn(enemy);
+				gameEngine->changeScene("PLAY", previousScene);
+			}
 		}
 	}
 }
@@ -265,124 +269,119 @@ void SceneBattle::sAnimation() {
 // ----------- BATTLE STATE CONTROL FUNCTIONS ---------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------
 
-void SceneBattle::playerInputState() {
-	if (playerAction == "ATTACK") {
-		if (enemyFaster) {
-			battleState = BattleState::ENEMY_INPUT;
-			return;
+void SceneBattle::inputState() {
+
+	// Player has decided, now enemy decides what to do. If the enemy is faster, it will go first.
+	if (playerAction != "") {
+		// Enemy decision logic
+		int usemagic = 0;
+		if (enemy->hasComponent<CMagic>()) {
+			std::mt19937 gen(rd());
+			std::bernoulli_distribution dist(0.75);
+			usemagic = dist(gen) ? 1 : 0;
+			if (usemagic) {
+				enemyAction = "MAGIC";
+			}
 		}
-		queueMessage(playername + " attacks!", BattleState::PLAYER_TURN);
-	}
-	else if (playerAction == "DEFEND") {
-		if (enemyFaster) {
-			battleState = BattleState::ENEMY_INPUT;
-			return;
+		else {
+			enemyAction = "ATTACK";
 		}
-		queueMessage(playername + " braces for impact!", BattleState::PLAYER_TURN);
-	}
-	else if (playerAction == "MAGIC") {
+
+		// Evaluate next turn based on speed stats
 		if (enemyFaster) {
-			battleState = BattleState::ENEMY_INPUT;
-			return;
+			playerTurn = false;
+			if (enemyAction == "MAGIC") {
+				queueMessage("Enemy casts a spell!", BattleState::ACTION);
+			}
+			else {
+				queueMessage(enemyname + " attacks!", BattleState::ACTION);
+			}
 		}
-		queueMessage(playername + " prepares a spell!", BattleState::PLAYER_TURN);
-	}
-	else if (playerAction == "ITEM") {
-		if (enemyFaster) {
-			battleState = BattleState::ENEMY_INPUT;
-			return;
+		else {
+			if (playerAction == "ATTACK") {
+				queueMessage(playername + " attacks!", BattleState::ACTION);
+			}
+			else if (playerAction == "DEFEND") {
+				queueMessage(playername + " braces for impact!", BattleState::ACTION);
+			}
+			else if (playerAction == "MAGIC") {
+				queueMessage(playername + " prepares a spell!", BattleState::ACTION);
+			}
+			else if (playerAction == "ITEM") {
+				queueMessage(playername + " uses " + itemUsed.name + "!", BattleState::ACTION);
+			}
 		}
-		queueMessage(playername + " uses " + itemUsed.name + "!", BattleState::PLAYER_TURN);
+
 	}
+	// Wait override for the first turn of the battle
+
+	waitTimer = 0;
 }
 
-void SceneBattle::enemyInputState() {
-	int usemagic = 0;
-	if (enemy->hasComponent<CMagic>()) {
-		std::mt19937 gen(rd());
-		std::bernoulli_distribution dist(0.75);
-		usemagic = dist(gen) ? 1 : 0;
-		if (usemagic) {
-			enemyAction = "MAGIC";
-			queueMessage("Enemy casts a spell!", BattleState::ENEMY_TURN);
-		}
+void SceneBattle::actionState() {
+	battleMessage = "";
+
+	if (playerTurn) {
+		playerAct();
 	}
 	else {
-		enemyAction = "ATTACK";
-		queueMessage(enemyname + " attacks!", BattleState::ENEMY_TURN);
+		enemyAct();
 	}
+
+	waitTimer = battlespeed;
 }
 
-void SceneBattle::playerTurnState() {
+
+void SceneBattle::playerAct() {
 	if (playerAction == "ATTACK") {
 		player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLUSEU");
 		
-
 		spawnWeapon();
 
 		applyDamage(player, enemy, true);
 
 		if (enemy->getComponent<CHealth>().current <= 0) {
-			enemy->addComponent<CLifespan>(30);
-			enemy->getComponent<CLifespan>().remaining = 30;
+			enemy->addComponent<CLifespan>(45);
+			enemy->getComponent<CLifespan>().remaining = 45;
 			gameEngine->stopMusic("BATTLEMUSIC");
 			gameEngine->playSound("ENEMYDIE");
-			queueMessage("Victory! Enemy defeated!", BattleState::VICTORY);
+			queueMessage("Victory!", BattleState::VICTORY);
+			collectLoot(player, enemy);
 			return;
 		}
-
 		playerAction = "";
-		if (enemyFaster) {
-			queueNext(BattleState::PLAYER_INPUT, battlespeed);
-		}
-		else {
-			queueNext(BattleState::ENEMY_INPUT, battlespeed);
-		}
 	}
 	if (playerAction == "ITEM") {
 		menu = 0;
 		playerAction = "";
-
 		useItem();
 		CItems& items = player->getComponent<CItems>();
 		items.removeItem(itemUsed);
-
-		if (enemyFaster) {
-			queueNext(BattleState::PLAYER_INPUT, battlespeed);
+	}
+	
+	playerTurn = false;
+	
+	if (enemyFaster) {
+		waitTimer = battlespeed;
+		battleState = BattleState::INPUT;
+	}
+	else {
+		if (enemyAction == "MAGIC") {
+			queueMessage("Enemy casts a spell!", BattleState::ACTION);
 		}
 		else {
-			queueNext(BattleState::ENEMY_INPUT, battlespeed);
+			queueMessage(enemyname + " attacks!", BattleState::ACTION);
 		}
 	}
-
-
 }
 
-void SceneBattle::enemyTurnState() {
+void SceneBattle::enemyAct() {
 	if (enemyAction == "ATTACK") {
 		applyDamage(enemy, player, false);
 
 		if (player->getComponent<CHealth>().current <= 0) {
 			battleState = BattleState::DEFEAT;
 			waitTimer = 200;
-		}
-
-		if (enemyFaster) {
-			if (playerAction == "ATTACK") {
-				queueMessage(playername + " attacks!", BattleState::PLAYER_TURN);
-			}
-			else if (playerAction == "DEFEND") {
-				queueMessage(playername + " braces for impact!", BattleState::PLAYER_TURN);
-			}
-			else if (playerAction == "MAGIC") {
-				queueMessage(playername + " prepares a spell!", BattleState::PLAYER_TURN);
-			}
-			else if (playerAction == "ITEM") {
-				queueMessage(playername + " uses " + itemUsed.name + "!", BattleState::PLAYER_TURN);
-			}
-		}
-		else {
-			queueNext(BattleState::PLAYER_INPUT, battlespeed);
 		}
 	}
 	else if (enemyAction == "MAGIC") {
@@ -392,22 +391,39 @@ void SceneBattle::enemyTurnState() {
 			battleState = BattleState::DEFEAT;
 			waitTimer = 200;
 		}
-		else {
-			waitTimer = 80;
-			if (enemyFaster) {
-				queueNext(BattleState::PLAYER_TURN, battlespeed);
-			}
-			else {
-				queueNext(BattleState::PLAYER_INPUT, battlespeed);
-			}
-		}
 	}
 
+	playerTurn = true;
+
+	if (enemyFaster) {
+		if (playerAction == "ATTACK") {
+			queueMessage(playername + " attacks!", BattleState::ACTION);
+		}
+		else if (playerAction == "DEFEND") {
+			queueMessage(playername + " braces for impact!", BattleState::ACTION);
+		}
+		else if (playerAction == "MAGIC") {
+			queueMessage(playername + " prepares a spell!", BattleState::ACTION);
+		}
+		else if (playerAction == "ITEM") {
+			queueMessage(playername + " uses " + itemUsed.name + "!", BattleState::ACTION);
+		}
+	}
+	else {
+		waitTimer = battlespeed;
+		battleState = BattleState::INPUT;
+	}
 }
 
 void SceneBattle::victoryState() {
-	previousScene->battleReturn(enemy);
-	gameEngine->changeScene("PLAY", previousScene);
+	battleState = BattleState::RESULTS;
+	waitTimer = battlespeed;
+}
+
+void SceneBattle::resultsState() {
+	battleMessage = "";
+	//previousScene->battleReturn(enemy);
+	//gameEngine->changeScene("PLAY", previousScene);
 }
 
 // ----------- HELPER FUNCTIONS -----------------------------------------------------------------------------------------------
@@ -450,23 +466,27 @@ void SceneBattle::renderUI() {
 
 	// RIGHT PANEL
 
-	DrawTexturePro(
-		menuBox,
-		Rectangle{ 0.0f, 0.0f, static_cast<float>(menuBox.width), static_cast<float>(menuBox.height) },
-		Rectangle{ rightPanelX, panelY, panelWidth, panelHeight },
-		Vector2{ 0.0f, 0.0f },
-		0.0f,
-		WHITE
-	);
+	if (battleState != BattleState::RESULTS && battleState != BattleState::VICTORY) {
 
-	DrawTextEx(
-		font,
-		player->getComponent<CName>().name.c_str(),
-		Vector2(rightPanelX + panelWidth / 2, panelY + textPaddingY),
-		fontSize,
-		spacing,
-		BLACK
-	);
+		DrawTexturePro(
+			menuBox,
+			Rectangle{ 0.0f, 0.0f, static_cast<float>(menuBox.width), static_cast<float>(menuBox.height) },
+			Rectangle{ rightPanelX, panelY, panelWidth, panelHeight },
+			Vector2{ 0.0f, 0.0f },
+			0.0f,
+			WHITE
+		);
+
+		DrawTextEx(
+			font,
+			player->getComponent<CName>().name.c_str(),
+			Vector2(rightPanelX + panelWidth / 2, panelY + textPaddingY),
+			fontSize,
+			spacing,
+			BLACK
+		);
+	}
+
 
 	// TOP MESSAGE BAR
 
@@ -480,21 +500,22 @@ void SceneBattle::renderUI() {
 			0.0f,
 			WHITE
 		);
+
+		// TOP MESSAGE TEXT
+
+		DrawTextEx(
+			font,
+			battleMessage.c_str(),
+			Vector2(messageX, messageY),
+			fontSize,
+			spacing,
+			BLACK
+		);
 	}
 
-	// TOP MESSAGE TEXT
-
-	DrawTextEx(
-		font,
-		battleMessage.c_str(),
-		Vector2(messageX, messageY),
-		fontSize,
-		spacing,
-		BLACK
-	);
-
 	// SELECTION TIP PANEL
-	if (battleState == BattleState::PLAYER_INPUT && waitTimer <= 0 && (menu == 1 || menu == 2)) {
+
+	if (battleState == BattleState::INPUT && waitTimer <= 0 && (menu == 1 || menu == 2)) {
 		DrawTexturePro(
 			menuBox,
 			Rectangle{ 0.0f, 0.0f, static_cast<float>(menuBox.width), static_cast<float>(menuBox.height) },
@@ -516,7 +537,7 @@ void SceneBattle::renderUI() {
 
 	// SELECTION MENU
 
-	if (battleState == BattleState::PLAYER_INPUT && waitTimer <= 0 && menu == 0) {
+	if (battleState == BattleState::INPUT && waitTimer <= 0 && menu == 0) {
 
 		DrawTexturePro(
 			menuBox,
@@ -549,7 +570,7 @@ void SceneBattle::renderUI() {
 
 	// ITEM MENU
 
-	if (battleState == BattleState::PLAYER_INPUT && waitTimer <= 0 && menu == 1) {
+	if (battleState == BattleState::INPUT && waitTimer <= 0 && menu == 1) {
 		DrawTexturePro(
 			menuBox,
 			Rectangle{ 0.0f, 0.0f, static_cast<float>(menuBox.width), static_cast<float>(menuBox.height) },
@@ -626,8 +647,7 @@ void SceneBattle::renderUI() {
 	}
 
 	// MAGIC MENU
-
-	if (battleState == BattleState::PLAYER_INPUT && waitTimer <= 0 && menu == 2) {
+	if (battleState == BattleState::INPUT && waitTimer <= 0 && menu == 2) {
 		DrawTexturePro(
 			menuBox,
 			Rectangle{ 0.0f, 0.0f, static_cast<float>(menuBox.width), static_cast<float>(menuBox.height) },
@@ -684,6 +704,28 @@ void SceneBattle::renderUI() {
 				);
 			}
 		}
+
+	}
+
+	// RESULTS SCREEN
+
+	if (battleState == BattleState::RESULTS && waitTimer <= 0) {
+		DrawTexturePro(
+			menuBox,
+			Rectangle{ 0.0f, 0.0f, static_cast<float>(menuBox.width), static_cast<float>(menuBox.height) },
+			Rectangle{ leftPanelX, panelY, panelWidth, panelHeight },
+			Vector2{ 0.0f, 0.0f },
+			0.0f,
+			WHITE
+		);
+		DrawTextEx(
+			font,
+			"Press SELECT to continue",
+			Vector2(leftPanelX + textPaddingX, panelY + textPaddingY),
+			20.0f,
+			spacing,
+			BLACK
+		);
 	}
 	
 	// DAMAGE NUMBERS
@@ -697,6 +739,8 @@ void SceneBattle::renderUI() {
 	float textY = damageNumber.position.y - textSize.y / 2.0f;
 
 	DrawTextEx(font, damageNumber.text.c_str(), Vector2(textX, textY), 40, spacing, tint);
+
+
 }
 
 void SceneBattle::useItem() {
@@ -851,16 +895,10 @@ void SceneBattle::renderBattleEntity(std::shared_ptr<Entity> entity) {
 }
 
 void SceneBattle::queueMessage(const std::string& message, BattleState nextState) {
-	battleMessage = message;
+	nextMessage = message;
 	nextBattleState = nextState;
 	waitTimer = battlespeed;
 	battleState = BattleState::MESSAGE;
-}
-
-void SceneBattle::queueNext(BattleState nextState, int frames) {
-	nextBattleState = nextState;
-	waitTimer = frames;
-	battleState = BattleState::NEXT;
 }
 
 void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<Entity> defender, bool playerAttack) {

@@ -7,15 +7,12 @@
 class ScenePlay; // circular dependency
 
 enum class BattleState {
-	PLAYER_INPUT,
-	PLAYER_TURN,
-	ENEMY_INPUT,
-	ENEMY_TURN,
+	INPUT,
+	ACTION,
 	MESSAGE,
-	NEXT,
-	EFFECTS,
 	VICTORY,
-	DEFEAT
+	DEFEAT,
+	RESULTS,
 };
 
 struct DamageNumber {
@@ -28,36 +25,36 @@ struct DamageNumber {
 };
 
 class SceneBattle : public Scene {
-
-	bool enemyFaster = false;
-
-	int battlespeed = 80;
-
+	// Meta variables
 	std::string playername;
 	std::string enemyname;
-
 	std::random_device rd;
-	
 	std::string title;                    /* Scene name */
 	std::vector<std::string> menuStrings; /* List of menu strings that are drawn to the screen */
 	std::vector<std::string> levelPaths;  /* List of relative paths to level definition files */
 	std::shared_ptr<Entity> enemy;        /* Pointer to the enemy entity */
 	std::shared_ptr<Entity> player;        /* Pointer to the player entity */
 	std::shared_ptr<ScenePlay> previousScene; /* Pointer to the previous scene */
-	std::string menuText;                 /* Other menu text */
 	std::string selectTip = "";
 	int selectedMenuItem = 0;               /* Currently selected menu item */
 	int menu = 0;
-	BattleState battleState = BattleState::PLAYER_INPUT; /* Current state of the battle */
+	
+	// Battle system variables
+	BattleState battleState = BattleState::INPUT; /* Current state of the battle */
 	BattleState nextBattleState;
 	DamageNumber damageNumber;
 	std::string playerAction = "";
+	std::string enemyAction = "";
 	ItemSpec itemUsed;
 	MagicSpec magicUsed;
-	std::string enemyAction = "";
 	std::string battleMessage = "";
+	std::string nextMessage = "";
+	bool enemyFaster = false;
+	int battlespeed = 80;
 	int waitTimer = 0;                       /* Buffer for waiting between actions so everything isnt instant */
 	bool playerTurn = true;
+
+	// Systems
 	void init();
 	void sRender() override;
 	void sDoAction(const Action& action) override;
@@ -67,19 +64,19 @@ class SceneBattle : public Scene {
 	void sBattle();
 
 	// State control
-	void playerInputState();
-	void enemyInputState();
-	void playerTurnState();
-	void enemyTurnState();
+	void inputState();
+	void actionState();
+	void playerAct();
+	void enemyAct();
 	void victoryState();
 	void defeatState();
+	void resultsState();
 
 	// Helpers
 	void applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<Entity> defender, bool playerAttack);
 	void useItem();
 	void collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<Entity> looted);
 	void queueMessage(const std::string& message, BattleState nextState);
-	void queueNext(BattleState nextState, int frames);
 	void drawDamageNumber(bool player, int damage, Color color);
 	void renderUI();
 	void renderBattleEntity(std::shared_ptr<Entity> entity);
