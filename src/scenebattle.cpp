@@ -196,6 +196,7 @@ void SceneBattle::sDoAction(const Action& action) {
 			}
 			if (action.getName() == "BACK") {
 				menu = 0;
+				gameEngine->playSound("BACK");
 				selectedMenuItem = 3;
 			}
 			if (uniqueItems.empty()) {
@@ -225,6 +226,7 @@ void SceneBattle::sDoAction(const Action& action) {
 			const auto& spells = player->getComponent<CMagic>().magic;
 
 			if (action.getName() == "BACK") {
+				gameEngine->playSound("BACK");
 				menu = 0;
 				selectedMenuItem = 2;
 			}

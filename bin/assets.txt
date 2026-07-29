@@ -79,6 +79,7 @@ Sound MENUSELECT ./assets/sounds/blip.wav
 Sound HEAL ./assets/sounds/heal.wav
 Sound SMASH ./assets/sounds/smash.wav
 Sound SLASH ./assets/sounds/slash.wav
+Sound BACK ./assets/sounds/back.wav
 Sound ENEMYDIE ./assets/sounds/enemydie.wav
 Sound ENEMYHIT ./assets/sounds/EnemyHit.wav
 Sound HEART ./assets/sounds/HeartPickup.wav
