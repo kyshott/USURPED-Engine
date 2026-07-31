@@ -3,7 +3,7 @@
         "name": "Foot Soldier",
         "health": 10,
         "mana": 0,
-        "damage": 3,
+        "strength": 3,
         "damageType":  "SLASH",
         "defense": 1,
         "magicDefense":  0,

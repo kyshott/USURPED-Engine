@@ -149,7 +149,6 @@ void SceneBattle::sDoAction(const Action& action) {
 			}
 			if (action.getName() == "SELECT") {
 				if (selectedMenuItem == 0) {
-					//gameEngine->playSound("ATTACK");
 					gameEngine->playSound("MENUSELECT");
 					playerAction = "ATTACK";
 				}
@@ -307,7 +306,7 @@ void SceneBattle::inputState() {
 				queueMessage(playername + " braces for impact!", BattleState::ACTION);
 			}
 			else if (playerAction == "MAGIC") {
-				queueMessage(playername + " prepares a spell!", BattleState::ACTION);
+				queueMessage(playername + " casts " + magicUsed.name + "!", BattleState::ACTION);
 			}
 			else if (playerAction == "ITEM") {
 				queueMessage(playername + " uses " + itemUsed.name + "!", BattleState::ACTION);
@@ -340,7 +339,7 @@ void SceneBattle::playerAct() {
 		
 		spawnWeapon();
 
-		applyDamage(player, enemy, true);
+		applyDamage(player, enemy);
 
 		if (enemy->getComponent<CHealth>().current <= 0) {
 			enemy->addComponent<CLifespan>(45);
@@ -351,6 +350,24 @@ void SceneBattle::playerAct() {
 			collectLoot(player, enemy);
 			return;
 		}
+		playerAction = "";
+	}
+	if (playerAction == "MAGIC") {
+		player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLUSEU");
+
+		applyMagic(player, enemy, magicUsed);
+
+		if (enemy->getComponent<CHealth>().current <= 0) {
+			enemy->addComponent<CLifespan>(45);
+			enemy->getComponent<CLifespan>().remaining = 45;
+			gameEngine->stopMusic("BATTLEMUSIC");
+			gameEngine->playSound("ENEMYDIE");
+			queueMessage("Victory!", BattleState::VICTORY);
+			collectLoot(player, enemy);
+			return;
+		}
+		menu = 0;
+		selectedMenuItem = 0;
 		playerAction = "";
 	}
 	if (playerAction == "ITEM") {
@@ -379,7 +396,7 @@ void SceneBattle::playerAct() {
 
 void SceneBattle::enemyAct() {
 	if (enemyAction == "ATTACK") {
-		applyDamage(enemy, player, false);
+		applyDamage(enemy, player);
 
 		if (player->getComponent<CHealth>().current <= 0) {
 			battleState = BattleState::DEFEAT;
@@ -405,7 +422,7 @@ void SceneBattle::enemyAct() {
 			queueMessage(playername + " braces for impact!", BattleState::ACTION);
 		}
 		else if (playerAction == "MAGIC") {
-			queueMessage(playername + " prepares a spell!", BattleState::ACTION);
+			queueMessage(playername + " casts " + magicUsed.name + "!", BattleState::ACTION);
 		}
 		else if (playerAction == "ITEM") {
 			queueMessage(playername + " uses " + itemUsed.name + "!", BattleState::ACTION);
@@ -903,23 +920,78 @@ void SceneBattle::queueMessage(const std::string& message, BattleState nextState
 	battleState = BattleState::MESSAGE;
 }
 
-void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<Entity> defender, bool playerAttack) {
-	if (playerAttack) {
+void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<Entity> defender, MagicSpec spell) {
+	if (attacker->getComponent<CHealth>().currentMana < magicUsed.manacost) {
+		queueMessage("Not enough mana!", BattleState::INPUT);
+		return;
+	}
+	else {
+		float multiplier = 1.0f;
+		attacker->getComponent<CHealth>().currentMana -= spell.manacost;
+
+		// Damaging spells
+
+		if (spell.effect.type == "DAMAGE") {
+			if (defender->hasComponent<CWeaknesses>()) {
+				std::vector<std::string>& weaknesses = defender->getComponent<CWeaknesses>().weaknesses;
+				if (std::find(weaknesses.begin(), weaknesses.end(), spell.effect.id) != weaknesses.end()) {
+					multiplier = 1.25f;
+				}
+			}
+			if (defender->hasComponent<CResistances>()) {
+				std::vector<std::string>& resistances = defender->getComponent<CResistances>().resistances;
+				if (std::find(resistances.begin(), resistances.end(), spell.effect.id) != resistances.end()) {
+					multiplier = 0.75f;
+				}
+			}
+
+			float total = 0.0f;
+
+			if ((spell.effect.magnitude + attacker->getComponent<CStats>().intelligence - defender->getComponent<CStats>().magicdefense) * multiplier <= 0) {
+				total = 0.0f;
+			}
+			else {
+				total = (spell.effect.magnitude + attacker->getComponent<CStats>().intelligence - defender->getComponent<CStats>().magicdefense) * multiplier;
+			}
+			defender->getComponent<CHealth>().current -= total;
+
+			if (spell.effect.id == "FIRE") {
+				gameEngine->playSound("FIRE");
+				drawDamageNumber(false, static_cast<int>(total), ORANGE);
+			}
+			else if (spell.effect.id == "ICE") {
+				gameEngine->playSound("ICE");
+				drawDamageNumber(false, static_cast<int>(total), SKYBLUE);
+			}
+			else if (spell.effect.id == "LIGHTNING") {
+				gameEngine->playSound("LIGHTNING");
+				drawDamageNumber(false, static_cast<int>(total), YELLOW);
+			}
+			else {
+				gameEngine->playSound("HIT");
+				drawDamageNumber(false, static_cast<int>(total), WHITE);
+			}
+		}
+
+		// Restorative spells
+
+		if (spell.effect.type == "RESTORE") {
+			attacker->getComponent<CHealth>().currentMana -= spell.manacost;
+			CHealth& health = attacker->getComponent<CHealth>();
+			health.current += spell.effect.magnitude;
+			if (health.current > health.max) {
+				health.current = health.max;
+			}
+			drawDamageNumber(true, -spell.effect.magnitude, GREEN);
+			gameEngine->playSound("HEAL");
+		}
+	}
+}
+
+void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<Entity> defender) {
+	if (attacker->hasComponent<CWeapons>() && attacker->getComponent<CWeapons>().currentWeapon.id != "") {
 		float multiplier = 1.0f;
 		WeaponSpec& pWeapon = attacker->getComponent<CWeapons>().currentWeapon;
-
-		if (pWeapon.effect.id == "SLASH") {
-			gameEngine->playSound("SLASH");
-		}
-		else if (pWeapon.effect.id == "PIERCE") {
-			gameEngine->playSound("PIERCE");
-		}
-		else if (pWeapon.effect.id == "SMASH") {
-			gameEngine->playSound("SMASH");
-		}
-		else {
-			gameEngine->playSound("HIT");
-		}
 
 		if (defender->hasComponent<CWeaknesses>()) {
 			std::vector<std::string>& weaknesses = defender->getComponent<CWeaknesses>().weaknesses;
@@ -936,16 +1008,30 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 
 		float total = 0.0f;
 
-		if (pWeapon.damage - defender->getComponent<CStats>().defense <= 0) {
+		if ((pWeapon.damage + attacker->getComponent<CStats>().strength * multiplier - defender->getComponent<CStats>().defense) * multiplier <= 0) {
 			total = 0.0f;
 		}
 		else {
-			total = (pWeapon.damage - defender->getComponent<CStats>().defense) * multiplier;
+			total = (pWeapon.damage + attacker->getComponent<CStats>().strength - defender->getComponent<CStats>().defense) * multiplier;
+		}
+
+		if (pWeapon.effect.id == "SLASH") {
+			gameEngine->playSound("SLASH");
+		}
+		else if (pWeapon.effect.id == "PIERCE") {
+			gameEngine->playSound("PIERCE");
+		}
+		else if (pWeapon.effect.id == "SMASH") {
+			gameEngine->playSound("SMASH");
+		}
+		else {
+			gameEngine->playSound("HIT");
 		}
 		defender->getComponent<CHealth>().current -= total;
 		drawDamageNumber(false, static_cast<int>(total), WHITE);
 	}
 	else {
+
 		float multiplier = 1.0f;
 		std::string type = attacker->getComponent<CStats>().baseDamageType;
 		std::vector<std::string>& weaknesses = defender->getComponent<CWeaknesses>().weaknesses;
@@ -960,12 +1046,13 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 
 		float total = 0.0f;
 
-		if (attacker->getComponent<CStats>().baseDamage - defender->getComponent<CStats>().defense <= 0) {
+		if ((attacker->getComponent<CStats>().strength - defender->getComponent<CStats>().defense) * multiplier <= 0) {
 			total = 0.0f;
 		}
 		else {
-			total = (attacker->getComponent<CStats>().baseDamage - defender->getComponent<CStats>().defense) * multiplier;
+			total = (attacker->getComponent<CStats>().strength - defender->getComponent<CStats>().defense) * multiplier;
 		}
+		gameEngine->playSound("SMASH");
 		defender->getComponent<CHealth>().current -= total;
 		drawDamageNumber(true, static_cast<int>(total), RED);
 	}

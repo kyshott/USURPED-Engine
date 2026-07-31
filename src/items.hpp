@@ -16,7 +16,6 @@ class GameEngine;
 struct Effect {
 	std::string id;
 	std::string type;
-	std::string element;
 	int magnitude = 0;
 };
 

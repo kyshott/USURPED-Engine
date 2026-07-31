@@ -73,7 +73,8 @@ class SceneBattle : public Scene {
 	void resultsState();
 
 	// Helpers
-	void applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<Entity> defender, bool playerAttack);
+	void applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<Entity> defender);
+	void applyMagic(std::shared_ptr<Entity> caster, std::shared_ptr<Entity> target, MagicSpec spell);
 	void useItem();
 	void collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<Entity> looted);
 	void queueMessage(const std::string& message, BattleState nextState);

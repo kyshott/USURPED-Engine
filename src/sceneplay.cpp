@@ -186,6 +186,12 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->addComponent<CStats>();
                 e->getComponent<CStats>().speed = 10;
                 e->addComponent<CName>("Leever");
+                CLoot& loot = e->getComponent<CLoot>();
+                loot.exp = 10;
+                loot.gold = 5;
+                loot.itemDropChance = 0.25f;
+                loot.lootItem.first = "ITEM";
+                loot.lootItem.second = "SHEAL";
             }
         }
     }
@@ -928,6 +934,7 @@ void ScenePlay::spawnPlayer(){
     player->addComponent<CMagic>();
     CMagic& magic = player->getComponent<CMagic>();
     magic.magic.push_back(gameEngine->getAssets().getMagic("BURN"));
+	magic.magic.push_back(gameEngine->getAssets().getMagic("SMEND"));
     player->addComponent<CName>("Player");
 }
 

@@ -102,7 +102,8 @@ class CStats : public Component {
         int speed = 5;
         int defense = 0;
         int magicdefense = 0;
-        int baseDamage = 0;
+        int strength = 0;
+        int intelligence = 0;
 		std::string baseDamageType = "SMASH";
 
         CStats();
