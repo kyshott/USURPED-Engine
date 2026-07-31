@@ -4,7 +4,7 @@
         "description": "Singes the target with conjured flame.",
         "effect": {
             "type": "DAMAGE",
-            "magnitude": 5,
+            "magnitude": 1,
             "id": "FIRE"
         },
         "manacost": 5,
@@ -16,7 +16,19 @@
         "description": "Heals a small amount of the user's HP.",
         "effect": {
             "type": "RESTORE",
-            "magnitude": 10
+            "magnitude": 10,
+            "id": "HEAL"
+        },
+        "manacost": 5,
+        "cost": 0
+    },
+    "POISON": {
+        "name": "Poison",
+        "description": "Poisons the target, causing damage over time.",
+        "effect": {
+            "type": "EFFECT",
+            "magnitude": 1,
+            "id": "POISON"
         },
         "manacost": 5,
         "cost": 0

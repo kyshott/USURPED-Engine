@@ -931,6 +931,9 @@ void ScenePlay::spawnPlayer(){
     items.items.push_back(gameEngine->getAssets().getItem("MHEAL"));
     items.items.push_back(gameEngine->getAssets().getItem("LHEAL"));
 
+    player->getComponent<CHealth>().maxMana = 20;
+	player->getComponent<CHealth>().currentMana = 20;
+
     player->addComponent<CMagic>();
     CMagic& magic = player->getComponent<CMagic>();
     magic.magic.push_back(gameEngine->getAssets().getMagic("BURN"));

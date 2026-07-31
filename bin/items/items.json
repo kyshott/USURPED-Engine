@@ -16,7 +16,7 @@
         "name": "Heal Potion",
         "description": "Restores a moderate amount of HP.",
         "effect": {
-            "id": "MHEAL",
+            "id": "HEAL",
             "type": "RESTORE",
             "magnitude": 50
         },
@@ -28,7 +28,7 @@
         "name": "Heal Elixir",
         "description": "Restores a large amount of HP.",
         "effect": {
-            "id": "LHEAL",
+            "id": "HEAL",
             "type": "RESTORE",
             "magnitude": 100
         },
@@ -41,7 +41,7 @@
         "description": "Restores a small amount of MP.",
         "effect": {
             "id": "HEALM",
-            "type": "RESTOREM",
+            "type": "RESTORE",
             "magnitude": 10
         },
         "cost": 10,
@@ -52,8 +52,8 @@
         "name": "Magic Potion",
         "description": "Restores a moderate amount of MP.",
         "effect": {
-            "id": "MHEALM",
-            "type": "RESTOREM",
+            "id": "HEALM",
+            "type": "RESTORE",
             "magnitude": 25
         },
         "cost": 20,
@@ -64,8 +64,8 @@
         "name": "Magic Elixir",
         "description": "Restores a large amount of MP.",
         "effect": {
-            "id": "LHEALM",
-            "type": "RESTOREM",
+            "id": "HEALM",
+            "type": "RESTORE",
             "magnitude": 50
         },
         "cost": 40,

@@ -32,6 +32,7 @@ class CName : public Component{
  */
 class CTransform : public Component{
     public:
+		Vec2 battlePos;       /* Position of the entity in battle (x,y) */ 
         Vec2 position;        /* Current position (x,y) of the entity */
         Vec2 prevPosition;    /* Previous frame position (x,y) of the entity */
         Vec2 velocity;        /* Current velocity (vx,vy) of the entity */
@@ -87,6 +88,12 @@ class CHealth : public Component{
 
         CHealth();
         CHealth(int m, int c);
+};
+
+class CEffects : public Component {
+    public:
+        std::vector<StatusEffect> effects; /* List of effects on the entity */
+        CEffects();
 };
 
 /*

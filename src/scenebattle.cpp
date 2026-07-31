@@ -29,7 +29,7 @@ void SceneBattle::init() {
 	registerAction(KEY_ESCAPE, "QUIT");
 	registerAction(KEY_BACKSPACE, "BACK");
 	gameEngine->stopMusic("TITLEMUSIC");
-	gameEngine->playMusic("BATTLEMUSIC");
+	//gameEngine->playMusic("BATTLEMUSIC");
 	player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLSTANDU");
 	playername = player->getComponent<CName>().name;
 	enemyname = enemy->getComponent<CName>().name;
@@ -95,6 +95,11 @@ void SceneBattle::sLifespan() {
 				if (e->getTag() == "WEAPON") {
 					player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLSTANDU");
 				}
+				if (e->getTag() == "MAGIC") {
+					if (e->getID() == magicUsed.id) {
+						player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLSTANDU");
+					}
+				}
 				e->destroy();
 			}
 		}
@@ -115,6 +120,7 @@ void SceneBattle::sMovement() {
 	for (auto& e : entityManager.getEntities("WEAPON")) {
 		battleWeaponSwing(e);
 	}
+
 	damageNumber.position += damageNumber.velocity;
 }
 
@@ -154,7 +160,7 @@ void SceneBattle::sDoAction(const Action& action) {
 				}
 				else if (selectedMenuItem == 1) {
 					gameEngine->playSound("MENUSELECT");
-					// Implement defend logic here
+					playerAction = "DEFEND";
 				}
 				else if (selectedMenuItem == 2) {
 					gameEngine->playSound("MENUSELECT");
@@ -267,10 +273,34 @@ void SceneBattle::sAnimation() {
 	}
 }
 
+void SceneBattle::sStatusEffects() {
+		for (auto& e : entityManager.getEntities()) {
+		if (e->hasComponent<CEffects>()) {
+			auto& statusEffects = e->getComponent<CEffects>().effects;
+			for (auto it = statusEffects.begin(); it != statusEffects.end();) {
+				it->duration--;
+				if (it->duration <= 0) {
+					it = statusEffects.erase(it);
+				}
+				else {
+					++it;
+				}
+			}
+		}
+		}
+}
+
 // ----------- BATTLE STATE CONTROL FUNCTIONS ---------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------------------------------
 
 void SceneBattle::inputState() {
+
+	battleMessage = "";
+
+	if (playerDefended) {
+		playerDefended = false;
+		player->getComponent<CStats>().defense /= 2;
+	}
 
 	// Player has decided, now enemy decides what to do. If the enemy is faster, it will go first.
 	if (playerAction != "") {
@@ -282,6 +312,7 @@ void SceneBattle::inputState() {
 			usemagic = dist(gen) ? 1 : 0;
 			if (usemagic) {
 				enemyAction = "MAGIC";
+				enemyMagic = enemy->getComponent<CMagic>().magic[0]; // Just use the first spell for now. Need more advanced AI later
 			}
 		}
 		else {
@@ -303,7 +334,7 @@ void SceneBattle::inputState() {
 				queueMessage(playername + " attacks!", BattleState::ACTION);
 			}
 			else if (playerAction == "DEFEND") {
-				queueMessage(playername + " braces for impact!", BattleState::ACTION);
+				queueMessage(playername + " defends!", BattleState::ACTION);
 			}
 			else if (playerAction == "MAGIC") {
 				queueMessage(playername + " casts " + magicUsed.name + "!", BattleState::ACTION);
@@ -352,9 +383,19 @@ void SceneBattle::playerAct() {
 		}
 		playerAction = "";
 	}
-	if (playerAction == "MAGIC") {
-		player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLUSEU");
+	if (playerAction == "DEFEND") {
+		player->getComponent<CStats>().defense *= 2;
 
+		playerDefended = true;
+
+		// maybe some sort of defense anim or something
+
+		playerAction = "";
+	}
+	if (playerAction == "MAGIC") {
+		if (player->getComponent<CHealth>().currentMana >= magicUsed.manacost) {
+			player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLUSEU");
+		}
 		applyMagic(player, enemy, magicUsed);
 
 		if (enemy->getComponent<CHealth>().current <= 0) {
@@ -404,11 +445,16 @@ void SceneBattle::enemyAct() {
 		}
 	}
 	else if (enemyAction == "MAGIC") {
-		gameEngine->playSound("ENEMYMAGIC");
-		player->getComponent<CHealth>().current -= 2;
-		if (player->getComponent<CHealth>().current <= 0) {
-			battleState = BattleState::DEFEAT;
-			waitTimer = 200;
+		applyMagic(enemy, player, magicUsed);
+
+		if (enemy->getComponent<CHealth>().current <= 0) {
+			enemy->addComponent<CLifespan>(45);
+			enemy->getComponent<CLifespan>().remaining = 45;
+			gameEngine->stopMusic("BATTLEMUSIC");
+			gameEngine->playSound("ENEMYDIE");
+			queueMessage("Victory!", BattleState::VICTORY);
+			collectLoot(player, enemy);
+			return;
 		}
 	}
 
@@ -499,10 +545,32 @@ void SceneBattle::renderUI() {
 		DrawTextEx(
 			font,
 			player->getComponent<CName>().name.c_str(),
-			Vector2(rightPanelX + panelWidth / 2, panelY + textPaddingY),
+			Vector2(rightPanelX + (panelWidth - MeasureTextEx(font, player->getComponent<CName>().name.c_str(), fontSize, spacing).x) / 2.0f, panelY + textPaddingY),
 			fontSize,
 			spacing,
 			BLACK
+		);
+
+		std::string resource = ("HP: " + std::to_string(player->getComponent<CHealth>().current) + "/" + std::to_string(player->getComponent<CHealth>().max)).c_str();
+
+		DrawTextEx(
+			font,
+			resource.c_str(),
+			Vector2(rightPanelX + (panelWidth - MeasureTextEx(font, resource.c_str(), fontSize, spacing).x) / 2.0f, panelY + textPaddingY * 4),
+			fontSize,
+			spacing,
+			RED
+		);
+
+		resource = ("MP: " + std::to_string(player->getComponent<CHealth>().currentMana) + "/" + std::to_string(player->getComponent<CHealth>().maxMana));
+
+		DrawTextEx(
+			font,
+			resource.c_str(),
+			Vector2(rightPanelX + (panelWidth - MeasureTextEx(font, resource.c_str(), fontSize, spacing).x) / 2.0f, panelY + textPaddingY * 6),
+			fontSize,
+			spacing,
+			BLUE
 		);
 	}
 
@@ -763,21 +831,23 @@ void SceneBattle::renderUI() {
 }
 
 void SceneBattle::useItem() {
-	if (itemUsed.effect.type == "RESTORE") {
+	if (itemUsed.effect.id == "HEAL") {
 		CHealth& health = player->getComponent<CHealth>();
 		health.current += itemUsed.effect.magnitude;
 		if (health.current > health.max) {
 			health.current = health.max;
 		}
+		spawnItem(player, itemUsed);
 		drawDamageNumber(true, -itemUsed.effect.magnitude, GREEN);
 		gameEngine->playSound("HEAL");
 	}
-	else if (itemUsed.effect.type == "RESTOREM") {
+	else if (itemUsed.effect.id == "HEALM") {
 		CHealth& health = player->getComponent<CHealth>();
 		health.currentMana += itemUsed.effect.magnitude;
 		if (health.currentMana > health.maxMana) {
 			health.currentMana = health.maxMana;
 		}
+		spawnItem(player, itemUsed);
 		drawDamageNumber(true, -itemUsed.effect.magnitude, BLUE);
 		gameEngine->playSound("HEAL");
 	}
@@ -827,6 +897,29 @@ void SceneBattle::spawnWeapon() {
 	e->addComponent<CLifespan>(15);
 	e->getComponent<CLifespan>().remaining = 15;
 	e->addComponent<CTransform>();
+}
+
+void SceneBattle::spawnSpell(std::shared_ptr<Entity> target, MagicSpec spell) {
+	auto e = entityManager.addEntity("MAGIC", spell.id);
+	if (spell.effect.type == "DAMAGE") {
+		e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(spell.effect.id), true);
+	}
+	else if (spell.effect.type == "RESTORE") {
+		e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(spell.effect.id), true);
+	}
+	e->addComponent<CLifespan>(25);
+	e->getComponent<CLifespan>().remaining = 25;
+	e->addComponent<CTransform>(Vec2(target->getComponent<CTransform>().battlePos.x, target->getComponent<CTransform>().battlePos.y), Vec2(0.0f, 0.0f), 0.0f);
+}
+
+void SceneBattle::spawnItem(std::shared_ptr<Entity> target, ItemSpec item) {
+	auto e = entityManager.addEntity("ITEM", item.id);
+	if (item.effect.type == "RESTORE") {
+		e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(item.effect.id), true);
+	}
+	e->addComponent<CLifespan>(25);
+	e->getComponent<CLifespan>().remaining = 25;
+	e->addComponent<CTransform>(Vec2(target->getComponent<CTransform>().battlePos.x, target->getComponent<CTransform>().battlePos.y), Vec2(0.0f, 0.0f), 0.0f);
 }
 
 void SceneBattle::battleWeaponSwing(std::shared_ptr<Entity> e) {
@@ -879,11 +972,13 @@ void SceneBattle::renderBattleEntity(std::shared_ptr<Entity> entity) {
 
 		xPos = gameEngine->getWidth() * 0.5f;
 		yPos = gameEngine->getHeight() * 0.65f;
+		enemy->getComponent<CTransform>().battlePos = Vec2(xPos, yPos);
 		scale = 1.5f;
 	}
 	else if (entity == player) {
 		xPos = gameEngine->getWidth() * 0.5f;
 		yPos = gameEngine->getHeight() * 0.85f;
+		player->getComponent<CTransform>().battlePos = Vec2(xPos, yPos);
 		scale = 1.75f;
 	}
 	else if (entity->getTag() == "WEAPON") {
@@ -921,8 +1016,8 @@ void SceneBattle::queueMessage(const std::string& message, BattleState nextState
 }
 
 void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<Entity> defender, MagicSpec spell) {
-	if (attacker->getComponent<CHealth>().currentMana < magicUsed.manacost) {
-		queueMessage("Not enough mana!", BattleState::INPUT);
+	if (attacker->getComponent<CHealth>().currentMana < spell.manacost) {
+		battleMessage = "Not enough MP!";
 		return;
 	}
 	else {
@@ -932,6 +1027,7 @@ void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<E
 		// Damaging spells
 
 		if (spell.effect.type == "DAMAGE") {
+			spawnSpell(defender, spell);
 			if (defender->hasComponent<CWeaknesses>()) {
 				std::vector<std::string>& weaknesses = defender->getComponent<CWeaknesses>().weaknesses;
 				if (std::find(weaknesses.begin(), weaknesses.end(), spell.effect.id) != weaknesses.end()) {
@@ -976,7 +1072,7 @@ void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<E
 		// Restorative spells
 
 		if (spell.effect.type == "RESTORE") {
-			attacker->getComponent<CHealth>().currentMana -= spell.manacost;
+			spawnSpell(attacker, spell);
 			CHealth& health = attacker->getComponent<CHealth>();
 			health.current += spell.effect.magnitude;
 			if (health.current > health.max) {
@@ -1015,7 +1111,10 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 			total = (pWeapon.damage + attacker->getComponent<CStats>().strength - defender->getComponent<CStats>().defense) * multiplier;
 		}
 
-		if (pWeapon.effect.id == "SLASH") {
+		if (total <= 0) {
+			gameEngine->playSound("NODAMAGE");
+		}
+		else if (pWeapon.effect.id == "SLASH") {
 			gameEngine->playSound("SLASH");
 		}
 		else if (pWeapon.effect.id == "PIERCE") {
@@ -1051,8 +1150,24 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 		}
 		else {
 			total = (attacker->getComponent<CStats>().strength - defender->getComponent<CStats>().defense) * multiplier;
+		}	
+
+		if (total <= 0) {
+			gameEngine->playSound("NODAMAGE");
 		}
-		gameEngine->playSound("SMASH");
+		else if (type == "SLASH") {
+			gameEngine->playSound("SLASH");
+		}
+		else if (type == "PIERCE") {
+			gameEngine->playSound("PIERCE");
+		}
+		else if (type == "SMASH") {
+			gameEngine->playSound("SMASH");
+		}
+		else {
+			gameEngine->playSound("HIT");
+		}
+
 		defender->getComponent<CHealth>().current -= total;
 		drawDamageNumber(true, static_cast<int>(total), RED);
 	}
@@ -1097,4 +1212,5 @@ void SceneBattle::update() {
 	sAnimation();
 	sMusic();
 	sRender();
+	sStatusEffects();
 }

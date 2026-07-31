@@ -47,6 +47,8 @@ class SceneBattle : public Scene {
 	std::string enemyAction = "";
 	ItemSpec itemUsed;
 	MagicSpec magicUsed;
+	MagicSpec enemyMagic;
+	bool playerDefended = false;
 	std::string battleMessage = "";
 	std::string nextMessage = "";
 	bool enemyFaster = false;
@@ -62,6 +64,7 @@ class SceneBattle : public Scene {
 	void sLifespan();
 	void sMovement();
 	void sBattle();
+	void sStatusEffects();
 
 	// State control
 	void inputState();
@@ -82,6 +85,8 @@ class SceneBattle : public Scene {
 	void renderUI();
 	void renderBattleEntity(std::shared_ptr<Entity> entity);
 	void spawnWeapon();
+	void spawnSpell(std::shared_ptr<Entity> target, MagicSpec spell);
+	void spawnItem(std::shared_ptr<Entity> target, ItemSpec item);
 	void battleWeaponSwing(std::shared_ptr<Entity> e);
 
 public:

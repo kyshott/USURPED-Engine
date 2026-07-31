@@ -12,6 +12,9 @@ Texture LINKUSER ./assets/textures/LinkUseR.png
 Texture LINKUSEU ./assets/textures/LinkUseU.png
 Texture LINKWALKD ./assets/textures/LinkWalkD.png
 Texture MENUBOX ./assets/textures/MENUBOX.png
+Texture FIRE ./assets/textures/FIRE.png
+Texture HEAL ./assets/textures/HEAL.png
+Texture HEALM ./assets/textures/HEALM.png
 Texture OLWALKD ./assets/textures/OLWALKD.png
 Texture OLWALKU ./assets/textures/OLWALKU.png
 Texture OLWALKR ./assets/textures/OLWALKR.png
@@ -69,6 +72,9 @@ Animation ROCKUR ROCKUR 1 1 4
 Animation STATUE STATUE 1 1 4
 Animation SWORD SWORD 1 1 4
 Animation ANCIENTBLADE ANCIENTBLADE 1 1 5
+Animation FIRE FIRE 3 10 8
+Animation HEAL HEAL 3 10 8
+Animation HEALM HEALM 3 10 8
 Animation TEKTITE TEKTITE 2 15 4
 Animation TREESMALL TREESMALL 1 1 4
 Animation HEART HEART 1 1 4
@@ -80,6 +86,7 @@ Sound HEAL ./assets/sounds/heal.wav
 Sound FIRE ./assets/sounds/fire.wav
 Sound SMASH ./assets/sounds/smash.wav
 Sound SLASH ./assets/sounds/slash.wav
+Sound NODAMAGE ./assets/sounds/nodamage.wav
 Sound BACK ./assets/sounds/back.wav
 Sound ENEMYDIE ./assets/sounds/enemydie.wav
 Sound ENEMYHIT ./assets/sounds/EnemyHit.wav

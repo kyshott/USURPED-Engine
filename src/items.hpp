@@ -13,6 +13,13 @@ class GameEngine;
 * This is to avoid having to repeatedly load item information from disk every time an item is created.
 */
 
+struct StatusEffect {
+	std::string id;
+	std::string type;
+	int magnitude = 0;
+	int duration = 0;
+};
+
 struct Effect {
 	std::string id;
 	std::string type;
