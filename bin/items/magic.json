@@ -10,7 +10,6 @@
         "manacost": 5,
         "cost": 0
     },
-
     "SMEND": {
         "name": "Lesser Mend",
         "description": "Heals a small amount of the user's HP.",
@@ -22,13 +21,28 @@
         "manacost": 5,
         "cost": 0
     },
-    "POISON": {
-        "name": "Poison",
-        "description": "Poisons the target, causing damage over time.",
+    "TOXIN": {
+        "name": "Toxin",
+        "description": "Poisons the target with a mild toxin.",
         "effect": {
             "type": "EFFECT",
             "magnitude": 1,
-            "id": "POISON"
+            "id": "POISON",
+            "duration": 3,
+            "effectType": "DAMAGE"
+        },
+        "manacost": 5,
+        "cost": 0
+    },
+    "LOOPHEAL": {
+        "name": "Loop Heal",
+        "description": "Provides weak healing every turn.",
+        "effect": {
+            "type": "EFFECT",
+            "magnitude": 2,
+            "id": "HEAL",
+            "duration": 3,
+            "effectType": "HEAL"
         },
         "manacost": 5,
         "cost": 0

@@ -238,6 +238,10 @@ MagicSpec Assets::getMagic(std::string name) const {
         const auto& effect = data["effect"];
         spell.effect.id = effect.value("id", "none");
         spell.effect.type = effect.value("type", "none");
+        if (spell.effect.type == "EFFECT") {
+            spell.effect.duration = effect.value("duration", 0);
+            spell.effect.statusType = effect.value("effectType", "none");
+		}
 		spell.effect.magnitude = effect.value("magnitude", 0);
 	}
 
@@ -291,6 +295,7 @@ std::shared_ptr<Entity> Assets::getEnemy(std::string name) const {
     e->addComponent<CStats>();
     e->addComponent<CItems>();
 	e->addComponent<CName>(data.value("name", name));
+    e->addComponent<CEffects>();
 
 	CStats& stats = e->getComponent<CStats>();
     CItems& items = e->getComponent<CItems>();

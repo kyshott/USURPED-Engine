@@ -153,6 +153,7 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->addComponent<CName>("Tektite");
                 e->addComponent<CLoot>();
 				CLoot& loot = e->getComponent<CLoot>();
+                e->addComponent<CEffects>();
                 loot.exp = 10;
 				loot.gold = 5;
                 loot.itemDropChance = 0.25f;
@@ -186,6 +187,7 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->addComponent<CStats>();
                 e->getComponent<CStats>().speed = 10;
                 e->addComponent<CName>("Leever");
+                e->addComponent<CEffects>();
                 CLoot& loot = e->getComponent<CLoot>();
                 loot.exp = 10;
                 loot.gold = 5;
@@ -934,11 +936,15 @@ void ScenePlay::spawnPlayer(){
     player->getComponent<CHealth>().maxMana = 20;
 	player->getComponent<CHealth>().currentMana = 20;
 
+
     player->addComponent<CMagic>();
     CMagic& magic = player->getComponent<CMagic>();
     magic.magic.push_back(gameEngine->getAssets().getMagic("BURN"));
 	magic.magic.push_back(gameEngine->getAssets().getMagic("SMEND"));
+	magic.magic.push_back(gameEngine->getAssets().getMagic("TOXIN"));
+    magic.magic.push_back(gameEngine->getAssets().getMagic("LOOPHEAL"));
     player->addComponent<CName>("Player");
+    player->addComponent<CEffects>();
 }
 
 /**

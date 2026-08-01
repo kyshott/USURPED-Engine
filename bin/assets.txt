@@ -14,6 +14,7 @@ Texture LINKWALKD ./assets/textures/LinkWalkD.png
 Texture MENUBOX ./assets/textures/MENUBOX.png
 Texture FIRE ./assets/textures/FIRE.png
 Texture HEAL ./assets/textures/HEAL.png
+Texture POISON ./assets/textures/POISON.png
 Texture HEALM ./assets/textures/HEALM.png
 Texture OLWALKD ./assets/textures/OLWALKD.png
 Texture OLWALKU ./assets/textures/OLWALKU.png
@@ -75,6 +76,7 @@ Animation ANCIENTBLADE ANCIENTBLADE 1 1 5
 Animation FIRE FIRE 3 10 8
 Animation HEAL HEAL 3 10 8
 Animation HEALM HEALM 3 10 8
+Animation POISON POISON 3 10 8
 Animation TEKTITE TEKTITE 2 15 4
 Animation TREESMALL TREESMALL 1 1 4
 Animation HEART HEART 1 1 4
@@ -83,6 +85,7 @@ Music BATTLEMUSIC ./assets/sounds/music2.wav
 Music TITLEMUSIC ./assets/sounds/dungeon.wav
 Sound MENUSELECT ./assets/sounds/blip.wav
 Sound HEAL ./assets/sounds/heal.wav
+Sound POISON ./assets/sounds/poison.wav
 Sound FIRE ./assets/sounds/fire.wav
 Sound SMASH ./assets/sounds/smash.wav
 Sound SLASH ./assets/sounds/slash.wav

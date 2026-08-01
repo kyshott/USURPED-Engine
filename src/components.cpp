@@ -27,6 +27,8 @@ CInput::CInput(){};
 CHealth::CHealth(){}
 CHealth::CHealth(int m, int c): max(m), current(c){}
 
+CEffects::CEffects() {};
+
 CStats::CStats() {};
 
 

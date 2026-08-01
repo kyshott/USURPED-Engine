@@ -10,6 +10,7 @@ enum class BattleState {
 	INPUT,
 	ACTION,
 	MESSAGE,
+	EFFECTS,
 	VICTORY,
 	DEFEAT,
 	RESULTS,
@@ -78,6 +79,7 @@ class SceneBattle : public Scene {
 	// Helpers
 	void applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<Entity> defender);
 	void applyMagic(std::shared_ptr<Entity> caster, std::shared_ptr<Entity> target, MagicSpec spell);
+	void applyEffect(std::shared_ptr<Entity> target, Effect effect);
 	void useItem();
 	void collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<Entity> looted);
 	void queueMessage(const std::string& message, BattleState nextState);
@@ -85,6 +87,7 @@ class SceneBattle : public Scene {
 	void renderUI();
 	void renderBattleEntity(std::shared_ptr<Entity> entity);
 	void spawnWeapon();
+	void spawnEffect(std::shared_ptr<Entity> target, Effect effect);
 	void spawnSpell(std::shared_ptr<Entity> target, MagicSpec spell);
 	void spawnItem(std::shared_ptr<Entity> target, ItemSpec item);
 	void battleWeaponSwing(std::shared_ptr<Entity> e);

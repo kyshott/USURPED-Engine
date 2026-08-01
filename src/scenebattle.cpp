@@ -65,6 +65,10 @@ void SceneBattle::sBattle() {
 		waitTimer = 80;
 		break;
 
+	case BattleState::EFFECTS:
+		sStatusEffects();
+		break;
+
 	case BattleState::VICTORY:
 		victoryState();
 		break;
@@ -96,7 +100,7 @@ void SceneBattle::sLifespan() {
 					player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLSTANDU");
 				}
 				if (e->getTag() == "MAGIC") {
-					if (e->getID() == magicUsed.id) {
+					if (e->getID() == magicUsed.effect.id) {
 						player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLSTANDU");
 					}
 				}
@@ -274,10 +278,11 @@ void SceneBattle::sAnimation() {
 }
 
 void SceneBattle::sStatusEffects() {
-		for (auto& e : entityManager.getEntities()) {
+	for (auto& e : entityManager.getEntities()) {
 		if (e->hasComponent<CEffects>()) {
 			auto& statusEffects = e->getComponent<CEffects>().effects;
 			for (auto it = statusEffects.begin(); it != statusEffects.end();) {
+				applyEffect(e, *it);
 				it->duration--;
 				if (it->duration <= 0) {
 					it = statusEffects.erase(it);
@@ -287,7 +292,25 @@ void SceneBattle::sStatusEffects() {
 				}
 			}
 		}
-		}
+	}
+	if (enemy->getComponent<CHealth>().current <= 0) {
+		enemy->addComponent<CLifespan>(45);
+		enemy->getComponent<CLifespan>().remaining = 45;
+		gameEngine->stopMusic("BATTLEMUSIC");
+		gameEngine->playSound("ENEMYDIE");
+		queueMessage("Victory!", BattleState::VICTORY);
+		collectLoot(player, enemy);
+		return;
+	}
+
+	if (player->getComponent<CHealth>().current <= 0) {
+		battleState = BattleState::DEFEAT;
+		waitTimer = 200;
+		return;
+	}
+
+	battleState = BattleState::INPUT;
+	waitTimer = battlespeed;
 }
 
 // ----------- BATTLE STATE CONTROL FUNCTIONS ---------------------------------------------------------------------------------
@@ -423,7 +446,12 @@ void SceneBattle::playerAct() {
 	
 	if (enemyFaster) {
 		waitTimer = battlespeed;
-		battleState = BattleState::INPUT;
+		if (!player->getComponent<CEffects>().effects.empty() || !enemy->getComponent<CEffects>().effects.empty()) {
+			battleState = BattleState::EFFECTS;
+		}
+		else {
+			battleState = BattleState::INPUT;
+		}
 	}
 	else {
 		if (enemyAction == "MAGIC") {
@@ -465,7 +493,7 @@ void SceneBattle::enemyAct() {
 			queueMessage(playername + " attacks!", BattleState::ACTION);
 		}
 		else if (playerAction == "DEFEND") {
-			queueMessage(playername + " braces for impact!", BattleState::ACTION);
+			queueMessage(playername + " defends!", BattleState::ACTION);
 		}
 		else if (playerAction == "MAGIC") {
 			queueMessage(playername + " casts " + magicUsed.name + "!", BattleState::ACTION);
@@ -476,7 +504,12 @@ void SceneBattle::enemyAct() {
 	}
 	else {
 		waitTimer = battlespeed;
-		battleState = BattleState::INPUT;
+		if (!player->getComponent<CEffects>().effects.empty() || !enemy->getComponent<CEffects>().effects.empty()) {
+			battleState = BattleState::EFFECTS;
+		}
+		else {
+			battleState = BattleState::INPUT;
+		}
 	}
 }
 
@@ -797,19 +830,43 @@ void SceneBattle::renderUI() {
 	// RESULTS SCREEN
 
 	if (battleState == BattleState::RESULTS && waitTimer <= 0) {
+		const float resultsWidth = gameEngine->getWidth() * 0.75f;
+		const float resultsHeight = gameEngine->getHeight() * 0.60f;
+		const float resultsX = (gameEngine->getWidth() - resultsWidth) / 2.0f;
+		const float resultsY = (gameEngine->getHeight() - resultsHeight) / 2.0f;
+
 		DrawTexturePro(
 			menuBox,
 			Rectangle{ 0.0f, 0.0f, static_cast<float>(menuBox.width), static_cast<float>(menuBox.height) },
-			Rectangle{ leftPanelX, panelY, panelWidth, panelHeight },
+			Rectangle{ resultsX, resultsY, resultsWidth, resultsHeight },
 			Vector2{ 0.0f, 0.0f },
 			0.0f,
 			WHITE
 		);
+
 		DrawTextEx(
 			font,
-			"Press SELECT to continue",
-			Vector2(leftPanelX + textPaddingX, panelY + textPaddingY),
-			20.0f,
+			"RESULTS",
+			Vector2(
+				resultsX + (resultsWidth - MeasureTextEx(font, "RESULTS", 28.0f, spacing).x) / 2.0f,
+				resultsY + resultsHeight - MeasureTextEx(font, "RESULTS", 28.0f, spacing).y - 30.0f
+			),
+			28.0f,
+			spacing,
+			BLACK
+		);
+
+		const std::string resultsText = "Press SELECT to continue";
+		Vector2 resultsTextSize = MeasureTextEx(font, resultsText.c_str(), 28.0f, spacing);
+
+		DrawTextEx(
+			font,
+			resultsText.c_str(),
+			Vector2(
+				resultsX + (resultsWidth - resultsTextSize.x) / 2.0f,
+				resultsY + resultsHeight - resultsTextSize.y - 30.0f
+			),
+			28.0f,
 			spacing,
 			BLACK
 		);
@@ -899,14 +956,18 @@ void SceneBattle::spawnWeapon() {
 	e->addComponent<CTransform>();
 }
 
+void SceneBattle::spawnEffect(std::shared_ptr<Entity> target, Effect effect) {
+	auto e = entityManager.addEntity("EFFECT", effect.id);
+	e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(effect.id), true);
+	e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(effect.id), true);
+	e->addComponent<CLifespan>(25);
+	e->getComponent<CLifespan>().remaining = 25;
+	e->addComponent<CTransform>(Vec2(target->getComponent<CTransform>().battlePos.x, target->getComponent<CTransform>().battlePos.y), Vec2(0.0f, 0.0f), 0.0f);
+}
+
 void SceneBattle::spawnSpell(std::shared_ptr<Entity> target, MagicSpec spell) {
-	auto e = entityManager.addEntity("MAGIC", spell.id);
-	if (spell.effect.type == "DAMAGE") {
-		e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(spell.effect.id), true);
-	}
-	else if (spell.effect.type == "RESTORE") {
-		e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(spell.effect.id), true);
-	}
+	auto e = entityManager.addEntity("MAGIC", spell.effect.id);
+    e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(spell.effect.id), true);
 	e->addComponent<CLifespan>(25);
 	e->getComponent<CLifespan>().remaining = 25;
 	e->addComponent<CTransform>(Vec2(target->getComponent<CTransform>().battlePos.x, target->getComponent<CTransform>().battlePos.y), Vec2(0.0f, 0.0f), 0.0f);
@@ -1081,6 +1142,77 @@ void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<E
 			drawDamageNumber(true, -spell.effect.magnitude, GREEN);
 			gameEngine->playSound("HEAL");
 		}
+
+		// Status effect spells
+
+		if (spell.effect.type == "EFFECT") {
+			if (spell.effect.statusType == "DAMAGE") {
+				spawnSpell(defender, spell);
+				auto& effects = defender->getComponent<CEffects>().effects;
+
+				// Lambda to check to see if there is an existing status effect of the same type, if so then overwrite
+				auto it = std::find_if(effects.begin(), effects.end(), [&](const Effect& e) {
+					return e.statusType == spell.effect.statusType;
+					});
+				if (it != effects.end()) {
+					*it = spell.effect;
+				}
+				else {
+					defender->getComponent<CEffects>().effects.push_back(spell.effect);
+				}
+				gameEngine->playSound(spell.effect.id);
+			}
+			else {
+				spawnSpell(attacker, spell);
+				auto& effects = attacker->getComponent<CEffects>().effects;
+
+				// Lambda to check to see if there is an existing status effect of the same type, if so then overwrite
+				auto it = std::find_if(effects.begin(), effects.end(), [&](const Effect& e) {
+					return e.statusType == spell.effect.statusType;
+					});
+				if (it != effects.end()) {
+					*it = spell.effect;
+				}
+				else {
+					attacker->getComponent<CEffects>().effects.push_back(spell.effect);
+				}
+				gameEngine->playSound(spell.effect.id);
+			}
+		}
+	}
+}
+
+void SceneBattle::applyEffect(std::shared_ptr<Entity> target, Effect effect) {
+	if (effect.statusType == "DAMAGE") {
+		target->getComponent<CHealth>().current -= effect.magnitude;
+		spawnEffect(target, effect);
+
+		if (effect.id == "POISON") {
+			gameEngine->playSound("POISON");
+			drawDamageNumber(false, static_cast<int>(effect.magnitude), PURPLE);
+		}
+		else if (effect.id == "BURN") {
+			gameEngine->playSound("BURN");
+			drawDamageNumber(false, static_cast<int>(effect.magnitude), ORANGE);
+		}
+		else if (effect.id == "BLEED") {
+			gameEngine->playSound("BLEED");
+			drawDamageNumber(false, static_cast<int>(effect.magnitude), RED);
+		}
+		else {
+			gameEngine->playSound("HIT");
+			drawDamageNumber(false, static_cast<int>(effect.magnitude), WHITE);
+		}
+	}
+
+	if (effect.statusType == "HEAL") {
+		target->getComponent<CHealth>().current += effect.magnitude;
+		if (target->getComponent<CHealth>().current > target->getComponent<CHealth>().max) {
+			target->getComponent<CHealth>().current = target->getComponent<CHealth>().max;
+		}	
+		spawnEffect(target, effect);
+		gameEngine->playSound(effect.id);
+		drawDamageNumber(true, -static_cast<int>(effect.magnitude), GREEN);
 	}
 }
 
@@ -1212,5 +1344,4 @@ void SceneBattle::update() {
 	sAnimation();
 	sMusic();
 	sRender();
-	sStatusEffects();
 }

@@ -92,7 +92,7 @@ class CHealth : public Component{
 
 class CEffects : public Component {
     public:
-        std::vector<StatusEffect> effects; /* List of effects on the entity */
+        std::vector<Effect> effects; /* List of effects on the entity */
         CEffects();
 };
 
