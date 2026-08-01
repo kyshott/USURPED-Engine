@@ -7,6 +7,7 @@
 #include "json.hpp"
 
 struct ItemSpec;
+class EntityManager;
 
 using nlohmann::json;
 
@@ -57,4 +58,5 @@ class Assets{
         ItemSpec getItem(std::string name) const;
         MagicSpec getMagic(std::string name) const;
         std::shared_ptr<Entity> getEnemy(std::string name) const;
+        std::shared_ptr<Entity> getInteractable(std::string name) const;
 };

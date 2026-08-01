@@ -56,6 +56,10 @@ class SceneBattle : public Scene {
 	int battlespeed = 80;
 	int waitTimer = 0;                       /* Buffer for waiting between actions so everything isnt instant */
 	bool playerTurn = true;
+	int itemDrop = 0;
+	std::string itemDropName = "";
+	bool levelUp = false;
+	
 
 	// Systems
 	void init();
@@ -87,7 +91,7 @@ class SceneBattle : public Scene {
 	void renderUI();
 	void renderBattleEntity(std::shared_ptr<Entity> entity);
 	void spawnWeapon();
-	void spawnEffect(std::shared_ptr<Entity> target, Effect effect);
+	void spawnEffect(std::shared_ptr<Entity> target, std::string effectId);
 	void spawnSpell(std::shared_ptr<Entity> target, MagicSpec spell);
 	void spawnItem(std::shared_ptr<Entity> target, ItemSpec item);
 	void battleWeaponSwing(std::shared_ptr<Entity> e);

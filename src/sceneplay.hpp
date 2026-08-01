@@ -41,6 +41,8 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
         void spawnHeart(Vec2& position);
         void teleport(std::shared_ptr<Entity> e);
         void loadLevel(const std::string& levelPath);
+		void loadMap(const std::string& levelPath);
+		void loadObjects(const std::string& levelPath);
         void reloadScene();
         Vec2 getPosition(int rx, int ry, int tx, int ty);
 		Vec2 mouseToWorld(Vec2 windowPos);

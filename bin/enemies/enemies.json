@@ -4,12 +4,11 @@
         "health": 10,
         "mana": 0,
         "strength": 3,
-        "damageType":  "SLASH",
+        "damageType": "SLASH",
         "defense": 1,
-        "magicDefense":  0,
+        "magicDefense": 0,
         "speed": 2,
-        "ai":  "FOLLOW",
-        "magic": {},
+        "ai": "FOLLOW",
         "weakness": { "id": "SMASH" },
         "resistance": {},
         "loot": {
@@ -19,7 +18,33 @@
         },
         "gold": 3,
         "exp": 5,
-        "mapspeed":  3,
+        "mapspeed": 3,
         "description": "The lowest ranking soldiers of the empire. Fodder for your wrath."
+    },
+    "PYROMANCER": {
+        "name": "Pyromancer",
+        "health": 10,
+        "mana": 20,
+        "strength": 1,
+        "damageType": "SMASH",
+        "defense": 1,
+        "magicDefense": 5,
+        "speed": 2,
+        "ai": "FOLLOW",
+        "magic": {
+            "id": "BURN",
+            "castChance":  0.50
+        },
+        "weakness": { "id": "SMASH" },
+        "resistance": { "id": "FIRE"},
+        "loot": {
+            "type": "ITEM",
+            "id": "SMANA",
+            "dropchance": 0.25
+        },
+        "gold": 3,
+        "exp": 5,
+        "mapspeed": 3,
+        "description": "The empire's designated flame conjurers."
     }
 }

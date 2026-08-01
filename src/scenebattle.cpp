@@ -66,6 +66,7 @@ void SceneBattle::sBattle() {
 		break;
 
 	case BattleState::EFFECTS:
+		battleMessage = "";
 		sStatusEffects();
 		break;
 
@@ -165,6 +166,7 @@ void SceneBattle::sDoAction(const Action& action) {
 				else if (selectedMenuItem == 1) {
 					gameEngine->playSound("MENUSELECT");
 					playerAction = "DEFEND";
+					selectedMenuItem = 0;
 				}
 				else if (selectedMenuItem == 2) {
 					gameEngine->playSound("MENUSELECT");
@@ -331,7 +333,7 @@ void SceneBattle::inputState() {
 		int usemagic = 0;
 		if (enemy->hasComponent<CMagic>()) {
 			std::mt19937 gen(rd());
-			std::bernoulli_distribution dist(0.75);
+			std::bernoulli_distribution dist(enemy->getComponent<CMagic>().magic[0].castChance);
 			usemagic = dist(gen) ? 1 : 0;
 			if (usemagic) {
 				enemyAction = "MAGIC";
@@ -343,7 +345,7 @@ void SceneBattle::inputState() {
 		}
 
 		// Evaluate next turn based on speed stats
-		if (enemyFaster) {
+		if (enemyFaster && playerAction != "DEFEND") {
 			playerTurn = false;
 			if (enemyAction == "MAGIC") {
 				queueMessage("Enemy casts a spell!", BattleState::ACTION);
@@ -353,6 +355,7 @@ void SceneBattle::inputState() {
 			}
 		}
 		else {
+			playerTurn = true;
 			if (playerAction == "ATTACK") {
 				queueMessage(playername + " attacks!", BattleState::ACTION);
 			}
@@ -444,7 +447,7 @@ void SceneBattle::playerAct() {
 	
 	playerTurn = false;
 	
-	if (enemyFaster) {
+	if (enemyFaster && !playerDefended) {
 		waitTimer = battlespeed;
 		if (!player->getComponent<CEffects>().effects.empty() || !enemy->getComponent<CEffects>().effects.empty()) {
 			battleState = BattleState::EFFECTS;
@@ -471,9 +474,11 @@ void SceneBattle::enemyAct() {
 			battleState = BattleState::DEFEAT;
 			waitTimer = 200;
 		}
+
+		enemyAction = "";
 	}
 	else if (enemyAction == "MAGIC") {
-		applyMagic(enemy, player, magicUsed);
+		applyMagic(enemy, player, enemyMagic);
 
 		if (enemy->getComponent<CHealth>().current <= 0) {
 			enemy->addComponent<CLifespan>(45);
@@ -484,11 +489,13 @@ void SceneBattle::enemyAct() {
 			collectLoot(player, enemy);
 			return;
 		}
+
+		enemyAction = "";
 	}
 
 	playerTurn = true;
 
-	if (enemyFaster) {
+	if (enemyFaster && !playerDefended) {
 		if (playerAction == "ATTACK") {
 			queueMessage(playername + " attacks!", BattleState::ACTION);
 		}
@@ -530,6 +537,7 @@ void SceneBattle::resultsState() {
 void SceneBattle::renderUI() {
 	const Texture2D& background = gameEngine->getAssets().getTexture("BATTLEROOM");
 	const Texture2D& menuBox = gameEngine->getAssets().getTexture("MENUBOX");
+	const Texture2D& arrow = gameEngine->getAssets().getTexture("ARROW");
 	DrawTexturePro(
 		background,
 		Rectangle{ 0.0f, 0.0f, static_cast<float>(background.width), static_cast<float>(background.height) },
@@ -564,7 +572,7 @@ void SceneBattle::renderUI() {
 
 	// RIGHT PANEL
 
-	if (battleState != BattleState::RESULTS && battleState != BattleState::VICTORY) {
+	if (enemy->getComponent<CHealth>().current > 0) {
 
 		DrawTexturePro(
 			menuBox,
@@ -578,7 +586,8 @@ void SceneBattle::renderUI() {
 		DrawTextEx(
 			font,
 			player->getComponent<CName>().name.c_str(),
-			Vector2(rightPanelX + (panelWidth - MeasureTextEx(font, player->getComponent<CName>().name.c_str(), fontSize, spacing).x) / 2.0f, panelY + textPaddingY),
+			Vector2(rightPanelX + (panelWidth - MeasureTextEx(font, player->getComponent<CName>().name.c_str(), fontSize, spacing).x) / 2.0f, 
+			panelY + textPaddingY),
 			fontSize,
 			spacing,
 			BLACK
@@ -589,7 +598,8 @@ void SceneBattle::renderUI() {
 		DrawTextEx(
 			font,
 			resource.c_str(),
-			Vector2(rightPanelX + (panelWidth - MeasureTextEx(font, resource.c_str(), fontSize, spacing).x) / 2.0f, panelY + textPaddingY * 4),
+			Vector2(rightPanelX + (panelWidth - MeasureTextEx(font, resource.c_str(), fontSize, spacing).x) / 2.0f, 
+			panelY + textPaddingY + 40.0f),
 			fontSize,
 			spacing,
 			RED
@@ -600,7 +610,8 @@ void SceneBattle::renderUI() {
 		DrawTextEx(
 			font,
 			resource.c_str(),
-			Vector2(rightPanelX + (panelWidth - MeasureTextEx(font, resource.c_str(), fontSize, spacing).x) / 2.0f, panelY + textPaddingY * 6),
+			Vector2(rightPanelX + (panelWidth - MeasureTextEx(font, resource.c_str(), fontSize, spacing).x) / 2.0f, 
+			panelY + textPaddingY + 70.0f),
 			fontSize,
 			spacing,
 			BLUE
@@ -763,6 +774,18 @@ void SceneBattle::renderUI() {
 					textColor
 				);
 			}
+
+			if (startIndex + itemsPerPage < uniqueItems.size()) {
+				const float arrowX = leftPanelX + (panelWidth - static_cast<float>(arrow.width)) / 2.0f;
+				const float arrowY = panelY + panelHeight - static_cast<float>(arrow.height) - 8.0f;
+
+				DrawTexture(
+					arrow,
+					static_cast<int>(arrowX),
+					static_cast<int>(arrowY),
+					WHITE
+				);
+			}
 		}
 	}
 
@@ -823,8 +846,19 @@ void SceneBattle::renderUI() {
 					textColor
 				);
 			}
-		}
 
+			if (startIndex + itemsPerPage < spells.size()) {
+				const float arrowX = leftPanelX + (panelWidth - static_cast<float>(arrow.width)) / 2.0f;
+				const float arrowY = panelY + panelHeight - static_cast<float>(arrow.height) - 8.0f;
+
+				DrawTexture(
+					arrow,
+					static_cast<int>(arrowX),
+					static_cast<int>(arrowY),
+					WHITE
+				);
+			}
+		}
 	}
 
 	// RESULTS SCREEN
@@ -833,7 +867,7 @@ void SceneBattle::renderUI() {
 		const float resultsWidth = gameEngine->getWidth() * 0.75f;
 		const float resultsHeight = gameEngine->getHeight() * 0.60f;
 		const float resultsX = (gameEngine->getWidth() - resultsWidth) / 2.0f;
-		const float resultsY = (gameEngine->getHeight() - resultsHeight) / 2.0f;
+		const float resultsY = (gameEngine->getHeight() - resultsHeight - 100) / 2.0f;
 
 		DrawTexturePro(
 			menuBox,
@@ -846,30 +880,85 @@ void SceneBattle::renderUI() {
 
 		DrawTextEx(
 			font,
-			"RESULTS",
+			"SPOILS",
 			Vector2(
-				resultsX + (resultsWidth - MeasureTextEx(font, "RESULTS", 28.0f, spacing).x) / 2.0f,
-				resultsY + resultsHeight - MeasureTextEx(font, "RESULTS", 28.0f, spacing).y - 30.0f
+				resultsX + (resultsWidth - MeasureTextEx(font, "SPOILS", 40.0f, spacing).x) / 2.0f,
+				resultsY + resultsHeight - MeasureTextEx(font, "SPOILS", 40.0f, spacing).y - 380.0f
 			),
-			28.0f,
+			40.0f,
 			spacing,
 			BLACK
 		);
 
-		const std::string resultsText = "Press SELECT to continue";
-		Vector2 resultsTextSize = MeasureTextEx(font, resultsText.c_str(), 28.0f, spacing);
+		std::string resultsText = "Obtained " + std::to_string(enemy->getComponent<CLoot>().gold) + " gold";
 
 		DrawTextEx(
 			font,
 			resultsText.c_str(),
 			Vector2(
-				resultsX + (resultsWidth - resultsTextSize.x) / 2.0f,
-				resultsY + resultsHeight - resultsTextSize.y - 30.0f
+				resultsX + (resultsWidth - MeasureTextEx(font, resultsText.c_str(), 28.0f, spacing).x) / 2.0f,
+				resultsY + resultsHeight - MeasureTextEx(font, resultsText.c_str(), 28.0f, spacing).y - 300.0f
 			),
 			28.0f,
 			spacing,
 			BLACK
 		);
+
+		resultsText = "Earned " + std::to_string(enemy->getComponent<CLoot>().exp) + " EXP";
+
+		DrawTextEx(
+			font,
+			resultsText.c_str(),
+			Vector2(
+				resultsX + (resultsWidth - MeasureTextEx(font, resultsText.c_str(), 28.0f, spacing).x) / 2.0f,
+				resultsY + resultsHeight - MeasureTextEx(font, resultsText.c_str(), 28.0f, spacing).y - 220.0f
+			),
+			28.0f,
+			spacing,
+			BLACK
+		);
+
+		if (itemDrop != 0) {
+			if (itemDrop == 1) {
+				resultsText = "Dropped weapon: " + itemDropName;
+			}
+			else if (itemDrop == 2) {
+				resultsText = "Dropped spell: " + itemDropName;
+			}
+			else if (itemDrop == 3) {
+				resultsText = "Dropped item: " + itemDropName;
+			}
+		}
+		else {
+			resultsText = "No items dropped";
+		}
+
+		DrawTextEx(
+			font,
+			resultsText.c_str(),
+			Vector2(
+				resultsX + (resultsWidth - MeasureTextEx(font, resultsText.c_str(), 28.0f, spacing).x) / 2.0f,
+				resultsY + resultsHeight - MeasureTextEx(font, resultsText.c_str(), 28.0f, spacing).y - 140.0f
+			),
+			28.0f,
+			spacing,
+			BLACK
+		);
+
+		if (levelUp) {
+			resultsText = "Level Up!";
+			DrawTextEx(
+				font,
+				resultsText.c_str(),
+				Vector2(
+					resultsX + (resultsWidth - MeasureTextEx(font, resultsText.c_str(), 38.0f, spacing).x) / 2.0f,
+					resultsY + resultsHeight - MeasureTextEx(font, resultsText.c_str(), 38.0f, spacing).y - 60.0f
+				),
+				38.0f,
+				spacing,
+				GOLD
+			);
+		}
 	}
 	
 	// DAMAGE NUMBERS
@@ -922,27 +1011,47 @@ void SceneBattle::collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<En
 	if (dist(gen)) {
 		if (loot.lootItem.first == "WEAPON") {
 			WeaponSpec weapon = gameEngine->getAssets().getWeapon(loot.lootItem.second);
+			itemDropName = weapon.name;
+			itemDrop = 1;
 			looter->getComponent<CWeapons>().weapons.push_back(weapon);
 		}
 		else if (loot.lootItem.first == "MAGIC") {
 			MagicSpec magic = gameEngine->getAssets().getMagic(loot.lootItem.second);
-			looter->getComponent<CMagic>().magic.push_back(magic);
+			itemDropName = magic.name;
+			itemDrop = 2;
+			std::vector<MagicSpec> magicvec = looter->getComponent<CMagic>().magic;
+			auto it = std::find_if(magicvec.begin(), magicvec.end(), [&](const MagicSpec& m) {
+				return m.id == magic.id;
+				});
+			if (it == magicvec.end()) {
+				looter->getComponent<CMagic>().magic.push_back(magic);
+			}
 		}
 		else if (loot.lootItem.first == "ITEM") {
 			ItemSpec item = gameEngine->getAssets().getItem(loot.lootItem.second);
+			itemDropName = item.name;
+			itemDrop = 3;
 			looter->getComponent<CItems>().items.push_back(item);
 		}
 
 		looter->getComponent<CItems>().gold += loot.gold;
 
-		// Placeholder level up
 		stats.exp += loot.exp;
 		if (stats.exp >= stats.nextlevel) {
+			levelUp = true;
 			stats.level++;
 			stats.exp -= stats.nextlevel;
 			stats.nextlevel = static_cast<int>(stats.nextlevel * 1.5f);
-			stats.speed += 2;
-			stats.defense += 2;
+			stats.speed += 1;
+			stats.defense += 1;
+			stats.intelligence += 1;
+			stats.strength += 1;
+			stats.magicdefense += 1;
+			CHealth& health = looter->getComponent<CHealth>();
+			health.max += 5;
+			health.maxMana += 5;
+			health.current += 5;
+			health.currentMana += 5;
 		}
 	}
 }
@@ -956,10 +1065,10 @@ void SceneBattle::spawnWeapon() {
 	e->addComponent<CTransform>();
 }
 
-void SceneBattle::spawnEffect(std::shared_ptr<Entity> target, Effect effect) {
-	auto e = entityManager.addEntity("EFFECT", effect.id);
-	e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(effect.id), true);
-	e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(effect.id), true);
+void SceneBattle::spawnEffect(std::shared_ptr<Entity> target, std::string effectId) {
+	auto e = entityManager.addEntity("EFFECT", effectId);
+	e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(effectId), true);
+	e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(effectId), true);
 	e->addComponent<CLifespan>(25);
 	e->getComponent<CLifespan>().remaining = 25;
 	e->addComponent<CTransform>(Vec2(target->getComponent<CTransform>().battlePos.x, target->getComponent<CTransform>().battlePos.y), Vec2(0.0f, 0.0f), 0.0f);
@@ -1185,7 +1294,7 @@ void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<E
 void SceneBattle::applyEffect(std::shared_ptr<Entity> target, Effect effect) {
 	if (effect.statusType == "DAMAGE") {
 		target->getComponent<CHealth>().current -= effect.magnitude;
-		spawnEffect(target, effect);
+		spawnEffect(target, effect.id);
 
 		if (effect.id == "POISON") {
 			gameEngine->playSound("POISON");
@@ -1210,7 +1319,7 @@ void SceneBattle::applyEffect(std::shared_ptr<Entity> target, Effect effect) {
 		if (target->getComponent<CHealth>().current > target->getComponent<CHealth>().max) {
 			target->getComponent<CHealth>().current = target->getComponent<CHealth>().max;
 		}	
-		spawnEffect(target, effect);
+		spawnEffect(target, effect.id);
 		gameEngine->playSound(effect.id);
 		drawDamageNumber(true, -static_cast<int>(effect.magnitude), GREEN);
 	}
@@ -1259,6 +1368,7 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 			gameEngine->playSound("HIT");
 		}
 		defender->getComponent<CHealth>().current -= total;
+		spawnEffect(defender, pWeapon.effect.id);
 		drawDamageNumber(false, static_cast<int>(total), WHITE);
 	}
 	else {
@@ -1299,6 +1409,8 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 		else {
 			gameEngine->playSound("HIT");
 		}
+
+		spawnEffect(defender, type);
 
 		defender->getComponent<CHealth>().current -= total;
 		drawDamageNumber(true, static_cast<int>(total), RED);

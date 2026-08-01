@@ -105,7 +105,7 @@ class CStats : public Component {
     public:
         int level = 1;
         int exp = 0;
-        int nextlevel = 100;
+        int nextlevel = 10;
         int speed = 5;
         int defense = 0;
         int magicdefense = 0;

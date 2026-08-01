@@ -17,7 +17,7 @@ void SceneMenu::init(){
     menuStrings.push_back("Level 3");
     menuText = "Up: W      Down: S      Play: Space      ESC: Quit";
 
-    levelPaths.push_back("level1.txt");
+    levelPaths.push_back("assets/maps/TestRoom.tmj");
     levelPaths.push_back("level2.txt");
     levelPaths.push_back("level3.txt");
 

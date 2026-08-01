@@ -62,6 +62,7 @@ struct MagicSpec {
 	std::string description;
 	int cost = 0;
 	int manacost = 0;
+	float castChance = 1.0f;
 	Effect effect;
 };
 

@@ -7,6 +7,7 @@
 #include <string>
 #include <print>
 #include "scenebattle.hpp"
+#include "tileson.hpp"
 
 /**
  * Constructor for the Play Scene
@@ -31,13 +32,13 @@ ScenePlay::ScenePlay(GameEngine* gameEngine, std::string levelPath):Scene(gameEn
  */
 void ScenePlay::init(const std::string& levelPath){
     loadLevel(levelPath);
+    //loadMap(levelPath);
     spawnPlayer();
 
     //TODO: Add actions for UP, DOWN, LEFT, RIGHT, and ATTACK
     registerAction(KEY_B,"BB");
     registerAction(KEY_G,"GRID");
     registerAction(KEY_T,"TEX");
-    registerAction(KEY_H,"HEALTH");
     registerAction(KEY_V,"VISION");
     registerAction(KEY_ESCAPE,"QUIT");
     registerAction(KEY_R,"RELOAD");
@@ -53,6 +54,32 @@ void ScenePlay::init(const std::string& levelPath){
     
     mainCamera=Camera2D({gameEngine->getWidth()/2.0f*GetWindowScaleDPI().x,gameEngine->getHeight()/2.0f*GetWindowScaleDPI().y},{gameEngine->getWidth()/2.0f,gameEngine->getHeight()/2.0f},0,GetWindowScaleDPI().x);
 
+}
+
+void ScenePlay::loadMap(const std::string& levelPath) {
+    tson::Tileson t;
+	std::shared_ptr<tson::Map> map = t.parse(levelPath);
+
+   if (map->getStatus() == tson::ParseStatus::OK) {
+       for (auto& layer : map->getLayers()) {
+           if (layer.getType() == tson::LayerType::ObjectGroup) {
+               for (auto& obj : layer.getObjects()) {
+                   if (obj.getType() == "ENEMY") {
+					   auto e = entityManager.addEntity("ENEMY", obj.getName());
+					   e = gameEngine->getAssets().getEnemy(obj.getName());
+                       Vec2 global = getPosition(0, 0, obj.getPosition().x, obj.getPosition().y);
+					   Vec2 pos = gridToMidPixel(global.x, global.y, e);
+					   e->addComponent<CTransform>(Vec2(pos.x, pos.y), Vec2(0.0f, 0.0f), 0.0f);
+                   }
+               }
+           }
+           if (layer.getType() == tson::LayerType::TileLayer) {
+               for (auto& tile : layer.getTileData()) {
+                   // this is where the weird stuff happens
+               }
+		   }
+       }
+   }
 }
 
 /**
@@ -156,7 +183,7 @@ void ScenePlay::loadLevel(const std::string& levelPath){
                 e->addComponent<CEffects>();
                 loot.exp = 10;
 				loot.gold = 5;
-                loot.itemDropChance = 0.25f;
+                loot.itemDropChance = 1.0f;
 				loot.lootItem.first = "ITEM";
 				loot.lootItem.second = "SHEAL";
                 
@@ -644,8 +671,6 @@ void ScenePlay::sRender(){
     //********** Raylib Drawing Content **********
         if(renderTextures){
             renderTex();
-            if(renderHealth)
-                renderHealthBar();
         }
         if(renderBoundingBox)
             renderBB();
@@ -679,7 +704,6 @@ void ScenePlay::sGUI(){
                 {
                     ImGui::SeparatorText("Rendering Controls");
                     ImGui::Checkbox("Textures",&renderTextures);
-                    ImGui::Checkbox("Health Bar",&renderHealth);
                     ImGui::Checkbox("Bounding Boxes",&renderBoundingBox);
                     ImGui::Checkbox("Vision Debug",&renderVisionDebug);
                     ImGui::Checkbox("Grid",&renderGridLines);
@@ -731,29 +755,6 @@ void ScenePlay::sGUI(){
         rlImGuiEnd();
 }
 
-/**
- * Render entity health bars
- */
-void ScenePlay::renderHealthBar(){
-    for(auto& e : entityManager.getEntities("DYNAMIC")){
-        if(e->hasComponent<CHealth>()){
-            CHealth health=e->getComponent<CHealth>();
-            Vec2 position=e->getComponent<CTransform>().position;
-            Vec2 size=e->getComponent<CAnimation>().animation.getScaledSize();
-            float yPos=position.y-size.y/2-15;
-            float xPos=position.x-size.x/2;
-            float width=size.x/health.max;
-            float shift=0;
-            Color c = RED;
-            for(int i=0;i<health.max;i++){
-                if(i>=health.current) c=BLACK;
-                DrawRectangle(xPos+shift, yPos+1, width, 6, c);
-                DrawRectangleLines(xPos+shift,yPos,width, 8,BLACK);
-                shift+=width-1;
-            }
-        }
-    }
-}
 
 /**
  * Render AI Debug information, including vision and patrol paths
@@ -801,9 +802,6 @@ void ScenePlay::sDoAction(const Action& action) {
         }
         if (action.getName() == "TEX") {
             renderTextures = !renderTextures;
-        }
-        if (action.getName() == "HEALTH") {
-            renderHealth = !renderHealth;
         }
         if (action.getName() == "VISION") {
             renderVisionDebug = !renderVisionDebug;
