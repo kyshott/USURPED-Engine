@@ -285,11 +285,10 @@ ItemSpec Assets::getItem(std::string name) const {
 * @param name Enemy name, as it appears as a key in the enemies.json file
 */
 
-std::shared_ptr<Entity> Assets::getEnemy(std::string name) const {
+std::shared_ptr<Entity> Assets::getEnemy(std::string name, std::shared_ptr<Entity> e) const {
 	if (!enemies.contains(name)) {
 		throw std::runtime_error("Enemy key not found in enemies.json: " + name);
 	}
-	auto e = std::make_shared<Entity>();
 	const auto& data = enemies.at(name);
 
     e->addComponent<CStats>();

@@ -19,6 +19,20 @@
          "id":1,
          "name":"Tile Layer 1",
          "opacity":1,
+         "properties":[
+                {
+                 "name":"ROOM",
+                 "type":"list",
+                 "value":[
+                        {
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "type":"int",
+                         "value":0
+                        }]
+                }],
          "type":"tilelayer",
          "visible":true,
          "width":20,
@@ -36,12 +50,26 @@
                  "name":"FOOTSOLDIER",
                  "opacity":1,
                  "point":true,
+                 "properties":[
+                        {
+                         "name":"ROOM",
+                         "type":"list",
+                         "value":[
+                                {
+                                 "type":"int",
+                                 "value":0
+                                }, 
+                                {
+                                 "type":"int",
+                                 "value":0
+                                }]
+                        }],
                  "rotation":0,
                  "type":"ENEMY",
                  "visible":true,
                  "width":0,
-                 "x":48,
-                 "y":64
+                 "x":56,
+                 "y":56
                 }, 
                 {
                  "height":0,
@@ -49,12 +77,26 @@
                  "name":"PYROMANCER",
                  "opacity":1,
                  "point":true,
+                 "properties":[
+                        {
+                         "name":"ROOM",
+                         "type":"list",
+                         "value":[
+                                {
+                                 "type":"int",
+                                 "value":0
+                                }, 
+                                {
+                                 "type":"int",
+                                 "value":0
+                                }]
+                        }],
                  "rotation":0,
                  "type":"ENEMY",
                  "visible":true,
                  "width":0,
-                 "x":224,
-                 "y":48
+                 "x":232,
+                 "y":40
                 }, 
                 {
                  "height":0,
@@ -62,12 +104,26 @@
                  "name":"CHEST",
                  "opacity":1,
                  "point":true,
+                 "properties":[
+                        {
+                         "name":"ROOM",
+                         "type":"list",
+                         "value":[
+                                {
+                                 "type":"int",
+                                 "value":0
+                                }, 
+                                {
+                                 "type":"int",
+                                 "value":0
+                                }]
+                        }],
                  "rotation":0,
                  "type":"INTERACTABLE",
                  "visible":true,
                  "width":0,
-                 "x":112,
-                 "y":160
+                 "x":120,
+                 "y":152
                 }, 
                 {
                  "height":0,
@@ -75,12 +131,26 @@
                  "name":"ENTRANCE",
                  "opacity":1,
                  "point":true,
+                 "properties":[
+                        {
+                         "name":"ROOM",
+                         "type":"list",
+                         "value":[
+                                {
+                                 "type":"int",
+                                 "value":0
+                                }, 
+                                {
+                                 "type":"int",
+                                 "value":0
+                                }]
+                        }],
                  "rotation":0,
                  "type":"TELEPORT",
                  "visible":true,
                  "width":0,
-                 "x":288,
-                 "y":176
+                 "x":296,
+                 "y":168
                 }],
          "opacity":1,
          "type":"objectgroup",

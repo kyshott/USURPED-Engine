@@ -31,8 +31,8 @@ ScenePlay::ScenePlay(GameEngine* gameEngine, std::string levelPath):Scene(gameEn
  * @param levelPath Path to level defintion file, relative to exe
  */
 void ScenePlay::init(const std::string& levelPath){
-    loadLevel(levelPath);
-    //loadMap(levelPath);
+    //loadLevel(levelPath);
+    loadMap(levelPath);
     spawnPlayer();
 
     //TODO: Add actions for UP, DOWN, LEFT, RIGHT, and ATTACK
@@ -65,11 +65,15 @@ void ScenePlay::loadMap(const std::string& levelPath) {
            if (layer.getType() == tson::LayerType::ObjectGroup) {
                for (auto& obj : layer.getObjects()) {
                    if (obj.getType() == "ENEMY") {
-					   auto e = entityManager.addEntity("ENEMY", obj.getName());
-					   e = gameEngine->getAssets().getEnemy(obj.getName());
-                       Vec2 global = getPosition(0, 0, obj.getPosition().x, obj.getPosition().y);
-					   Vec2 pos = gridToMidPixel(global.x, global.y, e);
+                       auto e = entityManager.addEntity("DYNAMIC", "ENEMY");
+                       e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(obj.getName()), true);
+					   gameEngine->getAssets().getEnemy(obj.getName(), e);
+                       // vec2 whatever the fuck -> tiled coords to regular coords
+                       //Vec2 global = getPosition(obj.getProp("ROOM")->getValue(), 0, obj.getPosition().y, obj.getPosition().y);
+					   Vec2 pos = gridToMidPixel(obj.getPosition().y, obj.getPosition().y, e);
 					   e->addComponent<CTransform>(Vec2(pos.x, pos.y), Vec2(0.0f, 0.0f), 0.0f);
+                       e->getComponent<CTransform>().prevPosition.x = pos.x;
+                       e->getComponent<CTransform>().prevPosition.y = pos.y;
                    }
                }
            }
@@ -912,7 +916,7 @@ void ScenePlay::spawnPlayer(){
     int scaledHeight=player->getComponent<CAnimation>().animation.getScaledSize().y;
     int scaledWidth=player->getComponent<CAnimation>().animation.getScaledSize().x - 30;
     player->addComponent<CBoundingBox>(Vec2(gameEngine->getTileSizeX(), gameEngine->getTileSizeY()));
-    Vec2 pos = gridToMidPixel(playerConfig.X,playerConfig.Y,player);
+    Vec2 pos = gridToMidPixel(9,6,player);
     player->addComponent<CTransform>(Vec2(pos.x,pos.y), Vec2(0.0f,0.0f), 0.0f);
     player->addComponent<CWeapons>();
     player->getComponent<CWeapons>().weapons.push_back(gameEngine->getAssets().getWeapon("ANCIENTBLADE"));
@@ -1047,6 +1051,12 @@ void ScenePlay::reloadScene(){
  * return Vec2 with the world position
  */
 Vec2 ScenePlay::getPosition(int rx, int ry, int tx, int ty) {
+    int w = gameEngine->getTilesX();
+    int h = gameEngine->getTilesY();
+    return Vec2(rx * w + tx, ry * h + ty);
+}
+
+Vec2 ScenePlay::getRoomPos(int rx, int ry, int tx, int ty) {
     int w = gameEngine->getTilesX();
     int h = gameEngine->getTilesY();
     return Vec2(rx * w + tx, ry * h + ty);

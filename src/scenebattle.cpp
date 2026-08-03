@@ -348,7 +348,7 @@ void SceneBattle::inputState() {
 		if (enemyFaster && playerAction != "DEFEND") {
 			playerTurn = false;
 			if (enemyAction == "MAGIC") {
-				queueMessage("Enemy casts a spell!", BattleState::ACTION);
+				queueMessage(enemyname + " casts " + enemyMagic.name + "!", BattleState::ACTION);
 			}
 			else {
 				queueMessage(enemyname + " attacks!", BattleState::ACTION);
@@ -458,7 +458,7 @@ void SceneBattle::playerAct() {
 	}
 	else {
 		if (enemyAction == "MAGIC") {
-			queueMessage("Enemy casts a spell!", BattleState::ACTION);
+			queueMessage(enemyname + " casts " + enemyMagic.name + "!", BattleState::ACTION);
 		}
 		else {
 			queueMessage(enemyname + " attacks!", BattleState::ACTION);
@@ -523,6 +523,7 @@ void SceneBattle::enemyAct() {
 void SceneBattle::victoryState() {
 	battleState = BattleState::RESULTS;
 	waitTimer = battlespeed;
+	player->getComponent<CEffects>().effects.clear(); // clear effects for player at the end
 }
 
 void SceneBattle::resultsState() {

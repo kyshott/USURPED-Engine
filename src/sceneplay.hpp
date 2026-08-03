@@ -10,7 +10,7 @@
 /**
  * Contains the player data from the level definition file. Filled when a scene loads a level.
  */
-struct PlayerConfig{float X,Y,BX,BY,SPEED,HEALTH; std::string WEAPON;};
+struct PlayerConfig{float X=9,Y=6,BX=64,BY=64,SPEED=5,HEALTH=10; std::string WEAPON;};
 
 /**
  * Scene that contains all logic and information for playing a loaded level
@@ -45,6 +45,7 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
 		void loadObjects(const std::string& levelPath);
         void reloadScene();
         Vec2 getPosition(int rx, int ry, int tx, int ty);
+        Vec2 getRoomPos(int rx, int ry, int tx, int ty);
 		Vec2 mouseToWorld(Vec2 windowPos);
         void renderHealthBar();
         void renderAIDebug();
