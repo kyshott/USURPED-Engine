@@ -333,11 +333,14 @@ void SceneBattle::inputState() {
 		int usemagic = 0;
 		if (enemy->hasComponent<CMagic>()) {
 			std::mt19937 gen(rd());
-			std::bernoulli_distribution dist(enemy->getComponent<CMagic>().magic[0].castChance);
+			std::bernoulli_distribution dist(enemy->getComponent<CMagic>().castChance);
 			usemagic = dist(gen) ? 1 : 0;
 			if (usemagic) {
 				enemyAction = "MAGIC";
 				enemyMagic = enemy->getComponent<CMagic>().magic[0]; // Just use the first spell for now. Need more advanced AI later
+			}
+			else {
+				enemyAction = "ATTACK";
 			}
 		}
 		else {

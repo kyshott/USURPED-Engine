@@ -52,16 +52,12 @@
                  "point":true,
                  "properties":[
                         {
-                         "name":"ROOM",
+                         "name":"AI",
                          "type":"list",
                          "value":[
                                 {
-                                 "type":"int",
-                                 "value":0
-                                }, 
-                                {
-                                 "type":"int",
-                                 "value":0
+                                 "type":"string",
+                                 "value":"FOLLOW"
                                 }]
                         }],
                  "rotation":0,
@@ -79,16 +75,12 @@
                  "point":true,
                  "properties":[
                         {
-                         "name":"ROOM",
+                         "name":"AI",
                          "type":"list",
                          "value":[
                                 {
-                                 "type":"int",
-                                 "value":0
-                                }, 
-                                {
-                                 "type":"int",
-                                 "value":0
+                                 "type":"string",
+                                 "value":"FOLLOW"
                                 }]
                         }],
                  "rotation":0,
@@ -104,20 +96,6 @@
                  "name":"CHEST",
                  "opacity":1,
                  "point":true,
-                 "properties":[
-                        {
-                         "name":"ROOM",
-                         "type":"list",
-                         "value":[
-                                {
-                                 "type":"int",
-                                 "value":0
-                                }, 
-                                {
-                                 "type":"int",
-                                 "value":0
-                                }]
-                        }],
                  "rotation":0,
                  "type":"INTERACTABLE",
                  "visible":true,
@@ -131,26 +109,12 @@
                  "name":"ENTRANCE",
                  "opacity":1,
                  "point":true,
-                 "properties":[
-                        {
-                         "name":"ROOM",
-                         "type":"list",
-                         "value":[
-                                {
-                                 "type":"int",
-                                 "value":0
-                                }, 
-                                {
-                                 "type":"int",
-                                 "value":0
-                                }]
-                        }],
                  "rotation":0,
-                 "type":"TELEPORT",
+                 "type":"ENTRANCE",
                  "visible":true,
                  "width":0,
-                 "x":296,
-                 "y":168
+                 "x":280,
+                 "y":152
                 }],
          "opacity":1,
          "type":"objectgroup",

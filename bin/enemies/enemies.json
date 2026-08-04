@@ -14,11 +14,11 @@
         "loot": {
             "type": "ITEM",
             "id": "SHEAL",
-            "dropchance": 0.25
+            "dropchance": 0.25,
+            "gold": 3,
+            "exp": 5
         },
-        "gold": 3,
-        "exp": 5,
-        "mapspeed": 3,
+        "mapspeed": 2,
         "description": "The lowest ranking soldiers of the empire. Fodder for your wrath."
     },
     "PYROMANCER": {
@@ -40,11 +40,11 @@
         "loot": {
             "type": "ITEM",
             "id": "SMANA",
-            "dropchance": 0.25
+            "dropchance": 0.25,
+            "gold": 3,
+            "exp": 5
         },
-        "gold": 3,
-        "exp": 5,
-        "mapspeed": 3,
+        "mapspeed": 2,
         "description": "The empire's designated flame conjurers."
     }
 }

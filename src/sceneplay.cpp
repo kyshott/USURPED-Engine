@@ -31,8 +31,8 @@ ScenePlay::ScenePlay(GameEngine* gameEngine, std::string levelPath):Scene(gameEn
  * @param levelPath Path to level defintion file, relative to exe
  */
 void ScenePlay::init(const std::string& levelPath){
-    //loadLevel(levelPath);
     loadMap(levelPath);
+    renderTiledMap(levelPath);
     spawnPlayer();
 
     //TODO: Add actions for UP, DOWN, LEFT, RIGHT, and ATTACK
@@ -61,6 +61,7 @@ void ScenePlay::loadMap(const std::string& levelPath) {
 	std::shared_ptr<tson::Map> map = t.parse(levelPath);
 
    if (map->getStatus() == tson::ParseStatus::OK) {
+       
        for (auto& layer : map->getLayers()) {
            if (layer.getType() == tson::LayerType::ObjectGroup) {
                for (auto& obj : layer.getObjects()) {
@@ -68,22 +69,139 @@ void ScenePlay::loadMap(const std::string& levelPath) {
                        auto e = entityManager.addEntity("DYNAMIC", "ENEMY");
                        e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(obj.getName()), true);
 					   gameEngine->getAssets().getEnemy(obj.getName(), e);
-                       // vec2 whatever the fuck -> tiled coords to regular coords
-                       //Vec2 global = getPosition(obj.getProp("ROOM")->getValue(), 0, obj.getPosition().y, obj.getPosition().y);
-					   Vec2 pos = gridToMidPixel(obj.getPosition().y, obj.getPosition().y, e);
-					   e->addComponent<CTransform>(Vec2(pos.x, pos.y), Vec2(0.0f, 0.0f), 0.0f);
-                       e->getComponent<CTransform>().prevPosition.x = pos.x;
-                       e->getComponent<CTransform>().prevPosition.y = pos.y;
+					   e->addComponent<CTransform>(Vec2(obj.getPosition().x * 4, obj.getPosition().y * 4), Vec2(0.0f, 0.0f), 0.0f);
+                       e->getComponent<CTransform>().prevPosition.x = obj.getPosition().x * 4;
+                       e->getComponent<CTransform>().prevPosition.y = obj.getPosition().y * 4;
+					   e->addComponent<CBoundingBox>(gameEngine->getAssets().getAnimation(obj.getName()).getScaledSize());
+                       if (e->hasComponent<CFollowPlayer>()) {
+                           e->getComponent<CFollowPlayer>().base = e->getComponent<CTransform>().position;
+                       }
+                   }
+                   if (obj.getType() == "INTERACTABLE") {
+         
+                   }
+                   if (obj.getType() == "ENTRANCE") {
+                       spawnPoint.x = obj.getPosition().x * 4;
+					   spawnPoint.y = obj.getPosition().y * 4;
+                       auto e = entityManager.addEntity("DEC", "ENTRANCE");
+                       e->addComponent<CTransform>(spawnPoint, Vec2(0.0f, 0.0f), 0.0f);
+                       e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation("ENTRANCE"), true);
                    }
                }
            }
-           if (layer.getType() == tson::LayerType::TileLayer) {
-               for (auto& tile : layer.getTileData()) {
-                   // this is where the weird stuff happens
-               }
-		   }
        }
    }
+
+   buildTiledMap(levelPath);
+}
+
+void ScenePlay::buildTiledMap(const std::string& levelPath) {
+    tson::Tileson t;
+    std::shared_ptr<tson::Map> tiledMap = t.parse(levelPath);
+
+    for (auto& layer : tiledMap->getLayers()) {
+        if (layer.getType() != tson::LayerType::TileLayer) {
+            continue;
+        }
+
+        for (const auto& [tilePos, tile] : layer.getTileData()) {
+            if (tile == nullptr) {
+                continue;
+            }
+
+            if (!(tile->getClassType() == "TILE")) {
+                continue;
+            }
+
+            const int tiledX = std::get<0>(tilePos);
+            const int tiledY = std::get<1>(tilePos);
+
+            const int engineGridY = gameEngine->getTilesY() - 1 - tiledY;
+
+            const float centerX = tiledX * gameEngine->getTileSizeX() + gameEngine->getTileSizeX() / 2.0f;
+            const float centerY = gameEngine->getHeight() - engineGridY * gameEngine->getTileSizeY() - gameEngine->getTileSizeY() / 2.0f;
+
+            auto e = entityManager.addEntity("STATIC", "TILE");
+            e->addComponent<CTransform>(Vec2(centerX, centerY), Vec2(0.0f, 0.0f), 0.0f);
+			e->getComponent<CTransform>().prevPosition.x = centerX;
+			e->getComponent<CTransform>().prevPosition.y = centerY;
+            e->addComponent<CBoundingBox>(Vec2(gameEngine->getTileSizeX(), gameEngine->getTileSizeY()));
+
+            auto* visionProp = tile->getProp("blocksVision");
+            if (visionProp != nullptr) {
+                e->getComponent<CBoundingBox>().blocksVision = visionProp->getValue<bool>();
+            }
+
+            const tson::Rect& srcRect = tile->getDrawingRect();
+        }
+    }
+}
+
+void ScenePlay::renderTiledMap(const std::string& levelPath) {
+    tson::Tileson t;
+    std::shared_ptr<tson::Map> tiledMap = t.parse(levelPath);
+
+    if (tiledMap->getStatus() != tson::ParseStatus::OK) {
+        return;
+    }
+
+    const int mapWidthPixels = tiledMap->getSize().x * gameEngine->getTileSizeX();
+    const int mapHeightPixels = tiledMap->getSize().y * gameEngine->getTileSizeY();
+
+    mapTexture = LoadRenderTexture(mapWidthPixels, mapHeightPixels);
+    mapTextureReady = true;
+
+    BeginTextureMode(mapTexture);
+    ClearBackground(BLANK);
+
+    for (auto& layer : tiledMap->getLayers()) {
+        if (layer.getType() != tson::LayerType::TileLayer) {
+            continue;
+        }
+
+        for (const auto& [tilePos, tile] : layer.getTileData()) {
+            if (tile == nullptr) {
+                continue;
+            }
+
+            const int tileX = std::get<0>(tilePos);
+            const int tileY = std::get<1>(tilePos);
+
+            const tson::Rect& srcRect = tile->getDrawingRect();
+
+            Rectangle src = {
+                static_cast<float>(srcRect.x),
+                static_cast<float>(srcRect.y),
+                static_cast<float>(srcRect.width),
+                static_cast<float>(srcRect.height)
+            };
+
+            Rectangle dest = {
+                static_cast<float>(tileX * gameEngine->getTileSizeX()),
+                static_cast<float>(tileY * gameEngine->getTileSizeY()),
+                static_cast<float>(gameEngine->getTileSizeX()),
+                static_cast<float>(gameEngine->getTileSizeY())
+            };
+
+            tson::Tileset* tileset = tile->getTileset();
+            if (tileset == nullptr) {
+                continue;
+            }
+
+            const Texture2D& tilesetTexture = gameEngine->getAssets().getTexture(tileset->getName());
+
+            DrawTexturePro(
+                tilesetTexture,
+                src,
+                dest,
+                Vector2{ 0.0f, 0.0f },
+                0.0f,
+                WHITE
+            );
+        }
+    }
+
+    EndTextureMode();
 }
 
 /**
@@ -282,50 +400,6 @@ void ScenePlay::sAnimation() {
     }
 }
 
-void ScenePlay::sWeapons() {
-    for (auto& e : entityManager.getEntities("WEAPON")) {
-        if (!e->hasComponent<CTransform>() || !e->hasComponent<CLifespan>()) {
-            continue;
-        }
-
-        CTransform& playerTransform = player->getComponent<CTransform>();
-        CTransform& weaponTransform = e->getComponent<CTransform>();
-        CLifespan& life = e->getComponent<CLifespan>();
-
-        float progress = 1.0f - (static_cast<float>(life.remaining) / static_cast<float>(life.total));
-        float radius = static_cast<float>(gameEngine->getTileSizeX());
-
-        float startAngle = 0.0f;
-        float endAngle = 0.0f;
-
-        if (playerTransform.facing.y == 1) {
-            startAngle = 225.0f;
-            endAngle = 315.0f;
-        }
-        else if (playerTransform.facing.x == 1) {
-            startAngle = -45.0f;
-            endAngle = 45.0f;
-        }
-        else if (playerTransform.facing.y == -1) {
-            startAngle = 45.0f;
-            endAngle = 135.0f;
-        }
-        else if (playerTransform.facing.x == -1) {
-            startAngle = 135.0f;
-            endAngle = 225.0f;
-        }
-
-        float angle = startAngle + (endAngle - startAngle) * progress;
-        float radians = angle * DEG2RAD;
-
-        weaponTransform.prevPosition = weaponTransform.position;
-        weaponTransform.position.x = playerTransform.position.x + std::cos(radians) * radius;
-        weaponTransform.position.y = playerTransform.position.y + std::sin(radians) * radius;
-        weaponTransform.angle = angle + 90.0f;
-    }
-
-}
-
 /**
  * Movement System
  * 
@@ -417,12 +491,18 @@ void ScenePlay::sMovement() {
             Vec2 delta = follow.home - transf.position;
             float dist = delta.length();
 
-            if (dist > 0.0f && !blocked) {
+            if (dist > 0.0f && dist < 240.0f && !blocked) {
                 transf.velocity = delta.normalized() * follow.speed;
             }
             else {
-                transf.velocity.x = 0.0f;
-                transf.velocity.y = 0.0f;
+                delta = follow.base - transf.position;
+                dist = delta.length();
+                if (dist > 5.0f) {
+                    transf.velocity = delta.normalized() * follow.speed;
+                }
+                else {
+					transf.velocity = Vec2(0.0f, 0.0f);
+                }
             }
         }
 
@@ -463,7 +543,12 @@ void ScenePlay::sMovement() {
     }
 }
 
-
+/**
+ * Collision System
+ *
+ * Checks for any collisions between DYNAMIC objects and any other objects
+ *
+ */
 void ScenePlay::sCollision() {
     for (auto& de : entityManager.getEntities("DYNAMIC")) {
         int topYCollisions = 0;
@@ -654,14 +739,6 @@ void ScenePlay::sCollision() {
 }
 
 /**
- * Collision System
- * 
- * Checks for any collisions between DYNAMIC objects and any other objects
- * 
- */
-
-
-/**
  * Render System
  * 
  * Renders the textures, using the camera system
@@ -670,9 +747,35 @@ void ScenePlay::sCollision() {
 void ScenePlay::sRender(){
     BeginDrawing();
     BeginMode2D(mainCamera);
-    ClearBackground(Color(252,216,168,255));
+    ClearBackground(BLACK);
 
     //********** Raylib Drawing Content **********
+
+        if (mapTextureReady && renderTextures) {
+            Rectangle src = {
+                0.0f,
+                0.0f,
+                static_cast<float>(mapTexture.texture.width),
+                -static_cast<float>(mapTexture.texture.height)
+            };
+
+            Rectangle dest = {
+                0.0f,
+                0.0f,
+                static_cast<float>(mapTexture.texture.width),
+                static_cast<float>(mapTexture.texture.height)
+            };
+
+            DrawTexturePro(
+                mapTexture.texture,
+                src,
+                dest,
+                Vector2{ 0.0f, 0.0f },
+                0.0f,
+                WHITE
+            );
+        }
+
         if(renderTextures){
             renderTex();
         }
@@ -781,7 +884,14 @@ void ScenePlay::renderAIDebug(){
         if(e->hasComponent<CFollowPlayer>()){
             Vec2& home = e->getComponent<CFollowPlayer>().home;
             auto& position=e->getComponent<CTransform>().position;
-            DrawLineEx(Vector2(position.x,position.y), Vector2(home.x,home.y),2, BLUE);
+            Vec2 delta = home - position;
+            float dist = delta.length();
+            if (dist > 0.0f && dist < 240.0f) {
+                DrawLineEx(Vector2(position.x, position.y), Vector2(home.x, home.y), 2, RED);
+			}
+            else {
+                DrawLineEx(Vector2(position.x, position.y), Vector2(home.x, home.y), 2, BLUE);
+            }
         }
     }
 }
@@ -916,8 +1026,7 @@ void ScenePlay::spawnPlayer(){
     int scaledHeight=player->getComponent<CAnimation>().animation.getScaledSize().y;
     int scaledWidth=player->getComponent<CAnimation>().animation.getScaledSize().x - 30;
     player->addComponent<CBoundingBox>(Vec2(gameEngine->getTileSizeX(), gameEngine->getTileSizeY()));
-    Vec2 pos = gridToMidPixel(9,6,player);
-    player->addComponent<CTransform>(Vec2(pos.x,pos.y), Vec2(0.0f,0.0f), 0.0f);
+    player->addComponent<CTransform>(spawnPoint, Vec2(0.0f,0.0f), 0.0f);
     player->addComponent<CWeapons>();
     player->getComponent<CWeapons>().weapons.push_back(gameEngine->getAssets().getWeapon("ANCIENTBLADE"));
 	player->getComponent<CWeapons>().currentWeapon = player->getComponent<CWeapons>().weapons[0];
@@ -1003,16 +1112,6 @@ void ScenePlay::spawnSword() {
     }
 }
 
-/**
-* Spawns a heart at a defeated enemy's location.
-*/
-void ScenePlay::spawnHeart(Vec2& position) {
-	auto e = entityManager.addEntity("DYNAMIC", "HEART");
-	e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation("HEART"), true);
-    e->addComponent<CBoundingBox>(Vec2(gameEngine->getAssets().getAnimation("HEART").getScaledSize().x, gameEngine->getAssets().getAnimation("HEART").getScaledSize().y));
-	e->addComponent<CTransform>(Vec2(position.x, position.y), Vec2(0.0f, 0.0f), 0.0f);
-    e->getComponent<CBoundingBox>().blocksVision = false;
-}
 
 /**
 * Teleports the player to a random cave entrance location on the map
@@ -1056,11 +1155,6 @@ Vec2 ScenePlay::getPosition(int rx, int ry, int tx, int ty) {
     return Vec2(rx * w + tx, ry * h + ty);
 }
 
-Vec2 ScenePlay::getRoomPos(int rx, int ry, int tx, int ty) {
-    int w = gameEngine->getTilesX();
-    int h = gameEngine->getTilesY();
-    return Vec2(rx * w + tx, ry * h + ty);
-}
 
 /**
 * Converts mouse position in window coordinates to world coordinates
@@ -1098,7 +1192,6 @@ void ScenePlay::update(){
     entityManager.update();
 
     sMovement();
-    //sWeapons();
     sAnimation();
     sCollision();
     sLifespan();

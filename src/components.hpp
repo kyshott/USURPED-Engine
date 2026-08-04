@@ -150,7 +150,7 @@ class CLoot : public Component {
         std::pair<std::string, std::string> lootItem; // Loot item in the form <type, id>
         float itemDropChance = 100.0f;
         int gold = 0;
-        int exp = 10;
+        int exp = 0;
 
         CLoot();
 };
@@ -274,6 +274,7 @@ class CInvincibility : public Component{
 class CFollowPlayer : public Component{
     public:
         Vec2 home={0,0};  /*Point that the AI moves toward */
+		Vec2 base = {0,0};  /*Point that the AI moves toward when the player is not in range */
         float speed=0;    /*Speed that the AI moves at */
         CFollowPlayer();
         CFollowPlayer(Vec2 h, float s);

@@ -299,11 +299,9 @@ std::shared_ptr<Entity> Assets::getEnemy(std::string name, std::shared_ptr<Entit
 	CStats& stats = e->getComponent<CStats>();
     CItems& items = e->getComponent<CItems>();
 	stats.defense = data.value("defense", 0);
-	stats.exp = data.value("exp", 0);
-	items.gold = data.value("gold", 0);
-	stats.magicdefense = data.value("magicdefense", 0);
+	stats.magicdefense = data.value("magicDefense", 0);
 	stats.speed = data.value("speed", 1);
-	stats.strength = data.value("damage", 1);
+	stats.strength = data.value("strength", 1);
 	stats.baseDamageType = data.value("damageType", "SLASH");
     
 
@@ -324,6 +322,8 @@ std::shared_ptr<Entity> Assets::getEnemy(std::string name, std::shared_ptr<Entit
 		loot.lootItem.first = lootObj.value("type", "none");
 		loot.lootItem.second = lootObj.value("id", "none");
         loot.itemDropChance = lootObj.value("dropchance", 0.0f);
+        loot.exp = lootObj.value("exp", 0);
+        loot.gold = lootObj.value("gold", 0);
     }
     if (data.contains("magic") && data["magic"].is_object()) {
         e->addComponent<CMagic>();
@@ -340,13 +340,11 @@ std::shared_ptr<Entity> Assets::getEnemy(std::string name, std::shared_ptr<Entit
 
 	if (data.value("ai", "") == "FOLLOW") {
 		e->addComponent<CFollowPlayer>();
-        e->getComponent<CFollowPlayer>().speed = data.value("mapSpeed", 0.0f);
+        e->getComponent<CFollowPlayer>().speed = data.value("mapspeed", 0.0f);
     }
     else if (data.value("ai", "") == "PATROL") {
         e->addComponent<CPatrol>();
-        e->getComponent<CPatrol>().speed = data.value("mapSpeed", 0.0f);
-
-        // Patrol points are added later in sceneplay since they are specific to the particular scene
+        e->getComponent<CPatrol>().speed = data.value("mapspeed", 0.0f);
     }
 
     return e;

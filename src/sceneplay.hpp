@@ -25,12 +25,15 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
         bool renderHealth=true;         /* If the entity health should be rendered */
         bool followCam=false;           /* If the locked follow camera should be active, false=room cam */
         Vec2 room = {0,0};              /* Current (x,y) room. (0,0) is the starting room */
+        Vec2 spawnPoint = {0,0};
+
+        RenderTexture2D mapTexture{};
+        bool mapTextureReady = false;
 
         void init(const std::string& levelPath);
         void sAnimation();
         void sMovement();
         void sCollision();
-        void sWeapons();
         void sRender();
         void sLifespan();
         void sGUI();
@@ -38,16 +41,14 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
         void sCamera();
         void spawnPlayer();
         void spawnSword();
-        void spawnHeart(Vec2& position);
         void teleport(std::shared_ptr<Entity> e);
         void loadLevel(const std::string& levelPath);
 		void loadMap(const std::string& levelPath);
-		void loadObjects(const std::string& levelPath);
+        void renderTiledMap(const std::string& levelPath);
+        void buildTiledMap(const std::string& levelPath);
         void reloadScene();
         Vec2 getPosition(int rx, int ry, int tx, int ty);
-        Vec2 getRoomPos(int rx, int ry, int tx, int ty);
 		Vec2 mouseToWorld(Vec2 windowPos);
-        void renderHealthBar();
         void renderAIDebug();
     public:
         ScenePlay(GameEngine* gameEngine,std::string levelPath);

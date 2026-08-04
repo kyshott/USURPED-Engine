@@ -4,7 +4,7 @@
         "description": "Singes the target with conjured flame.",
         "effect": {
             "type": "DAMAGE",
-            "magnitude": 1,
+            "magnitude": 5,
             "id": "FIRE"
         },
         "manacost": 5,
