@@ -1046,26 +1046,26 @@ void SceneBattle::collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<En
 			itemDrop = 3;
 			looter->getComponent<CItems>().items.push_back(item);
 		}
+	}
 
-		looter->getComponent<CItems>().gold += loot.gold;
+	looter->getComponent<CItems>().gold += loot.gold;
 
-		stats.exp += loot.exp;
-		if (stats.exp >= stats.nextlevel) {
-			levelUp = true;
-			stats.level++;
-			stats.exp -= stats.nextlevel;
-			stats.nextlevel = static_cast<int>(stats.nextlevel * 1.5f);
-			stats.speed += 1;
-			stats.defense += 1;
-			stats.intelligence += 1;
-			stats.strength += 1;
-			stats.magicdefense += 1;
-			CHealth& health = looter->getComponent<CHealth>();
-			health.max += 5;
-			health.maxMana += 5;
-			health.current += 5;
-			health.currentMana += 5;
-		}
+	stats.exp += loot.exp;
+	if (stats.exp >= stats.nextlevel) {
+		levelUp = true;
+		stats.level++;
+		stats.exp -= stats.nextlevel;
+		stats.nextlevel = static_cast<int>(stats.nextlevel * 1.5f);
+		stats.speed += 1;
+		stats.defense += 1;
+		stats.intelligence += 1;
+		stats.strength += 1;
+		stats.magicdefense += 1;
+		CHealth& health = looter->getComponent<CHealth>();
+		health.max += 5;
+		health.maxMana += 5;
+		health.current += 5;
+		health.currentMana += 5;
 	}
 }
 

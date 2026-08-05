@@ -36,7 +36,12 @@ void ScenePlay::init(const std::string& levelPath){
     spawnPlayer();
 	this->stage = player->getComponent<CStats>().stage;
 
-    //TODO: Add actions for UP, DOWN, LEFT, RIGHT, and ATTACK
+    menuStrings.push_back("STATUS");
+    menuStrings.push_back("ITEMS");
+	menuStrings.push_back("MAGIC");
+    menuStrings.push_back("WEAPONS");
+    menuStrings.push_back("QUIT");
+
     registerAction(KEY_B,"BB");
     registerAction(KEY_G,"GRID");
     registerAction(KEY_T,"TEX");
@@ -49,9 +54,8 @@ void ScenePlay::init(const std::string& levelPath){
     registerAction(KEY_A, "LEFT");
     registerAction(KEY_D, "RIGHT");
     registerAction(KEY_SPACE, "INTERACT");
-    registerAction(MOUSE_BUTTON_RIGHT, "SECONDARY");
-    registerAction(KEY_E, "INTERACT");
-    registerAction(KEY_L, "BATTLE_TEST");
+	registerAction(KEY_TAB, "INVENTORY");
+	registerAction(KEY_BACKSPACE, "BACK");
     
     mainCamera=Camera2D({gameEngine->getWidth()/2.0f*GetWindowScaleDPI().x,gameEngine->getHeight()/2.0f*GetWindowScaleDPI().y},{gameEngine->getWidth()/2.0f,gameEngine->getHeight()/2.0f},0,GetWindowScaleDPI().x);
 
@@ -927,7 +931,7 @@ void ScenePlay::sGUI(){
         ImGui::End();
         rlImGuiEnd();
 
-        // CUSTOM UI
+        // Message Bar
         if (showMessage) {
 
             const float fontSize = 28.0f;
@@ -972,8 +976,350 @@ void ScenePlay::sGUI(){
                 BLACK
             );
         }
-}
 
+        // Inventory Screen
+        if (inventory) {
+
+            // Sidebar & main box
+
+            const float resultsWidth = gameEngine->getWidth() * 0.40f;
+            const float resultsHeight = gameEngine->getHeight() * 0.50f;
+            const float resultsX = 30.0f;
+            const float resultsY = 30.0f;
+
+            DrawTexturePro(
+                invBox,
+                Rectangle{ 0.0f, 0.0f, static_cast<float>(invBox.width), static_cast<float>(invBox.height) },
+                Rectangle{ resultsX, resultsY, resultsWidth, resultsHeight },
+                Vector2{ 0.0f, 0.0f },
+                0.0f,
+                WHITE
+            );
+
+            const float menuFontSize = 28.0f;
+            const float menuSpacing = 3.0f;
+            const float menuStartX = resultsX + 24.0f;
+            const float menuStartY = resultsY + 45.0f;
+            const float menuLineHeight = 60.0f;
+
+            for (int i = 0; i < menuStrings.size(); i++) {
+                Color textColor = BLACK;
+                if (i == selectedMenuItem) {
+                    textColor = RED;
+                }
+
+                DrawTextEx(
+                    font,
+                    menuStrings[i].c_str(),
+                    Vector2(menuStartX, menuStartY + menuLineHeight * i),
+                    menuFontSize,
+                    menuSpacing,
+                    textColor
+                );
+            }
+
+            // Sub menu stuff
+
+            // STATUS MENU
+            if (selectedMenuItem == 0) {
+                const CName& name = player->getComponent<CName>();
+                const CStats& stats = player->getComponent<CStats>();
+                const CHealth& health = player->getComponent<CHealth>();
+
+                const float sidebarWidth = 190.0f;
+                const float contentX = resultsX + sidebarWidth + 20.0f;
+                const float contentY = resultsY + 20.0f;
+
+                const float portraitWidth = static_cast<float>(portrait.width * 2);
+                const float portraitHeight = static_cast<float>(portrait.height * 2);
+
+                DrawTexturePro(
+                    portrait,
+                    Rectangle{ 0.0f, 0.0f, static_cast<float>(portrait.width), static_cast<float>(portrait.height) },
+                    Rectangle{ contentX, contentY, portraitWidth, portraitHeight },
+                    Vector2{ 0.0f, 0.0f },
+                    0.0f,
+                    WHITE
+                );
+
+                const float nameX = contentX + portraitWidth + 20.0f;
+                const float nameY = contentY + 8.0f;
+
+                DrawTextEx(
+                    font,
+                    name.name.c_str(),
+                    Vector2(nameX, nameY),
+                    32.0f,
+                    2.0f,
+                    BLACK
+                );
+
+                DrawTextEx(
+                    font,
+                    ("Floor: " + std::to_string(stats.stage)).c_str(),
+                    Vector2(nameX + 12.0f, nameY + 45.0f),
+                    20.0f,
+                    2.0f,
+                    BLACK
+                );
+
+                const float statsX = contentX;
+                const float statsY = contentY + portraitHeight + 20.0f;
+                const float lineHeight = 25.0f;
+                const float statFontSize = 24.0f;
+                const float statSpacing = 2.0f;
+
+                DrawTextEx(font, TextFormat("Level: %i", stats.level), Vector2(statsX, statsY + lineHeight * 0), statFontSize, statSpacing, BLACK);
+                DrawTextEx(font, TextFormat("EXP: %i / %i", stats.exp, stats.nextlevel), Vector2(statsX, statsY + lineHeight * 1), statFontSize, statSpacing, BLACK);
+                DrawTextEx(font, TextFormat("HP: %i / %i", health.current, health.max), Vector2(statsX, statsY + lineHeight * 2), statFontSize, statSpacing, RED);
+                DrawTextEx(font, TextFormat("MP: %i / %i", health.currentMana, health.maxMana), Vector2(statsX, statsY + lineHeight * 3), statFontSize, statSpacing, BLUE);
+                DrawTextEx(font, TextFormat("Strength: %i", stats.strength), Vector2(statsX, statsY + lineHeight * 4), statFontSize, statSpacing, BLACK);
+                DrawTextEx(font, TextFormat("Defense: %i", stats.defense), Vector2(statsX, statsY + lineHeight * 5), statFontSize, statSpacing, BLACK);
+                DrawTextEx(font, TextFormat("Intelligence: %i", stats.intelligence), Vector2(statsX, statsY + lineHeight * 6), statFontSize, statSpacing, BLACK);
+                DrawTextEx(font, TextFormat("Magic Def: %i", stats.magicdefense), Vector2(statsX, statsY + lineHeight * 7), statFontSize, statSpacing, BLACK);
+                DrawTextEx(font, TextFormat("Speed: %i", stats.speed), Vector2(statsX, statsY + lineHeight * 8), statFontSize, statSpacing, BLACK);
+            }
+
+            // ITEMS MENU
+            else if (subMenu == 1) {
+                std::vector<ItemSpec> uniqueItems;
+                std::vector<int> itemCounts;
+                const auto& inventoryItems = player->getComponent<CItems>().items;
+
+                for (const auto& item : inventoryItems) {
+                    bool found = false;
+                    for (int i = 0; i < uniqueItems.size(); i++) {
+                        if (uniqueItems[i].id == item.id) {
+                            itemCounts[i]++;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        uniqueItems.push_back(item);
+                        itemCounts.push_back(1);
+                    }
+                }
+
+                const float sidebarWidth = 190.0f;
+                const float contentX = resultsX + sidebarWidth + 12.0f;
+                const float contentY = resultsY + 20.0f;
+                const float contentWidth = resultsWidth - sidebarWidth - 40.0f;
+
+                const float descFontSize = 15.0f;
+                const float itemFontSize = 22.0f;
+                const float spacing = 1.0f;
+
+                const float descY = contentY + 12.0f;
+                const float listY = contentY + 55.0f;
+                const float rowHeight = 55.0f;
+                const int itemsPerPage = 5;
+
+                if (uniqueItems.empty()) {
+                    /*
+                    selectTip = "No items!";
+
+                    DrawTextEx(
+                        font,
+                        selectTip.c_str(),
+                        Vector2(contentX, descY),
+                        descFontSize,
+                        spacing,
+                        BLACK
+                    );
+                    */
+                    DrawTextEx(
+                        font,
+                        "No items!",
+                        Vector2(contentX, listY),
+                        itemFontSize,
+                        spacing,
+                        BLACK
+                    );
+                    
+                }
+                else {
+                    if (selectedSubMenuItem >= uniqueItems.size()) {
+                        selectedSubMenuItem = uniqueItems.size() - 1;
+                    }
+
+                    selectTip = uniqueItems[selectedSubMenuItem].description;
+
+                    DrawTextEx(
+                        font,
+                        selectTip.c_str(),
+                        Vector2(contentX, descY),
+                        descFontSize,
+                        spacing,
+                        BLACK
+                    );
+
+                    const int startIndex = (selectedSubMenuItem / itemsPerPage) * itemsPerPage;
+                    int endIndex = startIndex + itemsPerPage;
+                    if (endIndex > uniqueItems.size()) {
+                        endIndex = uniqueItems.size();
+                    }
+
+                    for (int i = startIndex; i < endIndex; i++) {
+                        const int row = i - startIndex;
+                        const float textY = listY + row * rowHeight;
+                        const Color textColor = (i == selectedSubMenuItem) ? RED : BLACK;
+
+                        DrawTextEx(
+                            font,
+                            uniqueItems[i].name.c_str(),
+                            Vector2(contentX, textY),
+                            itemFontSize,
+                            spacing,
+                            textColor
+                        );
+
+                        std::string countText = std::to_string(itemCounts[i]);
+                        Vector2 countSize = MeasureTextEx(font, countText.c_str(), itemFontSize, spacing);
+                        const float countX = contentX + contentWidth - countSize.x - 10.0f;
+
+                        DrawTextEx(
+                            font,
+                            countText.c_str(),
+                            Vector2(countX, textY),
+                            itemFontSize,
+                            spacing,
+                            textColor
+                        );
+                    }
+
+                    if (startIndex + itemsPerPage < uniqueItems.size()) {
+                        const float arrowX = contentX + (contentWidth - static_cast<float>(arrow.width)) / 2.0f;
+                        const float arrowY = listY + itemsPerPage * rowHeight;
+
+                        DrawTexture(
+                            arrow,
+                            static_cast<int>(arrowX),
+                            static_cast<int>(arrowY),
+                            WHITE
+                        );
+                    }
+                }
+            }
+            else if (subMenu == 2) {
+                const auto& spells = player->getComponent<CMagic>().magic;
+                const CHealth& health = player->getComponent<CHealth>();
+
+                const float sidebarWidth = 190.0f;
+                const float contentX = resultsX + sidebarWidth + 12.0f;
+                const float contentY = resultsY + 30.0f;
+                const float contentWidth = resultsWidth - sidebarWidth - 40.0f;
+
+                const float headerFontSize = 14.0f;
+                const float itemFontSize = 22.0f;
+                const float spacing = 1.0f;
+
+                const float manaY = contentY;
+                const float descY = contentY + 28.0f;
+                const float listY = contentY + 70.0f;
+                const float rowHeight = 55.0f;
+                const int itemsPerPage = 5;
+
+                DrawTextEx(
+                    font,
+                    TextFormat("MP: %i / %i", health.currentMana, health.maxMana),
+                    Vector2(contentX + 65.0f, manaY),
+                    25.0f,
+                    spacing,
+                    BLUE
+                );
+
+                if (spells.empty()) {
+                    selectTip = "No magic";
+
+                    DrawTextEx(
+                        font,
+                        selectTip.c_str(),
+                        Vector2(contentX, descY),
+                        headerFontSize,
+                        spacing,
+                        BLACK
+                    );
+
+                    DrawTextEx(
+                        font,
+                        "No magic",
+                        Vector2(contentX, listY),
+                        itemFontSize,
+                        spacing,
+                        BLACK
+                    );
+                }
+                else {
+                    if (selectedSubMenuItem >= spells.size()) {
+                        selectedSubMenuItem = spells.size() - 1;
+                    }
+
+                    selectTip = spells[selectedSubMenuItem].description;
+
+                    DrawTextEx(
+                        font,
+                        selectTip.c_str(),
+                        Vector2(contentX, descY),
+                        headerFontSize,
+                        spacing,
+                        BLACK
+                    );
+
+                    const int startIndex = (selectedSubMenuItem / itemsPerPage) * itemsPerPage;
+                    int endIndex = startIndex + itemsPerPage;
+                    if (endIndex > spells.size()) {
+                        endIndex = spells.size();
+                    }
+
+                    for (int i = startIndex; i < endIndex; i++) {
+                        const int row = i - startIndex;
+                        const float textY = listY + row * rowHeight;
+                        const Color textColor = (i == selectedSubMenuItem) ? RED : BLACK;
+
+                        DrawTextEx(
+                            font,
+                            spells[i].name.c_str(),
+                            Vector2(contentX, textY),
+                            itemFontSize,
+                            spacing,
+                            textColor
+                        );
+
+                        std::string costText = std::to_string(spells[i].manacost);
+                        Vector2 costSize = MeasureTextEx(font, costText.c_str(), itemFontSize, spacing);
+                        const float costX = contentX + contentWidth - costSize.x - 10.0f;
+
+                        DrawTextEx(
+                            font,
+                            costText.c_str(),
+                            Vector2(costX, textY),
+                            itemFontSize,
+                            spacing,
+                            textColor
+                        );
+                    }
+
+                    if (startIndex + itemsPerPage < spells.size()) {
+                        const float arrowX = contentX + (contentWidth - static_cast<float>(arrow.width)) / 2.0f;
+                        const float arrowY = listY + itemsPerPage * rowHeight;
+
+                        DrawTexture(
+                            arrow,
+                            static_cast<int>(arrowX),
+                            static_cast<int>(arrowY),
+                            WHITE
+                        );
+                    }
+                }
+                }
+            else if (selectedMenuItem == 3) {
+
+			}
+
+        }
+}
 
 /**
  * Render AI Debug information, including vision and patrol paths
@@ -1039,7 +1385,9 @@ void ScenePlay::sDoAction(const Action& action) {
             reload = true;
         }
 
-        if (!showMessage) {
+        // Standard player control
+
+        if (!showMessage && !inventory) {
             if (action.getName() == "UP") {
                 input.up = true;
             }
@@ -1059,11 +1407,152 @@ void ScenePlay::sDoAction(const Action& action) {
                     interact();
                 }
             }
+            if (action.getName() == "INVENTORY") {
+                inventory = true;
+                gameEngine->playSound("MENUSELECT");
+            }
         }
-        if (showMessage) {
+
+        // Message on screen control
+        else if (showMessage) {
            if (action.getName() == "INTERACT") {
                showMessage = false;
            }
+        }
+
+        // Inventory sidebar control
+        else if (inventory && !subControl) {
+            if (action.getName() == "INVENTORY") {
+                inventory = false;
+                gameEngine->playSound("BACK");
+                selectedMenuItem = 0;
+                selectedSubMenuItem = 0;
+			}
+            if (action.getName() == "UP") {
+                selectedMenuItem--;
+				gameEngine->playSound("MENUSELECT");
+                if (selectedMenuItem < 0) {
+                    selectedMenuItem = menuStrings.size() - 1;
+                }
+            }
+            if (action.getName() == "INTERACT") {
+                gameEngine->playSound("MENUSELECT");
+                subMenu = selectedMenuItem;
+                if (selectedMenuItem != 0) {
+                    subControl = true;
+                }
+			}
+            if (action.getName() == "BACK") {
+                inventory = false;
+                gameEngine->playSound("BACK");
+                selectedMenuItem = 0;
+                selectedSubMenuItem = 0;
+			}
+            if (action.getName() == "DOWN") {
+                selectedMenuItem++;
+                gameEngine->playSound("MENUSELECT");
+                if (selectedMenuItem >= menuStrings.size()) {
+                    selectedMenuItem = 0;
+                }
+            }
+        }
+
+        // Sub menu controls
+        else if (subControl) {
+            if (action.getName() == "BACK") {
+                subControl = false;
+                subMenu = -1;
+                gameEngine->playSound("BACK");
+                selectedSubMenuItem = 0;
+			}
+            if (action.getName() == "INVENTORY") {
+                inventory = false;
+                subControl = false;
+                gameEngine->playSound("BACK");
+                selectedMenuItem = 0;
+                selectedSubMenuItem = 0;
+            }
+
+			// Sub menu item selection
+            if (subMenu == 1) {
+                if (action.getName() == "UP") {
+                    selectedSubMenuItem--;
+                    gameEngine->playSound("MENUSELECT");
+                    if (selectedSubMenuItem < 0) {
+                        selectedSubMenuItem = 0;
+                    }
+                }
+                if (action.getName() == "DOWN") {
+                    selectedSubMenuItem++;
+					gameEngine->playSound("MENUSELECT");
+                    const auto& inventoryItems = player->getComponent<CItems>().items;
+                    std::vector<ItemSpec> uniqueItems;
+                    for (const auto& item : inventoryItems) {
+                        bool found = false;
+                        for (const auto& uniqueItem : uniqueItems) {
+                            if (uniqueItem.id == item.id) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            uniqueItems.push_back(item);
+                        }
+                    }
+                    if (selectedSubMenuItem >= uniqueItems.size()) {
+                        selectedSubMenuItem = uniqueItems.size() - 1;
+                    }
+                }
+
+                if (action.getName() == "INTERACT") {
+                    const auto& inventoryItems = player->getComponent<CItems>().items;
+                    std::vector<ItemSpec> uniqueItems;
+                    for (const auto& item : inventoryItems) {
+                        bool found = false;
+                        for (const auto& uniqueItem : uniqueItems) {
+                            if (uniqueItem.id == item.id) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            uniqueItems.push_back(item);
+                        }
+                    }
+                    if (!uniqueItems.empty() && selectedSubMenuItem < uniqueItems.size()) {
+                        const ItemSpec& selectedItem = uniqueItems[selectedSubMenuItem];
+                        gameEngine->playSound("MENUSELECT");
+                        useItem(selectedItem);
+                    }
+                }
+            }
+
+            // Sub menu magic selection
+            if (subMenu == 2) {
+                const auto& spells = player->getComponent<CMagic>().magic;
+
+                if (action.getName() == "UP") {
+                    selectedSubMenuItem--;
+                    gameEngine->playSound("MENUSELECT");
+                    if (selectedSubMenuItem < 0) {
+                        selectedSubMenuItem = 0;
+                    }
+                }
+                if (action.getName() == "DOWN") {
+                    selectedSubMenuItem++;
+                    gameEngine->playSound("MENUSELECT");
+                    if (selectedSubMenuItem >= spells.size()) {
+                        selectedSubMenuItem = spells.size() - 1;
+					}
+                }
+                if (action.getName() == "INTERACT") {
+                    if (!spells.empty() && selectedSubMenuItem < spells.size()) {
+                        const MagicSpec& selectedSpell = spells[selectedSubMenuItem];
+                        gameEngine->playSound("MENUSELECT");
+                        useMagic(selectedSpell);
+                    }
+                }
+            }
         }
     }
 
@@ -1169,6 +1658,7 @@ void ScenePlay::spawnPlayer(){
     magic.magic.push_back(gameEngine->getAssets().getMagic("LOOPHEAL"));
     player->addComponent<CName>("Player");
     player->addComponent<CEffects>();
+    player->addComponent<CStats>();
 }
 
 /**
@@ -1222,6 +1712,54 @@ void ScenePlay::spawnSword() {
         transf.position.y = py;
         transf.prevPosition.y = py;
         transf.angle = 270.0f;
+    }
+}
+
+void ScenePlay::useItem(const ItemSpec& item) {
+    if (item.effect.id == "HEAL") {
+        CHealth& health = player->getComponent<CHealth>();
+        if (health.current == health.max) {
+            gameEngine->playSound("NODAMAGE");
+        }
+        else {
+            health.current += item.effect.magnitude;
+            if (health.current > health.max) {
+                health.current = health.max;
+            }
+            gameEngine->playSound("HEAL");
+            CItems& items = player->getComponent<CItems>();
+            items.removeItem(item);
+        }
+    }
+    else if (item.effect.id == "HEALM") {
+        CHealth& health = player->getComponent<CHealth>();
+        if (health.currentMana == health.maxMana) {
+            gameEngine->playSound("NODAMAGE");
+        }
+        else {
+            health.currentMana += item.effect.magnitude;
+            if (health.currentMana > health.maxMana) {
+                health.currentMana = health.maxMana;
+            }
+            gameEngine->playSound("HEAL");
+            CItems& items = player->getComponent<CItems>();
+            items.removeItem(item);
+        }
+    }
+}
+
+void ScenePlay::useMagic(const MagicSpec& magic) {
+    CHealth& health = player->getComponent<CHealth>();
+    if (health.currentMana < magic.manacost || magic.effect.type != "RESTORE" || health.current == health.max) {
+        gameEngine->playSound("NODAMAGE");
+    }
+    else {
+        health.currentMana -= magic.manacost;
+        gameEngine->playSound("HEAL");
+        health.current += magic.effect.magnitude;
+        if (health.current > health.max) {
+            health.current = health.max;
+        }
     }
 }
 
@@ -1392,7 +1930,7 @@ void ScenePlay::sLifespan() {
 void ScenePlay::update(){
     entityManager.update();
 
-    if (!showMessage) {
+    if (!showMessage && !inventory) {
         sMovement();
         sAnimation();
     }

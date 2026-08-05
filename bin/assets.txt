@@ -4,6 +4,7 @@ Texture Tiles ./assets/tilemaps/FLOOR1.png
 
 Texture OLPORTRAIT ./assets/textures/OLPORTRAIT.png
 Texture MENUBOX ./assets/textures/MENUBOX.png
+Texture INVBOX ./assets/textures/InvBox.png
 Texture ARROW ./assets/textures/ARROW.png
 Texture FIRE ./assets/textures/FIRE.png
 Texture HEAL ./assets/textures/HEAL.png

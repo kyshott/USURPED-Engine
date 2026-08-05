@@ -29,12 +29,23 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
 		int stage = 1;					 /* Current stage of the player, used for loot selection */
         std::string message;
         bool showMessage = false;
+        bool inventory = false;
 
         RenderTexture2D mapTexture{};
         bool mapTextureReady = false;
 
         const Texture2D& menuBox = gameEngine->getAssets().getTexture("MENUBOX");
+        const Texture2D& invBox = gameEngine->getAssets().getTexture("INVBOX");
         const Font& font = gameEngine->getAssets().getFont("alagard");
+        const Texture2D& arrow = gameEngine->getAssets().getTexture("ARROW");
+        const Texture2D& portrait = gameEngine->getAssets().getTexture("OLPORTRAIT");
+
+        int subMenu = 0;
+        bool subControl = false;
+		int selectedMenuItem = 0;
+        int selectedSubMenuItem = 0;
+        std::vector<std::string> menuStrings;
+		std::string selectTip = "";
 
         void init(const std::string& levelPath);
         void sAnimation();
@@ -48,6 +59,8 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
         void spawnPlayer();
         void spawnSword();
         void interact();
+        void useItem(const ItemSpec& item);
+		void useMagic(const MagicSpec& magic);
         void teleport(std::shared_ptr<Entity> e);
         void loadLevel(const std::string& levelPath);
 		void loadMap(const std::string& levelPath);
