@@ -75,6 +75,17 @@ void Assets::load(const std::string path){
     enemies = json::parse(std::ifstream("enemies/enemies.json"));
 }
 
+json Assets::getAllWeapons() const {
+    return weapons;
+}
+
+json Assets::getAllItems() const {
+    return items;
+}
+
+json Assets::getAllMagic() const {
+    return magic;
+}
 
 /**
  * Gets the raylib texture based based on name
@@ -203,6 +214,7 @@ WeaponSpec Assets::getWeapon(std::string name) const {
     weapon.cost = data.value("cost", 0);
     weapon.type = data.value("type", "");
     weapon.description = data.value("description", "");
+	weapon.rarity = data.value("rarity", 0);
 
     if (data.contains("effect") && data["effect"].is_object()) {
         const auto& effect = data["effect"];
@@ -233,6 +245,7 @@ MagicSpec Assets::getMagic(std::string name) const {
     spell.cost = data.value("cost", 0);
     spell.manacost = data.value("manacost", 0);
     spell.description = data.value("description", "");
+	spell.rarity = data.value("rarity", 0);
 
     if (data.contains("effect") && data["effect"].is_object()) {
         const auto& effect = data["effect"];
@@ -266,6 +279,7 @@ ItemSpec Assets::getItem(std::string name) const {
     item.description = data.value("description", "");
     item.rarity = data.value("rarity", 0);
     item.cost = data.value("cost", 0);
+    item.rarity = data.value("rarity", 0);
 
     if (data.contains("effect") && data["effect"].is_object()) {
         const auto& effect = data["effect"];

@@ -5,7 +5,7 @@
         {
          "data":[7, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 7, 2, 2, 2, 2, 2, 2, 2, 6,
             5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 15, 15, 15, 1, 16, 16, 3,
-            5, 1, 15, 15, 15, 1, 1, 1, 16, 16, 1, 5, 1, 15, 15, 15, 1, 16, 16, 3,
+            5, 1, 15, 15, 15, 1, 1, 1, 16, 16, 1, 5, 1, 15, 15, 15, 1, 1, 16, 3,
             5, 1, 15, 15, 15, 1, 1, 1, 1, 1, 1, 5, 1, 15, 15, 15, 1, 1, 1, 3,
             5, 1, 15, 15, 15, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 3,
             5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 4, 4, 4, 1, 4, 4, 4, 9,
@@ -97,7 +97,7 @@
                  "opacity":1,
                  "point":true,
                  "rotation":0,
-                 "type":"INTERACTABLE",
+                 "type":"CHEST",
                  "visible":true,
                  "width":0,
                  "x":120,
@@ -115,6 +115,19 @@
                  "width":0,
                  "x":280,
                  "y":152
+                }, 
+                {
+                 "height":0,
+                 "id":15,
+                 "name":"MAGICCHEST",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"CHEST",
+                 "visible":true,
+                 "width":0,
+                 "x":280,
+                 "y":40
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -123,7 +136,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":15,
+ "nextobjectid":16,
  "orientation":"orthogonal",
  "renderorder":"left-up",
  "tiledversion":"1.12.2",

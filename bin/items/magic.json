@@ -1,5 +1,6 @@
 {
     "BURN": {
+        "id": "BURN",
         "name": "Burn",
         "description": "Singes the target with conjured flame.",
         "effect": {
@@ -8,9 +9,11 @@
             "id": "FIRE"
         },
         "manacost": 5,
-        "cost": 0
+        "cost": 0,
+        "rarity": 0
     },
     "SMEND": {
+        "id": "SMEND",
         "name": "Lesser Mend",
         "description": "Heals a small amount of the user's HP.",
         "effect": {
@@ -19,22 +22,26 @@
             "id": "HEAL"
         },
         "manacost": 5,
-        "cost": 0
+        "cost": 0,
+        "rarity": 0
     },
     "TOXIN": {
+        "id": "TOXIN",
         "name": "Toxin",
         "description": "Poisons the target with a mild toxin.",
         "effect": {
             "type": "EFFECT",
-            "magnitude": 1,
+            "magnitude": 3,
             "id": "POISON",
             "duration": 3,
             "effectType": "DAMAGE"
         },
         "manacost": 5,
-        "cost": 0
+        "cost": 0,
+        "rarity": 1
     },
     "LOOPHEAL": {
+        "id": "LOOPHEAL",
         "name": "Loop Heal",
         "description": "Provides weak healing every turn.",
         "effect": {
@@ -45,6 +52,7 @@
             "effectType": "HEAL"
         },
         "manacost": 5,
-        "cost": 0
+        "cost": 0,
+        "rarity": 1
     }
 }

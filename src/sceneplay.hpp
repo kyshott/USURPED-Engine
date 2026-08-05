@@ -26,9 +26,15 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
         bool followCam=false;           /* If the locked follow camera should be active, false=room cam */
         Vec2 room = {0,0};              /* Current (x,y) room. (0,0) is the starting room */
         Vec2 spawnPoint = {0,0};
+		int stage = 1;					 /* Current stage of the player, used for loot selection */
+        std::string message;
+        bool showMessage = false;
 
         RenderTexture2D mapTexture{};
         bool mapTextureReady = false;
+
+        const Texture2D& menuBox = gameEngine->getAssets().getTexture("MENUBOX");
+        const Font& font = gameEngine->getAssets().getFont("alagard");
 
         void init(const std::string& levelPath);
         void sAnimation();
@@ -41,12 +47,14 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
         void sCamera();
         void spawnPlayer();
         void spawnSword();
+        void interact();
         void teleport(std::shared_ptr<Entity> e);
         void loadLevel(const std::string& levelPath);
 		void loadMap(const std::string& levelPath);
         void renderTiledMap(const std::string& levelPath);
         void buildTiledMap(const std::string& levelPath);
         void reloadScene();
+        std::string selectLoot(std::string type);
         Vec2 getPosition(int rx, int ry, int tx, int ty);
 		Vec2 mouseToWorld(Vec2 windowPos);
         void renderAIDebug();

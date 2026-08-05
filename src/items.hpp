@@ -51,6 +51,7 @@ struct WeaponSpec {
 	std::string name;
 	std::string description;
 	int damage = 0;
+	int rarity = 0;
 	int cost = 0;
 	Effect effect;
 };
@@ -60,6 +61,7 @@ struct MagicSpec {
 	std::string type;
 	std::string name;
 	std::string description;
+	int rarity = 0;
 	int cost = 0;
 	int manacost = 0;
 	float castChance = 1.0f;

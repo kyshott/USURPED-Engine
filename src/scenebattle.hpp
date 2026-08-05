@@ -39,6 +39,14 @@ class SceneBattle : public Scene {
 	std::string selectTip = "";
 	int selectedMenuItem = 0;               /* Currently selected menu item */
 	int menu = 0;
+
+	// Assets
+
+	const Texture2D& background = gameEngine->getAssets().getTexture("BATTLEROOM");
+	const Texture2D& menuBox = gameEngine->getAssets().getTexture("MENUBOX");
+	const Texture2D& arrow = gameEngine->getAssets().getTexture("ARROW");
+	const Texture2D& portrait = gameEngine->getAssets().getTexture("OLPORTRAIT");
+	const Font& font = gameEngine->getAssets().getFont("alagard");
 	
 	// Battle system variables
 	BattleState battleState = BattleState::INPUT; /* Current state of the battle */

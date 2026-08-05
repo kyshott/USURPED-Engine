@@ -34,6 +34,8 @@ void SceneBattle::init() {
 	playername = player->getComponent<CName>().name;
 	enemyname = enemy->getComponent<CName>().name;
 
+	
+
 }
 
 // ------------ SYSTEM FUNCTIONS ----------------------------------------------------------------------------------------------
@@ -539,9 +541,7 @@ void SceneBattle::resultsState() {
 // ----------------------------------------------------------------------------------------------------------------------------
 
 void SceneBattle::renderUI() {
-	const Texture2D& background = gameEngine->getAssets().getTexture("BATTLEROOM");
-	const Texture2D& menuBox = gameEngine->getAssets().getTexture("MENUBOX");
-	const Texture2D& arrow = gameEngine->getAssets().getTexture("ARROW");
+	
 	DrawTexturePro(
 		background,
 		Rectangle{ 0.0f, 0.0f, static_cast<float>(background.width), static_cast<float>(background.height) },
@@ -550,7 +550,6 @@ void SceneBattle::renderUI() {
 		0.0f,
 		WHITE
 	);
-	const Font& font = gameEngine->getAssets().getFont("alagard");
 
 	const float fontSize = 28.0f;
 	const float spacing = 1.0f;
@@ -587,10 +586,19 @@ void SceneBattle::renderUI() {
 			WHITE
 		);
 
+		DrawTexturePro(
+			portrait,
+			Rectangle{ 0.0f, 0.0f, static_cast<float>(portrait.width), static_cast<float>(portrait.height)},
+			Rectangle{ rightPanelX + 25, panelY + 20, static_cast<float>(portrait.width * 2), static_cast<float>(portrait.height * 2) },
+			Vector2{ 0.0f, 0.0f },
+			0.0f,
+			WHITE
+		);
+
 		DrawTextEx(
 			font,
 			player->getComponent<CName>().name.c_str(),
-			Vector2(rightPanelX + (panelWidth - MeasureTextEx(font, player->getComponent<CName>().name.c_str(), fontSize, spacing).x) / 2.0f, 
+			Vector2(rightPanelX + (panelWidth + 60 - MeasureTextEx(font, player->getComponent<CName>().name.c_str(), fontSize, spacing).x) / 2.0f, 
 			panelY + textPaddingY),
 			fontSize,
 			spacing,
@@ -602,7 +610,7 @@ void SceneBattle::renderUI() {
 		DrawTextEx(
 			font,
 			resource.c_str(),
-			Vector2(rightPanelX + (panelWidth - MeasureTextEx(font, resource.c_str(), fontSize, spacing).x) / 2.0f, 
+			Vector2(rightPanelX + (panelWidth + 60 - MeasureTextEx(font, resource.c_str(), fontSize, spacing).x) / 2.0f, 
 			panelY + textPaddingY + 40.0f),
 			fontSize,
 			spacing,
@@ -614,12 +622,13 @@ void SceneBattle::renderUI() {
 		DrawTextEx(
 			font,
 			resource.c_str(),
-			Vector2(rightPanelX + (panelWidth - MeasureTextEx(font, resource.c_str(), fontSize, spacing).x) / 2.0f, 
+			Vector2(rightPanelX + (panelWidth + 60 - MeasureTextEx(font, resource.c_str(), fontSize, spacing).x) / 2.0f, 
 			panelY + textPaddingY + 70.0f),
 			fontSize,
 			spacing,
 			BLUE
 		);
+
 	}
 
 

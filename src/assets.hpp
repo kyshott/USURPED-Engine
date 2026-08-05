@@ -48,6 +48,10 @@ class Assets{
         const Sound& getSound(const std::string& name) const;
         const Music& getMusic(const std::string& name) const;
 
+		json getAllWeapons() const;
+		json getAllItems() const;
+		json getAllMagic() const;
+
         void addFont(const std::string& name, const std::string& path);
         void addTexture(const std::string& name, const std::string& path);
         void addAnimation(const std::string& name, const std::string& texture, int frameCount, int speed, int scaleFactor);

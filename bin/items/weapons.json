@@ -11,6 +11,67 @@
             "type": "DAMAGE",
             "magnitude": 1
         },
-        "description": "Your old blade - Once imbued with dark sorcery, now powerless."
+        "description": "Your old blade - Once imbued with dark sorcery, now powerless.",
+        "rarity": 0
+    },
+    "IRONMACE": {
+        "id": "IRONMACE",
+        "type": "mace",
+        "name": "Iron Mace",
+        "damage": 8,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "SMASH",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "A blunt weapon that will crush enemies in their armor.",
+        "rarity": 1
+    },
+    "IRONBLADE": {
+        "id": "IRONBLADE",
+        "type": "sword",
+        "name": "Iron Blade",
+        "damage": 8,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "SLASH",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "A sharpened blade, notable for its versatility.",
+        "rarity": 1
+    },
+    "SABRE": {
+        "id": "SABRE",
+        "type": "sword",
+        "name": "Sabre",
+        "damage": 10,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "SLASH",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "A curved blade used by the empire's officers.",
+        "rarity": 2
+    },
+    "RITUALDAGGER": {
+        "id": "RITUALDAGGER",
+        "type": "sword",
+        "name": "Ritual Dagger",
+        "damage": 10,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "SLASH",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "A dagger once used by your minions for dark rituals.",
+        "rarity": 2
     }
 }

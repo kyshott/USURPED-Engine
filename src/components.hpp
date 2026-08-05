@@ -68,6 +68,7 @@ class CInput : public Component{
         bool up=false;     /* Is the player pressing the up button */
         bool down=false;   /* Is the player pressing the down button */
         bool attack=false; /* Is the player pressing the attack button */
+        bool interact = false;
 
 		Vec2 mouseLocation; /* Current mouse location */
 
@@ -107,11 +108,13 @@ class CStats : public Component {
         int exp = 0;
         int nextlevel = 10;
         int speed = 5;
-        int defense = 0;
+        int defense = 1;
         int magicdefense = 0;
         int strength = 0;
         int intelligence = 0;
 		std::string baseDamageType = "SMASH";
+
+        int stage = 1; // used for items, bosses, etc
 
         CStats();
 };
@@ -247,7 +250,7 @@ class CState : public Component {
     public:
         std::string state;     /*Current state name */
         bool isGrounded=false; /*Is the entity touching the top of another entity */
-        bool isAttacking = false;
+        bool isInteracting = false;
 
         CState();
         CState(std::string state);

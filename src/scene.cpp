@@ -74,8 +74,10 @@ void Scene::renderBB(){
 void Scene::renderTex(){
     renderType("DEC");
     renderType("TILE");
-    renderType("DYNAMIC");
+	renderType("STATIC");
     renderType("WEAPON");
+    renderType("INTERACTABLE");
+    renderType("DYNAMIC");
 }
 
 /**
