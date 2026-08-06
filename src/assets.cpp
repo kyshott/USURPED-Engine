@@ -299,7 +299,7 @@ ItemSpec Assets::getItem(std::string name) const {
 * @param name Enemy name, as it appears as a key in the enemies.json file
 */
 
-std::shared_ptr<Entity> Assets::getEnemy(std::string name, std::shared_ptr<Entity> e) const {
+std::shared_ptr<Entity> Assets::getEnemy(std::string name, std::shared_ptr<Entity> e, int stage) const {
 	if (!enemies.contains(name)) {
 		throw std::runtime_error("Enemy key not found in enemies.json: " + name);
 	}
@@ -315,7 +315,7 @@ std::shared_ptr<Entity> Assets::getEnemy(std::string name, std::shared_ptr<Entit
 	stats.defense = data.value("defense", 0);
 	stats.magicdefense = data.value("magicDefense", 0);
 	stats.speed = data.value("speed", 1);
-	stats.strength = data.value("strength", 1);
+	stats.strength = data.value("strength", 1) * stage;
 	stats.baseDamageType = data.value("damageType", "SLASH");
     
 
@@ -336,8 +336,8 @@ std::shared_ptr<Entity> Assets::getEnemy(std::string name, std::shared_ptr<Entit
 		loot.lootItem.first = lootObj.value("type", "none");
 		loot.lootItem.second = lootObj.value("id", "none");
         loot.itemDropChance = lootObj.value("dropchance", 0.0f);
-        loot.exp = lootObj.value("exp", 0);
-        loot.gold = lootObj.value("gold", 0);
+        loot.exp = lootObj.value("exp", 0) * stage;
+        loot.gold = lootObj.value("gold", 0) * stage;
     }
     if (data.contains("magic") && data["magic"].is_object()) {
         e->addComponent<CMagic>();
@@ -347,10 +347,10 @@ std::shared_ptr<Entity> Assets::getEnemy(std::string name, std::shared_ptr<Entit
 		magic.magic.push_back(getMagic(magicObj.value("id", "none")));
     }
 
-    e->addComponent<CHealth>(data.value("health", 1), data.value("health", 1));
+    e->addComponent<CHealth>(data.value("health", 1) * stage, data.value("health", 1) * stage);
 	CHealth& h = e->getComponent<CHealth>();
-	h.maxMana = data.value("mana", 0);
-	h.currentMana = data.value("mana", 0);
+	h.maxMana = data.value("mana", 0) * stage;
+	h.currentMana = data.value("mana", 0) * stage;
 
 	if (data.value("ai", "") == "FOLLOW") {
 		e->addComponent<CFollowPlayer>();

@@ -61,6 +61,6 @@ class Assets{
         WeaponSpec getWeapon(std::string name) const;
         ItemSpec getItem(std::string name) const;
         MagicSpec getMagic(std::string name) const;
-        std::shared_ptr<Entity> getEnemy(std::string name, std::shared_ptr<Entity> e) const;
+        std::shared_ptr<Entity> getEnemy(std::string name, std::shared_ptr<Entity> e, int stage) const;
         std::shared_ptr<Entity> getInteractable(std::string name) const;
 };

@@ -30,6 +30,7 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
         std::string message;
         bool showMessage = false;
         bool inventory = false;
+        bool first = true;
 
         RenderTexture2D mapTexture{};
         bool mapTextureReady = false;
@@ -61,18 +62,18 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
         void interact();
         void useItem(const ItemSpec& item);
 		void useMagic(const MagicSpec& magic);
+        void equipWeapon(int index);
         void teleport(std::shared_ptr<Entity> e);
-        void loadLevel(const std::string& levelPath);
 		void loadMap(const std::string& levelPath);
         void renderTiledMap(const std::string& levelPath);
         void buildTiledMap(const std::string& levelPath);
-        void reloadScene();
         std::string selectLoot(std::string type);
         Vec2 getPosition(int rx, int ry, int tx, int ty);
 		Vec2 mouseToWorld(Vec2 windowPos);
         void renderAIDebug();
     public:
-        ScenePlay(GameEngine* gameEngine,std::string levelPath);
+        ScenePlay(GameEngine* gameEngine, std::string& levelPath, bool first, int stage);
+        ScenePlay(GameEngine* gameEngine, std::string& levelPath, std::shared_ptr<Entity> player, bool first, int stage);
         ScenePlay()=default;
         void battleReturn(std::shared_ptr<Entity> e);
         void update();

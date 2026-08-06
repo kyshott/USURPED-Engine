@@ -33,9 +33,6 @@ void SceneBattle::init() {
 	player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLSTANDU");
 	playername = player->getComponent<CName>().name;
 	enemyname = enemy->getComponent<CName>().name;
-
-	
-
 }
 
 // ------------ SYSTEM FUNCTIONS ----------------------------------------------------------------------------------------------

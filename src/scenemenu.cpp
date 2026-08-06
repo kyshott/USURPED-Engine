@@ -69,7 +69,7 @@ void SceneMenu::sDoAction(const Action& action){
             if(selectedMenuItem>menuStrings.size()-1) selectedMenuItem=0;
         }
         if(action.getName()=="PLAY"){
-            gameEngine->changeScene("PLAY",std::make_shared<ScenePlay>(gameEngine, levelPaths[selectedMenuItem]));
+            gameEngine->changeScene("PLAY", std::make_shared<ScenePlay>(gameEngine, levelPaths[selectedMenuItem], true, 1));
         }
         if(action.getName()=="QUIT"){
             gameEngine->quit();

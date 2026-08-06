@@ -15,8 +15,18 @@
  * @param gameEngine raw pointer to the game engine class
  * @param levelPath Path to level defintion file, relative to exe
  */
-ScenePlay::ScenePlay(GameEngine* gameEngine, std::string levelPath):Scene(gameEngine){
-    this->levelPath=levelPath;
+ScenePlay::ScenePlay(GameEngine* gameEngine, std::string& levelPath, bool first, int stage):Scene(gameEngine){
+    this->levelPath = levelPath;
+    this->first = first;
+	this->stage = stage;
+    init(this->levelPath);
+}
+
+ScenePlay::ScenePlay(GameEngine* gameEngine, std::string& levelPath, std::shared_ptr<Entity> player, bool first, int stage) {
+    this->levelPath = levelPath;
+    this->first = first;
+    this->player = player;
+    this->stage = stage;    
     init(this->levelPath);
 }
 
@@ -33,8 +43,9 @@ ScenePlay::ScenePlay(GameEngine* gameEngine, std::string levelPath):Scene(gameEn
 void ScenePlay::init(const std::string& levelPath){
     loadMap(levelPath);
     renderTiledMap(levelPath);
-    spawnPlayer();
-	this->stage = player->getComponent<CStats>().stage;
+    if (first) {
+        spawnPlayer();
+    }
 
     menuStrings.push_back("STATUS");
     menuStrings.push_back("ITEMS");
@@ -46,8 +57,6 @@ void ScenePlay::init(const std::string& levelPath){
     registerAction(KEY_G,"GRID");
     registerAction(KEY_T,"TEX");
     registerAction(KEY_V,"VISION");
-    registerAction(KEY_ESCAPE,"QUIT");
-    registerAction(KEY_R,"RELOAD");
 
     registerAction(KEY_W, "UP");
     registerAction(KEY_S, "DOWN");
@@ -73,7 +82,7 @@ void ScenePlay::loadMap(const std::string& levelPath) {
                    if (obj.getType() == "ENEMY") {
                        auto e = entityManager.addEntity("DYNAMIC", "ENEMY");
                        e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(obj.getName()), true);
-					   gameEngine->getAssets().getEnemy(obj.getName(), e);
+					   gameEngine->getAssets().getEnemy(obj.getName(), e, this->stage);
 					   e->addComponent<CTransform>(Vec2(obj.getPosition().x * 4, obj.getPosition().y * 4), Vec2(0.0f, 0.0f), 0.0f);
                        e->getComponent<CTransform>().prevPosition.x = obj.getPosition().x * 4;
                        e->getComponent<CTransform>().prevPosition.y = obj.getPosition().y * 4;
@@ -236,150 +245,6 @@ void ScenePlay::renderTiledMap(const std::string& levelPath) {
     }
 
     EndTextureMode();
-}
-
-/**
- * Loads level information from level definition file.
- * 
- * Once loaded, the correct entity type is created and setup.
- * 
- * @param levelPath Path to level defintion file, relative to exe
- */
-void ScenePlay::loadLevel(const std::string& levelPath){
-    //TODO: Add the reading of the level file (Modify what you did from Assignment 3)
-
-    std::ifstream file(levelPath);
-    std::string str;
-    std::string type;
-
-    // enemy vars
-    std::string ai;
-    int roomX, roomY, x, y, np, speed, health, pairX, pairY;
-    std::vector <Vec2> patrolPoints;
-
-    //TODO: Add the reading of decorations (DEC) from the level definition file
-    //Refer to the assignment PDF for the formatting of decorations
-    while (file.good()) {
-        file >> str;
-        if (str == "TILE") {
-            file >> type >> roomX >> roomY >> x >> y;
-            auto e = entityManager.addEntity(str, type);
-            e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(type), true);
-            float scaledX = gameEngine->getAssets().getAnimation(type).getScaledSize().x;
-            float scaledY = gameEngine->getAssets().getAnimation(type).getScaledSize().y;
-            float tileSizeX = gameEngine->getTileSizeX();
-            float tileSizeY = gameEngine->getTileSizeY();
-            float bboxSizeX = tileSizeX;
-            float bboxSizeY = tileSizeY;
-            if (scaledX > tileSizeX || scaledY > tileSizeY) {
-                bboxSizeX = scaledX;
-                bboxSizeY = scaledY;
-            }
-            e->addComponent<CBoundingBox>(Vec2(bboxSizeX, bboxSizeY));
-            if (type == "POND") e->getComponent<CBoundingBox>().blocksVision = false;
-            Vec2 global = getPosition(roomX, roomY, x, y);
-            Vec2 pos = gridToMidPixel(global.x, global.y, e);
-            e->addComponent<CTransform>(Vec2(pos.x, pos.y), Vec2(0.0f, 0.0f), 0.0f);
-            e->getComponent<CTransform>().prevPosition.x = pos.x;
-            e->getComponent<CTransform>().prevPosition.y = pos.y;
-        }
-        if (str == "PLAYER") {
-            file >> playerConfig.X >> playerConfig.Y >> playerConfig.BX >> playerConfig.BY >> playerConfig.SPEED >> playerConfig.HEALTH >> playerConfig.WEAPON;
-        }
-        if (str == "DEC") {
-            file >> type >> roomX >> roomY >> x >> y;
-            auto e = entityManager.addEntity(str, type);
-            e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(type), true);
-            float scaledX = gameEngine->getAssets().getAnimation(type).getScaledSize().x;
-            float scaledY = gameEngine->getAssets().getAnimation(type).getScaledSize().y;
-            float tileSizeX = gameEngine->getTileSizeX();
-            float tileSizeY = gameEngine->getTileSizeY();
-            Vec2 global = getPosition(roomX, roomY, x, y);
-            Vec2 pos = gridToMidPixel(global.x, global.y, e);
-            e->addComponent<CTransform>(Vec2(pos.x, pos.y), Vec2(0.0f, 0.0f), 0.0f);
-            e->getComponent<CTransform>().prevPosition.x = pos.x;
-            e->getComponent<CTransform>().prevPosition.y = pos.y;
-        }
-        if (str == "ENEMY") {
-            file >> type >> ai;
-
-            if (ai == "PATROL") {
-                file >> roomX >> roomY >> x >> y >> speed >> health >> np;
-                patrolPoints.clear();
-                auto e = entityManager.addEntity("DYNAMIC", str);
-                e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(type), true);
-                for (int i = 0; i < np; ++i) {
-                    file >> pairX >> pairY;
-                    Vec2 global = getPosition(roomX, roomY, pairX, pairY);
-                    patrolPoints.push_back(gridToMidPixel(global.x, global.y, e));
-                }
-                float scaledX = gameEngine->getAssets().getAnimation(type).getScaledSize().x;
-                float scaledY = gameEngine->getAssets().getAnimation(type).getScaledSize().y;
-                float tileSizeX = gameEngine->getTileSizeX();
-                float tileSizeY = gameEngine->getTileSizeY();
-                float bboxSizeX = tileSizeX;
-                float bboxSizeY = tileSizeY;
-                if (scaledX > tileSizeX || scaledY > tileSizeY) {
-                    bboxSizeX = scaledX;
-                    bboxSizeY = scaledY;
-                }
-                e->addComponent<CBoundingBox>(Vec2(bboxSizeX, bboxSizeY));
-                Vec2 global = getPosition(roomX, roomY, x, y);
-                Vec2 pos = gridToMidPixel(global.x, global.y, e);
-                e->addComponent<CTransform>(Vec2(pos.x, pos.y), Vec2(0.0f, 0.0f), 0.0f);
-                e->getComponent<CTransform>().prevPosition.x = pos.x;
-                e->getComponent<CTransform>().prevPosition.y = pos.y;
-                e->addComponent<CPatrol>(patrolPoints, speed);
-                e->getComponent<CPatrol>().currentPosition = 0;
-                e->addComponent<CHealth>(health, health);
-                e->addComponent<CStats>();
-                e->addComponent<CName>("Tektite");
-                e->addComponent<CLoot>();
-				CLoot& loot = e->getComponent<CLoot>();
-                e->addComponent<CEffects>();
-                loot.exp = 10;
-				loot.gold = 5;
-                loot.itemDropChance = 1.0f;
-				loot.lootItem.first = "ITEM";
-				loot.lootItem.second = "SHEAL";
-                
-            }
-            else if (ai == "FOLLOW") {
-                file >> roomX >> roomY >> x >> y >> speed >> health;
-
-                auto e = entityManager.addEntity("DYNAMIC", str);
-                e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(type), true);
-                float scaledX = gameEngine->getAssets().getAnimation(type).getScaledSize().x;
-                float scaledY = gameEngine->getAssets().getAnimation(type).getScaledSize().y;
-                float tileSizeX = gameEngine->getTileSizeX();
-                float tileSizeY = gameEngine->getTileSizeY();
-                float bboxSizeX = tileSizeX;
-                float bboxSizeY = tileSizeY;
-                if (scaledX > tileSizeX || scaledY > tileSizeY) {
-                    bboxSizeX = scaledX;
-                    bboxSizeY = scaledY;
-                }
-                e->addComponent<CBoundingBox>(Vec2(bboxSizeX, bboxSizeY));
-                Vec2 global = getPosition(roomX, roomY, x, y);
-                Vec2 pos = gridToMidPixel(global.x, global.y, e);
-                e->addComponent<CTransform>(Vec2(pos.x, pos.y), Vec2(0.0f, 0.0f), 0.0f);
-                e->getComponent<CTransform>().prevPosition.x = pos.x;
-                e->getComponent<CTransform>().prevPosition.y = pos.y;
-                e->addComponent<CFollowPlayer>(Vec2(0.0f, 0.0f), speed);
-                e->addComponent<CHealth>(health, health);
-                e->addComponent<CStats>();
-                e->getComponent<CStats>().speed = 10;
-                e->addComponent<CName>("Leever");
-                e->addComponent<CEffects>();
-                CLoot& loot = e->getComponent<CLoot>();
-                loot.exp = 10;
-                loot.gold = 5;
-                loot.itemDropChance = 0.25f;
-                loot.lootItem.first = "ITEM";
-                loot.lootItem.second = "SHEAL";
-            }
-        }
-    }
 }
 
 /**
@@ -666,12 +531,22 @@ void ScenePlay::sCollision() {
                         message = "Found " + chest->getComponent<CItems>().items[0].name +"!";
                     }
                     else if (chest->hasComponent<CWeapons>()) {
+                        std::vector<WeaponSpec> weaponvec = player->getComponent<CWeapons>().weapons;
+                        WeaponSpec weapon = gameEngine->getAssets().getWeapon(chest->getComponent<CWeapons>().weapons[0].id);
+                        auto it = std::find_if(weaponvec.begin(), weaponvec.end(), [&](const WeaponSpec& w) {
+                            return w.id == weapon.id;
+                            });
+                        if (it == weaponvec.end()) {
+                            player->getComponent<CWeapons>().weapons.push_back(weapon);
+                            message = "Found " + chest->getComponent<CWeapons>().weapons[0].name + "!";
+                        }
+                        else {
+                            message = "Found (duplicate) " + chest->getComponent<CWeapons>().weapons[0].name + "!";
+                        }
                         chest->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("WEAPONCHESTOPEN");
                         gameEngine->playSound("GOTITEM");
                         chest->getComponent<CState>().state = "OPEN";
-						player->getComponent<CWeapons>().weapons.push_back(chest->getComponent<CWeapons>().weapons[0]);
                         showMessage = true;
-                        message = "Found " + chest->getComponent<CWeapons>().weapons[0].name + "!";
 					}
                 }
 
@@ -1164,7 +1039,10 @@ void ScenePlay::sGUI(){
                     for (int i = startIndex; i < endIndex; i++) {
                         const int row = i - startIndex;
                         const float textY = listY + row * rowHeight;
-                        const Color textColor = (i == selectedSubMenuItem) ? RED : BLACK;
+						Color textColor = BLACK;
+                        if (subControl) {
+                            textColor = (i == selectedSubMenuItem) ? RED : BLACK;
+                        }
 
                         DrawTextEx(
                             font,
@@ -1276,7 +1154,10 @@ void ScenePlay::sGUI(){
                     for (int i = startIndex; i < endIndex; i++) {
                         const int row = i - startIndex;
                         const float textY = listY + row * rowHeight;
-                        const Color textColor = (i == selectedSubMenuItem) ? RED : BLACK;
+                        Color textColor = BLACK;
+                        if (subControl) {
+                            textColor = (i == selectedSubMenuItem) ? RED : BLACK;
+                        }
 
                         DrawTextEx(
                             font,
@@ -1313,10 +1194,172 @@ void ScenePlay::sGUI(){
                         );
                     }
                 }
-                }
-            else if (selectedMenuItem == 3) {
+            }
+            // WEAPONS MENU
+            else if (subMenu == 3) {
+                const auto& weapons = player->getComponent<CWeapons>().weapons;
+                const auto& currentWeapon = player->getComponent<CWeapons>().currentWeapon;
 
-			}
+                const float sidebarWidth = 190.0f;
+                const float contentX = resultsX + sidebarWidth + 10.0f;
+                const float contentY = resultsY + 50.0f;
+                const float contentWidth = resultsWidth - sidebarWidth - 40.0f;
+
+                const float headerFontSize = 14.0f;
+                const float itemFontSize = 18.0f;
+                const float spacing = 1.0f;
+
+                const float descY = contentY;
+                const float listY = contentY + 40.0f;
+                const float rowHeight = 36.0f;
+                const int itemsPerPage = 5;
+
+                if (weapons.empty()) {
+                    selectTip = "No weapons";
+
+                    DrawTextEx(
+                        font,
+                        selectTip.c_str(),
+                        Vector2(contentX, descY),
+                        headerFontSize,
+                        spacing,
+                        BLACK
+                    );
+
+                    DrawTextEx(
+                        font,
+                        "No weapons",
+                        Vector2(contentX, listY),
+                        itemFontSize,
+                        spacing,
+                        BLACK
+                    );
+                }
+                else {
+                    if (selectedSubMenuItem >= weapons.size()) {
+                        selectedSubMenuItem = weapons.size() - 1;
+                    }
+
+                    selectTip = weapons[selectedSubMenuItem].description;
+
+                    DrawTextEx(
+                        font,
+                        selectTip.c_str(),
+                        Vector2(contentX, descY),
+                        headerFontSize,
+                        spacing,
+                        BLACK
+                    );
+
+                    const int startIndex = (selectedSubMenuItem / itemsPerPage) * itemsPerPage;
+                    int endIndex = startIndex + itemsPerPage;
+                    if (endIndex > weapons.size()) {
+                        endIndex = weapons.size();
+                    }
+
+                    for (int i = startIndex; i < endIndex; i++) {
+                        const int row = i - startIndex;
+                        const float textY = listY + row * rowHeight;
+                        Color textColor = BLACK;
+                        if (subControl) {
+                            textColor = (i == selectedSubMenuItem) ? RED : BLACK;
+                        }
+
+                        const bool equipped = (weapons[i].id == currentWeapon.id);
+
+                        if (equipped) {
+                            DrawTextEx(
+                                font,
+                                "E",
+                                Vector2(contentX, textY),
+                                itemFontSize,
+                                spacing,
+                                textColor
+                            );
+                        }
+
+                        DrawTextEx(
+                            font,
+                            weapons[i].name.c_str(),
+                            Vector2(contentX + 22.0f, textY),
+                            itemFontSize,
+                            spacing,
+                            textColor
+                        );
+
+                        std::string statText = std::to_string(weapons[i].damage) + "  " + weapons[i].effect.id;
+                        Vector2 statSize = MeasureTextEx(font, statText.c_str(), itemFontSize, spacing);
+                        const float statX = contentX + contentWidth - statSize.x - 10.0f;
+
+                        DrawTextEx(
+                            font,
+                            statText.c_str(),
+                            Vector2(statX, textY),
+                            itemFontSize,
+                            spacing,
+                            textColor
+                        );
+                    }
+
+                    if (startIndex + itemsPerPage < weapons.size()) {
+                        const float arrowX = contentX + (contentWidth - static_cast<float>(arrow.width)) / 2.0f;
+                        const float arrowY = listY + itemsPerPage * rowHeight;
+
+                        DrawTexture(
+                            arrow,
+                            static_cast<int>(arrowX),
+                            static_cast<int>(arrowY),
+                            WHITE
+                        );
+                    }
+                }
+            }
+            else if (subMenu == 4) {
+                if (subControl) {
+                    const float sidebarWidth = 190.0f;
+                    const float contentX = resultsX + sidebarWidth + 20.0f;
+                    const float contentY = resultsY + 55.0f;
+
+                    const float titleFontSize = 28.0f;
+                    const float optionFontSize = 24.0f;
+                    const float spacing = 2.0f;
+                    const float optionY = contentY + 55.0f;
+                    const float optionGap = 40.0f;
+
+                    DrawTextEx(
+                        font,
+                        "End Run?",
+                        Vector2(contentX, contentY),
+                        titleFontSize,
+                        spacing,
+                        BLACK
+                    );
+
+                    Color yesColor = BLACK;
+                    Color noColor = BLACK;
+
+                    yesColor = (selectedSubMenuItem == 0) ? RED : BLACK;
+                    noColor = (selectedSubMenuItem == 1) ? RED : BLACK;
+
+                    DrawTextEx(
+                        font,
+                        "YES",
+                        Vector2(contentX + 10.0f, optionY),
+                        optionFontSize,
+                        spacing,
+                        yesColor
+                    );
+
+                    DrawTextEx(
+                        font,
+                        "NO",
+                        Vector2(contentX + 10.0f, optionY + optionGap),
+                        optionFontSize,
+                        spacing,
+                        noColor
+                    );
+                }
+            }
 
         }
 }
@@ -1378,12 +1421,6 @@ void ScenePlay::sDoAction(const Action& action) {
         if (action.getName() == "VISION") {
             renderVisionDebug = !renderVisionDebug;
         }
-        if (action.getName() == "QUIT") {
-            gameEngine->changeScene("MENU", std::make_shared<SceneMenu>(gameEngine));
-        }
-        if (action.getName() == "RELOAD") {
-            reload = true;
-        }
 
         // Standard player control
 
@@ -1427,12 +1464,15 @@ void ScenePlay::sDoAction(const Action& action) {
                 gameEngine->playSound("BACK");
                 selectedMenuItem = 0;
                 selectedSubMenuItem = 0;
+                subMenu = 0;
 			}
             if (action.getName() == "UP") {
                 selectedMenuItem--;
+				subMenu = selectedMenuItem;
 				gameEngine->playSound("MENUSELECT");
                 if (selectedMenuItem < 0) {
                     selectedMenuItem = menuStrings.size() - 1;
+					subMenu = selectedMenuItem;
                 }
             }
             if (action.getName() == "INTERACT") {
@@ -1450,9 +1490,11 @@ void ScenePlay::sDoAction(const Action& action) {
 			}
             if (action.getName() == "DOWN") {
                 selectedMenuItem++;
+				subMenu = selectedMenuItem;
                 gameEngine->playSound("MENUSELECT");
                 if (selectedMenuItem >= menuStrings.size()) {
                     selectedMenuItem = 0;
+					subMenu = selectedMenuItem;
                 }
             }
         }
@@ -1471,6 +1513,7 @@ void ScenePlay::sDoAction(const Action& action) {
                 gameEngine->playSound("BACK");
                 selectedMenuItem = 0;
                 selectedSubMenuItem = 0;
+                subMenu = 0;
             }
 
 			// Sub menu item selection
@@ -1553,6 +1596,66 @@ void ScenePlay::sDoAction(const Action& action) {
                     }
                 }
             }
+
+            // Sub menu weapon selection
+            if (subMenu == 3) {
+                const auto& weapons = player->getComponent<CWeapons>().weapons;
+
+                if (action.getName() == "UP") {
+                    selectedSubMenuItem--;
+                    gameEngine->playSound("MENUSELECT");
+                    if (selectedSubMenuItem < 0) {
+                        selectedSubMenuItem = 0;
+                    }
+                }
+
+                if (action.getName() == "DOWN") {
+                    selectedSubMenuItem++;
+                    gameEngine->playSound("MENUSELECT");
+                    if (selectedSubMenuItem >= weapons.size()) {
+                        selectedSubMenuItem = weapons.size() - 1;
+                    }
+                }
+
+                if (action.getName() == "INTERACT") {
+                    if (!weapons.empty() && selectedSubMenuItem < weapons.size()) {
+                        gameEngine->playSound("MENUSELECT");
+                        equipWeapon(selectedSubMenuItem);
+                    }
+                }
+            }
+
+            // Sub menu quit selection
+            if (subMenu == 4) {
+                if (action.getName() == "UP") {
+                    selectedSubMenuItem--;
+                    gameEngine->playSound("MENUSELECT");
+                    if (selectedSubMenuItem < 0) {
+                        selectedSubMenuItem = 0;
+                    }
+                }
+
+                if (action.getName() == "DOWN") {
+                    selectedSubMenuItem++;
+                    gameEngine->playSound("MENUSELECT");
+                    if (selectedSubMenuItem > 1) {
+                        selectedSubMenuItem = 1;
+                    }
+                }
+
+                if (action.getName() == "INTERACT") {
+                    gameEngine->playSound("MENUSELECT");
+
+                    if (selectedSubMenuItem == 0) {
+                        gameEngine->changeScene("MENU", std::make_shared<SceneMenu>(gameEngine));
+                    }
+                    else {
+                        subControl = false;
+                        subMenu = selectedMenuItem;
+                        selectedSubMenuItem = 0;
+                    }
+                }
+            }
         }
     }
 
@@ -1632,6 +1735,10 @@ void ScenePlay::spawnPlayer(){
     player->addComponent<CWeapons>();
     player->getComponent<CWeapons>().weapons.push_back(gameEngine->getAssets().getWeapon("ANCIENTBLADE"));
 	player->getComponent<CWeapons>().currentWeapon = player->getComponent<CWeapons>().weapons[0];
+
+	CWeapons& weps = player->getComponent<CWeapons>();
+    weps.weapons.push_back(gameEngine->getAssets().getWeapon("IRONMACE"));
+    weps.weapons.push_back(gameEngine->getAssets().getWeapon("SABRE"));
     
     // Add stats
 
@@ -1713,6 +1820,25 @@ void ScenePlay::spawnSword() {
         transf.prevPosition.y = py;
         transf.angle = 270.0f;
     }
+}
+
+void ScenePlay::equipWeapon(int index) {
+    CWeapons& equipment = player->getComponent<CWeapons>();
+
+    if (index < 0 || index >= equipment.weapons.size()) {
+        gameEngine->playSound("NODAMAGE");
+        return;
+    }
+    if (equipment.weapons[index].id == equipment.currentWeapon.id) {
+        gameEngine->playSound("NODAMAGE");
+        return;
+	}
+
+    WeaponSpec selected = equipment.weapons[index];
+    equipment.weapons.erase(equipment.weapons.begin() + index);
+    equipment.weapons.insert(equipment.weapons.begin(), selected);
+    equipment.currentWeapon = equipment.weapons[0];
+    selectedSubMenuItem = 0;
 }
 
 void ScenePlay::useItem(const ItemSpec& item) {
@@ -1835,13 +1961,6 @@ void ScenePlay::teleport(std::shared_ptr<Entity> e) {
 }
 
 /**
- * Reloads this play scene
- */
-void ScenePlay::reloadScene(){
-    gameEngine->changeScene("PLAY",std::make_shared<ScenePlay>(gameEngine, levelPath));
-}
-
-/**
  * Gets the world position from room x,y and tile x,y
  * @param rx room x
  * @param ry room y
@@ -1940,9 +2059,5 @@ void ScenePlay::update(){
     sMusic();
     sCamera();
     sRender();
-
-    if(reload==true){
-        reloadScene();
-    }
     
 }

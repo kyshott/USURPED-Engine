@@ -128,6 +128,19 @@
                  "width":0,
                  "x":280,
                  "y":40
+                }, 
+                {
+                 "height":0,
+                 "id":16,
+                 "name":"WEAPONCHEST",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"CHEST",
+                 "visible":true,
+                 "width":0,
+                 "x":56,
+                 "y":24
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -136,7 +149,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":16,
+ "nextobjectid":17,
  "orientation":"orthogonal",
  "renderorder":"left-up",
  "tiledversion":"1.12.2",

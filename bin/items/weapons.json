@@ -11,7 +11,7 @@
             "type": "DAMAGE",
             "magnitude": 1
         },
-        "description": "Your old blade - Once imbued with dark sorcery, now powerless.",
+        "description": "Your old blade, now rusted.",
         "rarity": 0
     },
     "IRONMACE": {
@@ -26,7 +26,7 @@
             "type": "DAMAGE",
             "magnitude": 1
         },
-        "description": "A blunt weapon that will crush enemies in their armor.",
+        "description": "A reliable blunt weapon.",
         "rarity": 1
     },
     "IRONBLADE": {
@@ -41,7 +41,7 @@
             "type": "DAMAGE",
             "magnitude": 1
         },
-        "description": "A sharpened blade, notable for its versatility.",
+        "description": "A versatile yet common blade.",
         "rarity": 1
     },
     "SABRE": {
@@ -56,7 +56,7 @@
             "type": "DAMAGE",
             "magnitude": 1
         },
-        "description": "A curved blade used by the empire's officers.",
+        "description": "A curved and elegant blade.",
         "rarity": 2
     },
     "RITUALDAGGER": {
@@ -71,7 +71,7 @@
             "type": "DAMAGE",
             "magnitude": 1
         },
-        "description": "A dagger once used by your minions for dark rituals.",
+        "description": "Used in rituals summoning you.",
         "rarity": 2
     }
 }
