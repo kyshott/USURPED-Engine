@@ -11,8 +11,11 @@ class SceneMenu : public Scene{
     std::string title;                    /* Scene name */
     std::vector<std::string> menuStrings; /* List of menu strings that are drawn to the screen */
     std::vector<std::string> levelPaths;  /* List of relative paths to level definition files */
-    std::string menuText;                 /* Other menu text */
     int selectedMenuItem=0;               /* Currently selected menu item */
+
+    const Texture2D& bg = gameEngine->getAssets().getTexture("TITLE");
+    const Texture2D& menuBox = gameEngine->getAssets().getTexture("MENUBOX");
+    const Font& font = gameEngine->getAssets().getFont("alagard");
 
     void init();
     void sRender() override;

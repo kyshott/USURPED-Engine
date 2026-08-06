@@ -47,6 +47,8 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
         int selectedSubMenuItem = 0;
         std::vector<std::string> menuStrings;
 		std::string selectTip = "";
+        std::vector<ItemSpec> inventoryMenuItems;
+        std::vector<int> inventoryMenuCounts;
 
         void init(const std::string& levelPath);
         void sAnimation();
@@ -58,7 +60,6 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
         void sDoAction(const Action& action);
         void sCamera();
         void spawnPlayer();
-        void spawnSword();
         void interact();
         void useItem(const ItemSpec& item);
 		void useMagic(const MagicSpec& magic);
@@ -68,6 +69,8 @@ class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
         void renderTiledMap(const std::string& levelPath);
         void buildTiledMap(const std::string& levelPath);
         std::string selectLoot(std::string type);
+        void buildInventoryMenu();
+        void refreshInventoryMenuCounts();
         Vec2 getPosition(int rx, int ry, int tx, int ty);
 		Vec2 mouseToWorld(Vec2 windowPos);
         void renderAIDebug();

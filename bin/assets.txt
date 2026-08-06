@@ -2,6 +2,7 @@ Font orbitron ./assets/fonts/Orbitron.ttf
 Font alagard ./assets/fonts/alagard.ttf
 Texture Tiles ./assets/tilemaps/FLOOR1.png
 
+Texture TITLE ./assets/textures/Title.png
 Texture OLPORTRAIT ./assets/textures/OLPORTRAIT.png
 Texture MENUBOX ./assets/textures/MENUBOX.png
 Texture INVBOX ./assets/textures/InvBox.png

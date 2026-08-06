@@ -11,13 +11,12 @@ SceneMenu::SceneMenu(GameEngine* gameEngine) : Scene(gameEngine){
  * Initializes actions and sets strings for level paths and menu items
  */
 void SceneMenu::init(){
-    title="Idk";
-    menuStrings.push_back("Level 1");
-    menuStrings.push_back("Test Room");
-    menuStrings.push_back("Level 3");
-    menuText = "Up: W      Down: S      Play: Space      ESC: Quit";
+    title="USURPED!";
+    menuStrings.push_back("START");
+    menuStrings.push_back("TEST ROOM");
+    menuStrings.push_back("QUIT");
 
-    levelPaths.push_back("assets/maps/TestRoom.tmj");
+    levelPaths.push_back("assets/TestRoom.tmj");
     levelPaths.push_back("level2.txt");
     levelPaths.push_back("level3.txt");
 
@@ -38,17 +37,25 @@ void SceneMenu::sRender(){
 
         ClearBackground(Color(252,216,168,255));
 
+        DrawTexturePro(
+            bg,
+            Rectangle{ 0.0f, 0.0f, static_cast<float>(bg.width), static_cast<float>(bg.height) },
+            Rectangle{ 0.0f, 0.0f, static_cast<float>(gameEngine->getWidth()), static_cast<float>(gameEngine->getHeight()) },
+            Vector2{ 0.0f, 0.0f },
+            0.0f,
+            WHITE
+        );
+
         //********** Raylib Drawing Content **********
-        const Font& font = gameEngine->getAssets().getFont("orbitron");
         for (int i=0;i<menuStrings.size();i++) {
             Color textColor=BLACK;
             if(i==selectedMenuItem){
                 textColor=RED;
             }
-            DrawTextEx(font, menuStrings[i].c_str(), Vector2(50,75*(i+2)), 48, 1, textColor);
+            DrawTextEx(font, menuStrings[i].c_str(), Vector2(600,120*(i + 2.5)), 50, 1, textColor);
         }
-        DrawTextEx(font, menuText.c_str(), Vector2(50,730), 32, 1, BLACK);
-        DrawTextEx(font, title.c_str(), Vector2(50,50), 64, 1, BLACK);
+        DrawTextEx(font, title.c_str(), Vector2(500,60), 150, 1, GOLD);
+        DrawTextEx(font, std::string("Demo").c_str(), Vector2(1100, 175), 30, 1, WHITE);
 
     EndDrawing();
 }
@@ -61,15 +68,27 @@ void SceneMenu::sRender(){
 void SceneMenu::sDoAction(const Action& action){
     if((action.getType()=="PRESS")){
         if(action.getName()=="UP"){
+            gameEngine->playSound("MENUSELECT");
             selectedMenuItem--;
             if(selectedMenuItem<0) selectedMenuItem=menuStrings.size()-1;
         }
         if(action.getName()=="DOWN"){
+            gameEngine->playSound("MENUSELECT");
             selectedMenuItem++;
             if(selectedMenuItem>menuStrings.size()-1) selectedMenuItem=0;
         }
         if(action.getName()=="PLAY"){
-            gameEngine->changeScene("PLAY", std::make_shared<ScenePlay>(gameEngine, levelPaths[selectedMenuItem], true, 1));
+            gameEngine->playSound("MENUSELECT");
+            if (selectedMenuItem == 0) {
+                // random map selection logic
+                gameEngine->changeScene("PLAY", std::make_shared<ScenePlay>(gameEngine, levelPaths[selectedMenuItem], true, 1));
+            }
+            else if (selectedMenuItem == 1) {
+                gameEngine->changeScene("PLAY", std::make_shared<ScenePlay>(gameEngine, levelPaths[selectedMenuItem], true, 1));
+            }
+            else if (selectedMenuItem == 2) {
+                gameEngine->quit();
+			}
         }
         if(action.getName()=="QUIT"){
             gameEngine->quit();

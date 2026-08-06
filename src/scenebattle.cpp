@@ -1343,23 +1343,23 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 		if (defender->hasComponent<CWeaknesses>()) {
 			std::vector<std::string>& weaknesses = defender->getComponent<CWeaknesses>().weaknesses;
 			if (std::find(weaknesses.begin(), weaknesses.end(), pWeapon.effect.id) != weaknesses.end()) {
-				multiplier = 1.25f;
+				multiplier = 1.5f;
 			}
 		}
 		if (defender->hasComponent<CResistances>()) {
 			std::vector<std::string>& resistances = defender->getComponent<CResistances>().resistances;
 			if (std::find(resistances.begin(), resistances.end(), pWeapon.effect.id) != resistances.end()) {
-				multiplier = 0.75f;
+				multiplier = 0.5f;
 			}
 		}
 
 		float total = 0.0f;
 
-		if ((pWeapon.damage + attacker->getComponent<CStats>().strength * multiplier - defender->getComponent<CStats>().defense) * multiplier <= 0) {
+		if (((pWeapon.damage + attacker->getComponent<CStats>().strength) * multiplier) - defender->getComponent<CStats>().defense <= 0) {
 			total = 0.0f;
 		}
 		else {
-			total = (pWeapon.damage + attacker->getComponent<CStats>().strength - defender->getComponent<CStats>().defense) * multiplier;
+			total = ((pWeapon.damage + attacker->getComponent<CStats>().strength) * multiplier) - defender->getComponent<CStats>().defense;
 		}
 
 		if (total <= 0) {
@@ -1389,19 +1389,19 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 		std::vector<std::string>& resistances = defender->getComponent<CResistances>().resistances;
 
 		if (std::find(weaknesses.begin(), weaknesses.end(), type) != weaknesses.end()) {
-			multiplier = 1.25f;
+			multiplier = 1.5f;
 		}
 		else if (std::find(resistances.begin(), resistances.end(), type) != resistances.end()) {
-			multiplier = 0.75f;
+			multiplier = 0.5f;
 		}
 
 		float total = 0.0f;
 
-		if ((attacker->getComponent<CStats>().strength - defender->getComponent<CStats>().defense) * multiplier <= 0) {
+		if ((attacker->getComponent<CStats>().strength * multiplier) - defender->getComponent<CStats>().defense <= 0) {
 			total = 0.0f;
 		}
 		else {
-			total = (attacker->getComponent<CStats>().strength - defender->getComponent<CStats>().defense) * multiplier;
+			total = (attacker->getComponent<CStats>().strength * multiplier) - defender->getComponent<CStats>().defense;
 		}	
 
 		if (total <= 0) {

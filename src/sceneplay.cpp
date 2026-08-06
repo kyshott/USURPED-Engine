@@ -46,6 +46,7 @@ void ScenePlay::init(const std::string& levelPath){
     if (first) {
         spawnPlayer();
     }
+	buildInventoryMenu();
 
     menuStrings.push_back("STATUS");
     menuStrings.push_back("ITEMS");
@@ -957,26 +958,6 @@ void ScenePlay::sGUI(){
 
             // ITEMS MENU
             else if (subMenu == 1) {
-                std::vector<ItemSpec> uniqueItems;
-                std::vector<int> itemCounts;
-                const auto& inventoryItems = player->getComponent<CItems>().items;
-
-                for (const auto& item : inventoryItems) {
-                    bool found = false;
-                    for (int i = 0; i < uniqueItems.size(); i++) {
-                        if (uniqueItems[i].id == item.id) {
-                            itemCounts[i]++;
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found) {
-                        uniqueItems.push_back(item);
-                        itemCounts.push_back(1);
-                    }
-                }
-
                 const float sidebarWidth = 190.0f;
                 const float contentX = resultsX + sidebarWidth + 12.0f;
                 const float contentY = resultsY + 20.0f;
@@ -991,19 +972,7 @@ void ScenePlay::sGUI(){
                 const float rowHeight = 55.0f;
                 const int itemsPerPage = 5;
 
-                if (uniqueItems.empty()) {
-                    /*
-                    selectTip = "No items!";
-
-                    DrawTextEx(
-                        font,
-                        selectTip.c_str(),
-                        Vector2(contentX, descY),
-                        descFontSize,
-                        spacing,
-                        BLACK
-                    );
-                    */
+                if (inventoryMenuItems.empty()) {
                     DrawTextEx(
                         font,
                         "No items!",
@@ -1012,14 +981,13 @@ void ScenePlay::sGUI(){
                         spacing,
                         BLACK
                     );
-                    
                 }
                 else {
-                    if (selectedSubMenuItem >= uniqueItems.size()) {
-                        selectedSubMenuItem = uniqueItems.size() - 1;
+                    if (selectedSubMenuItem >= inventoryMenuItems.size()) {
+                        selectedSubMenuItem = inventoryMenuItems.size() - 1;
                     }
 
-                    selectTip = uniqueItems[selectedSubMenuItem].description;
+                    selectTip = inventoryMenuItems[selectedSubMenuItem].description;
 
                     DrawTextEx(
                         font,
@@ -1032,28 +1000,28 @@ void ScenePlay::sGUI(){
 
                     const int startIndex = (selectedSubMenuItem / itemsPerPage) * itemsPerPage;
                     int endIndex = startIndex + itemsPerPage;
-                    if (endIndex > uniqueItems.size()) {
-                        endIndex = uniqueItems.size();
+                    if (endIndex > inventoryMenuItems.size()) {
+                        endIndex = inventoryMenuItems.size();
                     }
 
                     for (int i = startIndex; i < endIndex; i++) {
                         const int row = i - startIndex;
                         const float textY = listY + row * rowHeight;
-						Color textColor = BLACK;
+                        Color textColor = BLACK;
                         if (subControl) {
                             textColor = (i == selectedSubMenuItem) ? RED : BLACK;
                         }
 
                         DrawTextEx(
                             font,
-                            uniqueItems[i].name.c_str(),
+                            inventoryMenuItems[i].name.c_str(),
                             Vector2(contentX, textY),
                             itemFontSize,
                             spacing,
                             textColor
                         );
 
-                        std::string countText = std::to_string(itemCounts[i]);
+                        std::string countText = std::to_string(inventoryMenuCounts[i]);
                         Vector2 countSize = MeasureTextEx(font, countText.c_str(), itemFontSize, spacing);
                         const float countX = contentX + contentWidth - countSize.x - 10.0f;
 
@@ -1067,7 +1035,7 @@ void ScenePlay::sGUI(){
                         );
                     }
 
-                    if (startIndex + itemsPerPage < uniqueItems.size()) {
+                    if (startIndex + itemsPerPage < inventoryMenuItems.size()) {
                         const float arrowX = contentX + (contentWidth - static_cast<float>(arrow.width)) / 2.0f;
                         const float arrowY = listY + itemsPerPage * rowHeight;
 
@@ -1480,8 +1448,13 @@ void ScenePlay::sDoAction(const Action& action) {
                 subMenu = selectedMenuItem;
                 if (selectedMenuItem != 0) {
                     subControl = true;
+                    selectedSubMenuItem = 0;
+
+                    if (selectedMenuItem == 1) {
+                        buildInventoryMenu();
+                    }
                 }
-			}
+            }
             if (action.getName() == "BACK") {
                 inventory = false;
                 gameEngine->playSound("BACK");
@@ -1525,47 +1498,21 @@ void ScenePlay::sDoAction(const Action& action) {
                         selectedSubMenuItem = 0;
                     }
                 }
+
                 if (action.getName() == "DOWN") {
                     selectedSubMenuItem++;
-					gameEngine->playSound("MENUSELECT");
-                    const auto& inventoryItems = player->getComponent<CItems>().items;
-                    std::vector<ItemSpec> uniqueItems;
-                    for (const auto& item : inventoryItems) {
-                        bool found = false;
-                        for (const auto& uniqueItem : uniqueItems) {
-                            if (uniqueItem.id == item.id) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            uniqueItems.push_back(item);
-                        }
-                    }
-                    if (selectedSubMenuItem >= uniqueItems.size()) {
-                        selectedSubMenuItem = uniqueItems.size() - 1;
+                    gameEngine->playSound("MENUSELECT");
+                    if (selectedSubMenuItem >= inventoryMenuItems.size()) {
+                        selectedSubMenuItem = inventoryMenuItems.empty() ? 0 : inventoryMenuItems.size() - 1;
                     }
                 }
 
                 if (action.getName() == "INTERACT") {
-                    const auto& inventoryItems = player->getComponent<CItems>().items;
-                    std::vector<ItemSpec> uniqueItems;
-                    for (const auto& item : inventoryItems) {
-                        bool found = false;
-                        for (const auto& uniqueItem : uniqueItems) {
-                            if (uniqueItem.id == item.id) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            uniqueItems.push_back(item);
-                        }
-                    }
-                    if (!uniqueItems.empty() && selectedSubMenuItem < uniqueItems.size()) {
-                        const ItemSpec& selectedItem = uniqueItems[selectedSubMenuItem];
+                    if (!inventoryMenuItems.empty() && selectedSubMenuItem < inventoryMenuItems.size()) {
+                        const ItemSpec selectedItem = inventoryMenuItems[selectedSubMenuItem];
                         gameEngine->playSound("MENUSELECT");
                         useItem(selectedItem);
+                        refreshInventoryMenuCounts();
                     }
                 }
             }
@@ -1648,6 +1595,7 @@ void ScenePlay::sDoAction(const Action& action) {
 
                     if (selectedSubMenuItem == 0) {
                         gameEngine->changeScene("MENU", std::make_shared<SceneMenu>(gameEngine));
+                        UnloadRenderTexture(mapTexture);
                     }
                     else {
                         subControl = false;
@@ -1768,57 +1716,63 @@ void ScenePlay::spawnPlayer(){
     player->addComponent<CStats>();
 }
 
-/**
- * Spawns a sword at the player's location
- */
-void ScenePlay::spawnSword() {
-    gameEngine->playSound("LINKSWING");
-    gameEngine->playSound("LINKYELP");
-    auto e = entityManager.addEntity("DYNAMIC", "SWORD");
-    e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation("SWORD"), true);
-    e->addComponent<CLifespan>(10);
-    e->getComponent<CLifespan>().remaining = 10;
-    //e->addComponent<CDamage>(1);
-    e->addComponent<CState>("NOHIT");
-    float bboxSizeX = gameEngine->getAssets().getAnimation("SWORD").getScaledSize().x;
-    float bboxSizeY = gameEngine->getAssets().getAnimation("SWORD").getScaledSize().y;
+void ScenePlay::buildInventoryMenu() {
+    inventoryMenuItems.clear();
+    inventoryMenuCounts.clear();
 
-    CTransform& ptsf = player->getComponent<CTransform>();
-    float px = ptsf.position.x;
-    float py = ptsf.position.y;
-    e->addComponent<CTransform>();
-    CTransform& transf = e->getComponent<CTransform>();
-    if (ptsf.facing.y == 1) {
-        e->addComponent<CBoundingBox>(Vec2(bboxSizeX, bboxSizeY));
-        transf.position.x = px;
-        transf.prevPosition.x = px;
-        transf.position.y = py - gameEngine->getTileSizeY();
-        transf.prevPosition.y = py - gameEngine->getTileSizeY();
-        transf.angle = 0.0f;
+    const auto& inventoryItems = player->getComponent<CItems>().items;
+
+    for (const auto& item : inventoryItems) {
+        bool found = false;
+
+        for (int i = 0; i < inventoryMenuItems.size(); i++) {
+            if (inventoryMenuItems[i].id == item.id) {
+                inventoryMenuCounts[i]++;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            inventoryMenuItems.push_back(item);
+            inventoryMenuCounts.push_back(1);
+        }
     }
-    else if (ptsf.facing.y == -1) {
-        e->addComponent<CBoundingBox>(Vec2(bboxSizeX, bboxSizeY));
-        transf.position.x = px;
-        transf.prevPosition.x = px;
-        transf.position.y = py + gameEngine->getTileSizeY() - 4;
-        transf.prevPosition.y = py + gameEngine->getTileSizeY();
-        transf.angle = 180.0f;
+
+    if (selectedSubMenuItem >= inventoryMenuItems.size()) {
+        selectedSubMenuItem = inventoryMenuItems.empty() ? 0 : inventoryMenuItems.size() - 1;
     }
-    else if (ptsf.facing.x == 1) {
-        e->addComponent<CBoundingBox>(Vec2(bboxSizeY, bboxSizeX));
-        transf.position.x = px + gameEngine->getTileSizeX() - 4;
-        transf.prevPosition.x = px + gameEngine->getTileSizeX() - 4;
-        transf.position.y = py;
-        transf.prevPosition.y = py;
-        transf.angle = 90.0f;
-    }
-    else if (ptsf.facing.x == -1) {
-        e->addComponent<CBoundingBox>(Vec2(bboxSizeY, bboxSizeX));
-        transf.position.x = px - gameEngine->getTileSizeX() + 4;
-        transf.prevPosition.x = px - gameEngine->getTileSizeX() + 4;
-        transf.position.y = py;
-        transf.prevPosition.y = py;
-        transf.angle = 270.0f;
+}
+
+void ScenePlay::refreshInventoryMenuCounts() {
+    const auto& inventoryItems = player->getComponent<CItems>().items;
+
+    for (int i = static_cast<int>(inventoryMenuItems.size()) - 1; i >= 0; i--) {
+        int count = 0;
+
+        for (const auto& item : inventoryItems) {
+            if (item.id == inventoryMenuItems[i].id) {
+                count++;
+            }
+        }
+
+        if (count == 0) {
+            inventoryMenuItems.erase(inventoryMenuItems.begin() + i);
+            inventoryMenuCounts.erase(inventoryMenuCounts.begin() + i);
+
+            if (selectedSubMenuItem > i) {
+                selectedSubMenuItem--;
+            }
+            else if (selectedSubMenuItem >= inventoryMenuItems.size() && !inventoryMenuItems.empty()) {
+                selectedSubMenuItem = inventoryMenuItems.size() - 1;
+            }
+            else if (inventoryMenuItems.empty()) {
+                selectedSubMenuItem = 0;
+            }
+        }
+        else {
+            inventoryMenuCounts[i] = count;
+        }
     }
 }
 
@@ -1973,6 +1927,7 @@ Vec2 ScenePlay::getPosition(int rx, int ry, int tx, int ty) {
     int h = gameEngine->getTilesY();
     return Vec2(rx * w + tx, ry * h + ty);
 }
+
 
 /*
 * Selects a random loot item of the specified type and rarity (according to the player's stage) from the game's assets.
