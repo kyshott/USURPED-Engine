@@ -58,6 +58,7 @@ class Assets{
         void addSound(const std::string& name, const std::string& path);
         void addMusic(const std::string& name, const std::string& path);
 
+        std::string getRandomMap() const;
         WeaponSpec getWeapon(std::string name) const;
         ItemSpec getItem(std::string name) const;
         MagicSpec getMagic(std::string name) const;

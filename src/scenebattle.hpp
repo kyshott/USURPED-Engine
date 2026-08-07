@@ -14,6 +14,7 @@ enum class BattleState {
 	VICTORY,
 	DEFEAT,
 	RESULTS,
+	GAMEOVER
 };
 
 struct DamageNumber {

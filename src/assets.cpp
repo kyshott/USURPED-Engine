@@ -6,6 +6,7 @@
 #include "animation.hpp"
 #include "json.hpp"
 #include "entity.hpp"
+#include <random>
 
 using nlohmann::json;
 
@@ -362,4 +363,27 @@ std::shared_ptr<Entity> Assets::getEnemy(std::string name, std::shared_ptr<Entit
     }
 
     return e;
+}
+
+std::string Assets::getRandomMap() const {
+    std::vector<std::string> mapPaths;
+    const std::filesystem::path mapsDir = "./assets/maps";
+
+    if (std::filesystem::exists(mapsDir) && std::filesystem::is_directory(mapsDir)) {
+        for (const auto& entry : std::filesystem::directory_iterator(mapsDir)) {
+            if (entry.is_regular_file() && entry.path().extension() == ".tmj") {
+                mapPaths.push_back(entry.path().generic_string());
+            }
+        }
+    }
+
+    if (mapPaths.empty()) {
+        return "assets/TestRoom.tmj";
+    }
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<size_t> dist(0, mapPaths.size() - 1);
+
+    return mapPaths[dist(gen)];
 }

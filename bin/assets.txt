@@ -25,6 +25,7 @@ Texture OLUSED ./assets/textures/OLUSED.png
 Texture OLUSEU ./assets/textures/OLUSEU.png
 Texture OLUSER ./assets/textures/OLUSER.png
 Texture BATTLEROOM ./assets/textures/BATTLEROOM1.png
+Texture GAMEOVER ./assets/textures/GAMEOVER.png
 Texture ENTRANCE ./assets/textures/ENTRANCE.png
 Texture CHEST ./assets/textures/CHEST.png
 Texture CHESTOPEN ./assets/textures/CHESTOPEN.png

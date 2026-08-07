@@ -1,5 +1,6 @@
 #include "scenebattle.hpp"
 #include "sceneplay.hpp"
+#include "scenegameover.hpp"
 
 SceneBattle::SceneBattle(GameEngine* gameEngine, std::shared_ptr<Entity> player, std::shared_ptr<Entity> enemy, std::shared_ptr<ScenePlay> previousScene) : Scene(gameEngine) {
 	this->player = player;
@@ -29,7 +30,7 @@ void SceneBattle::init() {
 	registerAction(KEY_ESCAPE, "QUIT");
 	registerAction(KEY_BACKSPACE, "BACK");
 	gameEngine->stopMusic("TITLEMUSIC");
-	//gameEngine->playMusic("BATTLEMUSIC");
+	gameEngine->playMusic("BATTLEMUSIC");
 	player->getComponent<CAnimation>().animation = gameEngine->getAssets().getAnimation("OLSTANDU");
 	playername = player->getComponent<CName>().name;
 	enemyname = enemy->getComponent<CName>().name;
@@ -70,11 +71,22 @@ void SceneBattle::sBattle() {
 		break;
 
 	case BattleState::VICTORY:
+		gameEngine->stopMusic("BATTLEMUSIC");
 		victoryState();
 		break;
 
 	case BattleState::RESULTS:
 		resultsState();
+		break;
+
+	case BattleState::DEFEAT:
+		gameEngine->stopMusic("BATTLEMUSIC");
+		waitTimer = battlespeed;
+		battleState = BattleState::GAMEOVER;
+		break;
+
+	case BattleState::GAMEOVER:
+		gameEngine->changeScene("GAMEOVER", std::make_shared<SceneGameOver>(gameEngine, player));
 		break;
 	}
 }
@@ -305,8 +317,14 @@ void SceneBattle::sStatusEffects() {
 	}
 
 	if (player->getComponent<CHealth>().current <= 0) {
-		battleState = BattleState::DEFEAT;
-		waitTimer = 200;
+		if (player->getComponent<CHealth>().current < 0) {
+			player->getComponent<CHealth>().current = 0;
+		}
+		player->addComponent<CLifespan>(45);
+		player->getComponent<CLifespan>().remaining = 45;
+		gameEngine->stopMusic("BATTLEMUSIC");
+		gameEngine->playSound("ENEMYDIE");
+		queueMessage(playername + " is defeated!", BattleState::DEFEAT);
 		return;
 	}
 
@@ -473,8 +491,15 @@ void SceneBattle::enemyAct() {
 		applyDamage(enemy, player);
 
 		if (player->getComponent<CHealth>().current <= 0) {
-			battleState = BattleState::DEFEAT;
-			waitTimer = 200;
+			if (player->getComponent<CHealth>().current < 0) {
+				player->getComponent<CHealth>().current = 0;
+			}
+			player->addComponent<CLifespan>(45);
+			player->getComponent<CLifespan>().remaining = 45;
+			gameEngine->stopMusic("BATTLEMUSIC");
+			gameEngine->playSound("ENEMYDIE");
+			queueMessage(playername + " is defeated!", BattleState::DEFEAT);
+			return;
 		}
 
 		enemyAction = "";
@@ -482,13 +507,15 @@ void SceneBattle::enemyAct() {
 	else if (enemyAction == "MAGIC") {
 		applyMagic(enemy, player, enemyMagic);
 
-		if (enemy->getComponent<CHealth>().current <= 0) {
-			enemy->addComponent<CLifespan>(45);
-			enemy->getComponent<CLifespan>().remaining = 45;
+		if (player->getComponent<CHealth>().current <= 0) {
+			if (player->getComponent<CHealth>().current < 0) {
+				player->getComponent<CHealth>().current = 0;
+			}
+			player->addComponent<CLifespan>(45);
+			player->getComponent<CLifespan>().remaining = 45;
 			gameEngine->stopMusic("BATTLEMUSIC");
 			gameEngine->playSound("ENEMYDIE");
-			queueMessage("Victory!", BattleState::VICTORY);
-			collectLoot(player, enemy);
+			queueMessage(playername + " is defeated!", BattleState::DEFEAT);
 			return;
 		}
 
@@ -1156,6 +1183,12 @@ void SceneBattle::renderBattleEntity(std::shared_ptr<Entity> entity) {
 		scale = 1.5f;
 	}
 	else if (entity == player) {
+
+		if (entity->hasComponent<CLifespan>()) {
+			float fade = static_cast<float>(entity->getComponent<CLifespan>().remaining) / static_cast<float>(entity->getComponent<CLifespan>().total);
+			tint.a = static_cast<unsigned char>(255.0f * fade);
+		}
+
 		xPos = gameEngine->getWidth() * 0.5f;
 		yPos = gameEngine->getHeight() * 0.85f;
 		player->getComponent<CTransform>().battlePos = Vec2(xPos, yPos);
@@ -1269,7 +1302,6 @@ void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<E
 				spawnSpell(defender, spell);
 				auto& effects = defender->getComponent<CEffects>().effects;
 
-				// Lambda to check to see if there is an existing status effect of the same type, if so then overwrite
 				auto it = std::find_if(effects.begin(), effects.end(), [&](const Effect& e) {
 					return e.statusType == spell.effect.statusType;
 					});
@@ -1285,7 +1317,6 @@ void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<E
 				spawnSpell(attacker, spell);
 				auto& effects = attacker->getComponent<CEffects>().effects;
 
-				// Lambda to check to see if there is an existing status effect of the same type, if so then overwrite
 				auto it = std::find_if(effects.begin(), effects.end(), [&](const Effect& e) {
 					return e.statusType == spell.effect.statusType;
 					});
@@ -1305,6 +1336,8 @@ void SceneBattle::applyEffect(std::shared_ptr<Entity> target, Effect effect) {
 	if (effect.statusType == "DAMAGE") {
 		target->getComponent<CHealth>().current -= effect.magnitude;
 		spawnEffect(target, effect.id);
+
+
 
 		if (effect.id == "POISON") {
 			gameEngine->playSound("POISON");

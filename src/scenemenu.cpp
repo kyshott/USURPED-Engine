@@ -1,6 +1,9 @@
 #include "scenemenu.hpp"
 #include "sceneplay.hpp"
 #include <iostream>
+#include "scenegameover.hpp"
+#include "fstream";
+#include "assets.hpp"
 
 SceneMenu::SceneMenu(GameEngine* gameEngine) : Scene(gameEngine){
     init();
@@ -16,9 +19,27 @@ void SceneMenu::init(){
     menuStrings.push_back("TEST ROOM");
     menuStrings.push_back("QUIT");
 
+	std::ifstream file("HIGHSCORES.txt");
+
+    int num;
+    std::string str;
+
+    while (file.good()) {
+        file >> str;
+        if (str == "FLOOR") {
+            file >> num;
+			highfloor = num;
+        }
+        if (str == "LEVEL") {
+            file >> num;
+            highlevel = num;
+        }
+    }
+
+    file.close();
+
+    levelPaths.push_back(gameEngine->getAssets().getRandomMap());
     levelPaths.push_back("assets/TestRoom.tmj");
-    levelPaths.push_back("level2.txt");
-    levelPaths.push_back("level3.txt");
 
     //register input
     registerAction(KEY_S, "DOWN");
@@ -55,7 +76,10 @@ void SceneMenu::sRender(){
             DrawTextEx(font, menuStrings[i].c_str(), Vector2(600,120*(i + 2.5)), 50, 1, textColor);
         }
         DrawTextEx(font, title.c_str(), Vector2(500,60), 150, 1, GOLD);
-        DrawTextEx(font, std::string("Demo").c_str(), Vector2(1100, 175), 30, 1, WHITE);
+        //DrawTextEx(font, std::string("Demo").c_str(), Vector2(1100, 175), 30, 1, WHITE);
+		DrawTextEx(font, "BEST RUN", Vector2(1100, 600), 30, 1, GOLD);
+        DrawTextEx(font, ("Floor: " + std::to_string(highfloor)).c_str(), Vector2(1100, 650), 30, 1, GOLD);
+        DrawTextEx(font, ("Level: " + std::to_string(highlevel)).c_str(), Vector2(1100, 725), 30, 1, GOLD);
 
     EndDrawing();
 }
@@ -82,9 +106,16 @@ void SceneMenu::sDoAction(const Action& action){
             if (selectedMenuItem == 0) {
                 // random map selection logic
                 gameEngine->changeScene("PLAY", std::make_shared<ScenePlay>(gameEngine, levelPaths[selectedMenuItem], true, 1));
+
+                // Uncomment to test out game over screen
+				//std::shared_ptr<Entity> player = std::make_shared<Entity>();
+                //player->addComponent<CStats>();
+                //player->getComponent<CStats>().level = 1;
+                //player->getComponent<CStats>().stage = 1;
+                //gameEngine->changeScene("PLAY", std::make_shared<SceneGameOver>(gameEngine, player));
             }
             else if (selectedMenuItem == 1) {
-                gameEngine->changeScene("PLAY", std::make_shared<ScenePlay>(gameEngine, levelPaths[selectedMenuItem], true, 1));
+                gameEngine->changeScene("TEST", std::make_shared<ScenePlay>(gameEngine, levelPaths[selectedMenuItem], true, 1));
             }
             else if (selectedMenuItem == 2) {
                 gameEngine->quit();

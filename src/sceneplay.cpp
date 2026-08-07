@@ -69,6 +69,7 @@ void ScenePlay::init(const std::string& levelPath){
     
     mainCamera=Camera2D({gameEngine->getWidth()/2.0f*GetWindowScaleDPI().x,gameEngine->getHeight()/2.0f*GetWindowScaleDPI().y},{gameEngine->getWidth()/2.0f,gameEngine->getHeight()/2.0f},0,GetWindowScaleDPI().x);
 
+    gameEngine->playMusic("TITLEMUSIC");
 }
 
 void ScenePlay::loadMap(const std::string& levelPath) {
@@ -747,65 +748,68 @@ void ScenePlay::sGUI(){
 
     // IMGUI DEBUG UI
 
-    rlImGuiBegin();
-    ImGui::SetNextWindowSize(ImVec2(400, 350));
-        ImGui::Begin("Debug",NULL,ImGuiWindowFlags_NoResize);
-            ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
-            if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
+    if (this->levelPath == "assets/TestRoom.tmj") {
+
+        rlImGuiBegin();
+        ImGui::SetNextWindowSize(ImVec2(400, 350));
+        ImGui::Begin("Debug", NULL, ImGuiWindowFlags_NoResize);
+        ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+        if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
+        {
+            if (ImGui::BeginTabItem("Controls"))
             {
-                if (ImGui::BeginTabItem("Controls"))
-                {
-                    ImGui::SeparatorText("Rendering Controls");
-                    ImGui::Checkbox("Textures",&renderTextures);
-                    ImGui::Checkbox("Bounding Boxes",&renderBoundingBox);
-                    ImGui::Checkbox("Vision Debug",&renderVisionDebug);
-                    ImGui::Checkbox("Grid",&renderGridLines);
-                    ImGui::SeparatorText("Camera Controls");
-                    ImGui::Checkbox("Follow Camera",&followCam);
-                    /* Room position debug
-                    ImGui::Text(std::to_string(room.x).c_str());
-                    ImGui::Text(std::to_string(room.y).c_str());
-                    */
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Entities"))
-                {
-                    int count=0;
-                    if (ImGui::TreeNode("By Tag")) {
-                        for (auto& tag : entityManager.getEntityMap()) {
-                            if (ImGui::TreeNode(tag.first.c_str())) {
-                                for (auto& e : tag.second) {
-                                    std::string str = "D###" + std::to_string(reinterpret_cast<uintptr_t>(e.get()));
-                                    if (ImGui::Button(str.c_str())) {
-                                        e->destroy();
-                                    }
-                                    ImGui::SameLine();
-                                    std::string text = tag.first + " " + e->getID() + " " + "(" + std::to_string((int)e->getComponent<CTransform>().position.x) + ", " + std::to_string((int)e->getComponent<CTransform>().position.y) + ")";
-                                    ImGui::Text(text.c_str());
-                                }
-                                ImGui::TreePop();
-                            }
-                        }
-                        ImGui::TreePop();
-                    }
-                    if (ImGui::TreeNode("All")) {
-                        for (auto e : entityManager.getEntities()) {
-                            std::string str = "D###" + std::to_string(reinterpret_cast<uintptr_t>(e.get()));
-                            if (ImGui::Button(str.c_str())) {
-                                e->destroy();
-                            }
-                            ImGui::SameLine();
-                            std::string text = e->getTag() + " " + e->getID() + " " + "(" + std::to_string((int)e->getComponent<CTransform>().position.x) + ", " + std::to_string((int)e->getComponent<CTransform>().position.y) + ")";
-                            ImGui::Text(text.c_str());
-                        }
-                        ImGui::TreePop();
-                    }
-                    ImGui::EndTabItem();
-                }
+                ImGui::SeparatorText("Rendering Controls");
+                ImGui::Checkbox("Textures", &renderTextures);
+                ImGui::Checkbox("Bounding Boxes", &renderBoundingBox);
+                ImGui::Checkbox("Vision Debug", &renderVisionDebug);
+                ImGui::Checkbox("Grid", &renderGridLines);
+                ImGui::SeparatorText("Camera Controls");
+                ImGui::Checkbox("Follow Camera", &followCam);
+                /* Room position debug
+                ImGui::Text(std::to_string(room.x).c_str());
+                ImGui::Text(std::to_string(room.y).c_str());
+                */
+                ImGui::EndTabItem();
             }
-            ImGui::EndTabBar();
+            if (ImGui::BeginTabItem("Entities"))
+            {
+                int count = 0;
+                if (ImGui::TreeNode("By Tag")) {
+                    for (auto& tag : entityManager.getEntityMap()) {
+                        if (ImGui::TreeNode(tag.first.c_str())) {
+                            for (auto& e : tag.second) {
+                                std::string str = "D###" + std::to_string(reinterpret_cast<uintptr_t>(e.get()));
+                                if (ImGui::Button(str.c_str())) {
+                                    e->destroy();
+                                }
+                                ImGui::SameLine();
+                                std::string text = tag.first + " " + e->getID() + " " + "(" + std::to_string((int)e->getComponent<CTransform>().position.x) + ", " + std::to_string((int)e->getComponent<CTransform>().position.y) + ")";
+                                ImGui::Text(text.c_str());
+                            }
+                            ImGui::TreePop();
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+                if (ImGui::TreeNode("All")) {
+                    for (auto e : entityManager.getEntities()) {
+                        std::string str = "D###" + std::to_string(reinterpret_cast<uintptr_t>(e.get()));
+                        if (ImGui::Button(str.c_str())) {
+                            e->destroy();
+                        }
+                        ImGui::SameLine();
+                        std::string text = e->getTag() + " " + e->getID() + " " + "(" + std::to_string((int)e->getComponent<CTransform>().position.x) + ", " + std::to_string((int)e->getComponent<CTransform>().position.y) + ")";
+                        ImGui::Text(text.c_str());
+                    }
+                    ImGui::TreePop();
+                }
+                ImGui::EndTabItem();
+            }
+        }
+        ImGui::EndTabBar();
         ImGui::End();
         rlImGuiEnd();
+    }
 
         // Message Bar
         if (showMessage) {
@@ -1949,10 +1953,12 @@ std::string ScenePlay::selectLoot(std::string type) {
     }
     else {
         return "";
-	}
+    }
+
+    const int lootTier = std::min(this->stage, 5);
 
     for (const auto& item : j_array) {
-        if (item.contains("rarity") && item["rarity"] == this->stage) {
+        if (item.contains("rarity") && item["rarity"] == lootTier) {
             matches.push_back(item);
         }
     }

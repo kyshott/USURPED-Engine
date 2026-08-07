@@ -16,6 +16,7 @@ set(SOURCES
         scenebattle.cpp
         vec2.cpp
         items.cpp
+        scenegameover.cpp
 )
 
 # Add the executable target
