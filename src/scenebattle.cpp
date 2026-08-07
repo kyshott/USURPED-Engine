@@ -1081,10 +1081,18 @@ void SceneBattle::collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<En
 		stats.exp -= stats.nextlevel;
 		stats.nextlevel = static_cast<int>(stats.nextlevel * 1.5f);
 		stats.speed += 1;
-		stats.defense += 1;
-		stats.intelligence += 1;
-		stats.strength += 1;
-		stats.magicdefense += 1;
+		if (stats.level % 5 == 0) {
+			stats.defense += 3;
+			stats.intelligence += 2;
+			stats.strength += 3;
+			stats.magicdefense += 2;
+		}
+		else {
+			stats.defense += 2;
+			stats.intelligence += 1;
+			stats.strength += 2;
+			stats.magicdefense += 1;
+		}
 		CHealth& health = looter->getComponent<CHealth>();
 		health.max += 5;
 		health.maxMana += 5;
@@ -1244,23 +1252,23 @@ void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<E
 			if (defender->hasComponent<CWeaknesses>()) {
 				std::vector<std::string>& weaknesses = defender->getComponent<CWeaknesses>().weaknesses;
 				if (std::find(weaknesses.begin(), weaknesses.end(), spell.effect.id) != weaknesses.end()) {
-					multiplier = 1.25f;
+					multiplier = 1.5f;
 				}
 			}
 			if (defender->hasComponent<CResistances>()) {
 				std::vector<std::string>& resistances = defender->getComponent<CResistances>().resistances;
 				if (std::find(resistances.begin(), resistances.end(), spell.effect.id) != resistances.end()) {
-					multiplier = 0.75f;
+					multiplier = 0.5f;
 				}
 			}
 
 			float total = 0.0f;
 
-			if ((spell.effect.magnitude + attacker->getComponent<CStats>().intelligence - defender->getComponent<CStats>().magicdefense) * multiplier <= 0) {
+			if (((spell.effect.magnitude + attacker->getComponent<CStats>().intelligence) * multiplier) - defender->getComponent<CStats>().magicdefense <= 0) {
 				total = 0.0f;
 			}
 			else {
-				total = (spell.effect.magnitude + attacker->getComponent<CStats>().intelligence - defender->getComponent<CStats>().magicdefense) * multiplier;
+				total = ((spell.effect.magnitude + attacker->getComponent<CStats>().intelligence) * multiplier) - defender->getComponent<CStats>().magicdefense * multiplier;
 			}
 			defender->getComponent<CHealth>().current -= total;
 
@@ -1401,8 +1409,8 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 		else if (pWeapon.effect.id == "SLASH") {
 			gameEngine->playSound("SLASH");
 		}
-		else if (pWeapon.effect.id == "PIERCE") {
-			gameEngine->playSound("PIERCE");
+		else if (pWeapon.effect.id == "STAB") {
+			gameEngine->playSound("STAB");
 		}
 		else if (pWeapon.effect.id == "SMASH") {
 			gameEngine->playSound("SMASH");
@@ -1443,8 +1451,8 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 		else if (type == "SLASH") {
 			gameEngine->playSound("SLASH");
 		}
-		else if (type == "PIERCE") {
-			gameEngine->playSound("PIERCE");
+		else if (type == "STAB") {
+			gameEngine->playSound("STAB");
 		}
 		else if (type == "SMASH") {
 			gameEngine->playSound("SMASH");

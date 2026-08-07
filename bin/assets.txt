@@ -1,6 +1,7 @@
 Font orbitron ./assets/fonts/Orbitron.ttf
 Font alagard ./assets/fonts/alagard.ttf
 Texture Tiles ./assets/tilemaps/FLOOR1.png
+Texture BaseFloors ./assets/tilemaps/BaseFloors.png
 
 Texture TITLE ./assets/textures/Title.png
 Texture OLPORTRAIT ./assets/textures/OLPORTRAIT.png
@@ -13,6 +14,7 @@ Texture POISON ./assets/textures/POISON.png
 Texture HEALM ./assets/textures/HEALM.png
 Texture SLASH ./assets/textures/SLASH.png
 Texture SMASH ./assets/textures/SMASH.png
+Texture STAB ./assets/textures/STAB.png
 Texture FOOTSOLDIER ./assets/textures/FOOTSOLDIER.png
 Texture PYROMANCER ./assets/textures/PYROMANCER.png
 Texture OLWALKD ./assets/textures/OLWALKD.png
@@ -27,6 +29,7 @@ Texture OLUSER ./assets/textures/OLUSER.png
 Texture BATTLEROOM ./assets/textures/BATTLEROOM1.png
 Texture GAMEOVER ./assets/textures/GAMEOVER.png
 Texture ENTRANCE ./assets/textures/ENTRANCE.png
+Texture EXIT ./assets/textures/EXIT.png
 Texture CHEST ./assets/textures/CHEST.png
 Texture CHESTOPEN ./assets/textures/CHESTOPEN.png
 Texture MAGICCHEST ./assets/textures/MAGICCHEST.png
@@ -50,6 +53,7 @@ Animation OLUSED OLUSED 1 1 4
 Animation OLUSEU OLUSEU 1 1 4
 Animation OLUSER OLUSER 1 1 4
 Animation ENTRANCE ENTRANCE 1 1 4
+Animation EXIT EXIT 1 1 4
 Animation CHEST CHEST 1 1 4
 Animation CHESTOPEN CHESTOPEN 1 1 4
 Animation MAGICCHEST MAGICCHEST 1 1 4
@@ -66,6 +70,7 @@ Animation HEAL HEAL 3 10 8
 Animation HEALM HEALM 3 10 8
 Animation SLASH SLASH 3 10 8
 Animation SMASH SMASH 3 10 8
+Animation STAB STAB 3 10 8
 Animation POISON POISON 3 10 8
 Animation FOOTSOLDIER FOOTSOLDIER 2 20 4
 Animation PYROMANCER PYROMANCER 2 20 4
@@ -79,6 +84,7 @@ Sound POISON ./assets/sounds/poison.wav
 Sound FIRE ./assets/sounds/fire.wav
 Sound SMASH ./assets/sounds/smash.wav
 Sound SLASH ./assets/sounds/slash.wav
+Sound STAB ./assets/sounds/stab.wav
 Sound NODAMAGE ./assets/sounds/nodamage.wav
 Sound BACK ./assets/sounds/back.wav
 Sound ENEMYDIE ./assets/sounds/enemydie.wav

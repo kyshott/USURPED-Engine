@@ -1,12 +1,13 @@
 {
     "FOOTSOLDIER": {
         "name": "Foot Soldier",
-        "health": 10,
+        "health": 20,
         "mana": 0,
-        "strength": 3,
+        "strength": 6,
         "damageType": "SLASH",
-        "defense": 1,
-        "magicDefense": 0,
+        "defense": 2,
+        "magicDefense": 2,
+        "intelligence": 0,
         "speed": 2,
         "ai": "FOLLOW",
         "weakness": { "id": "SMASH" },
@@ -23,17 +24,18 @@
     },
     "PYROMANCER": {
         "name": "Pyromancer",
-        "health": 10,
+        "health": 15,
         "mana": 20,
-        "strength": 1,
+        "strength": 4,
         "damageType": "SMASH",
         "defense": 1,
-        "magicDefense": 5,
+        "magicDefense": 3,
+        "intelligence": 2,
         "speed": 2,
         "ai": "FOLLOW",
         "magic": {
             "id": "BURN",
-            "castChance":  0.50
+            "castChance":  0.25
         },
         "weakness": { "id": "SMASH" },
         "resistance": { "id": "FIRE"},

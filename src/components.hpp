@@ -107,11 +107,11 @@ class CStats : public Component {
         int level = 1;
         int exp = 0;
         int nextlevel = 10;
-        int speed = 5;
-        int defense = 1;
-        int magicdefense = 0;
-        int strength = 0;
-        int intelligence = 0;
+        int speed = 3;
+        int defense = 2;
+        int magicdefense = 2;
+        int strength = 2;
+        int intelligence = 2;
 		std::string baseDamageType = "SMASH";
 
         int stage = 1; // used for items, bosses, etc

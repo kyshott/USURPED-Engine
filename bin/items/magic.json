@@ -5,7 +5,7 @@
         "description": "Singes the target with conjured flame.",
         "effect": {
             "type": "DAMAGE",
-            "magnitude": 5,
+            "magnitude": 8,
             "id": "FIRE"
         },
         "manacost": 5,
@@ -33,7 +33,7 @@
             "type": "EFFECT",
             "magnitude": 3,
             "id": "POISON",
-            "duration": 3,
+            "duration": 5,
             "effectType": "DAMAGE"
         },
         "manacost": 5,
@@ -46,7 +46,7 @@
         "description": "Provides weak healing every turn.",
         "effect": {
             "type": "EFFECT",
-            "magnitude": 2,
+            "magnitude": 8,
             "id": "HEAL",
             "duration": 3,
             "effectType": "HEAL"

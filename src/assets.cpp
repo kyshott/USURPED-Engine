@@ -318,6 +318,7 @@ std::shared_ptr<Entity> Assets::getEnemy(std::string name, std::shared_ptr<Entit
 	stats.speed = data.value("speed", 1);
 	stats.strength = data.value("strength", 1) * stage;
 	stats.baseDamageType = data.value("damageType", "SLASH");
+	stats.intelligence = data.value("intelligence", 0) * stage;
     
 
     if (data.contains("weakness") && data["weakness"].is_object()) {

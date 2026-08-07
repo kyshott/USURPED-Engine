@@ -58,6 +58,7 @@ void ScenePlay::init(const std::string& levelPath){
     registerAction(KEY_G,"GRID");
     registerAction(KEY_T,"TEX");
     registerAction(KEY_V,"VISION");
+    registerAction(KEY_C, "CAMERA");
 
     registerAction(KEY_W, "UP");
     registerAction(KEY_S, "DOWN");
@@ -72,6 +73,11 @@ void ScenePlay::init(const std::string& levelPath){
     gameEngine->playMusic("TITLEMUSIC");
 }
 
+/*
+* Loads, builds and renders the map from the Tiled JSON file.
+* 
+* @param levelPath Path to the Tiled JSON file
+*/
 void ScenePlay::loadMap(const std::string& levelPath) {
     tson::Tileson t;
 	std::shared_ptr<tson::Map> map = t.parse(levelPath);
@@ -132,6 +138,12 @@ void ScenePlay::loadMap(const std::string& levelPath) {
                        e->addComponent<CTransform>(spawnPoint, Vec2(0.0f, 0.0f), 0.0f);
                        e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation("ENTRANCE"), true);
                    }
+                   if (obj.getType() == "EXIT") {
+                       auto e = entityManager.addEntity("DYNAMIC", "EXIT");
+                       e->addComponent<CBoundingBox>(gameEngine->getAssets().getAnimation("EXIT").getScaledSize());
+                       e->addComponent<CTransform>(Vec2(obj.getPosition().x * 4, obj.getPosition().y * 4), Vec2(0.0f, 0.0f), 0.0f);
+                       e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation("EXIT"), true);
+                   }
                }
            }
        }
@@ -140,6 +152,11 @@ void ScenePlay::loadMap(const std::string& levelPath) {
    buildTiledMap(levelPath);
 }
 
+/*
+* Builds the tiled map from the Tiled JSON file and creates static tile entities in the game world.
+* 
+* @param levelPath Path to the Tiled JSON file
+*/
 void ScenePlay::buildTiledMap(const std::string& levelPath) {
     tson::Tileson t;
     std::shared_ptr<tson::Map> tiledMap = t.parse(levelPath);
@@ -172,9 +189,9 @@ void ScenePlay::buildTiledMap(const std::string& levelPath) {
 			e->getComponent<CTransform>().prevPosition.y = centerY;
             e->addComponent<CBoundingBox>(Vec2(gameEngine->getTileSizeX(), gameEngine->getTileSizeY()));
 
-            auto* visionProp = tile->getProp("blocksVision");
-            if (visionProp != nullptr) {
-                e->getComponent<CBoundingBox>().blocksVision = visionProp->getValue<bool>();
+            bool visionProp = tile->getProp("blocksVision");
+            if (visionProp == true) {
+                e->getComponent<CBoundingBox>().blocksVision = visionProp;
             }
 
             const tson::Rect& srcRect = tile->getDrawingRect();
@@ -182,7 +199,67 @@ void ScenePlay::buildTiledMap(const std::string& levelPath) {
     }
 }
 
+/*
+* Draws the visible portion of the tiled map based on the camera's view.
+*/
+void ScenePlay::drawVisibleTiledMap() {
+    if (cachedMapTiles.empty()) {
+        return;
+    }
+
+    Vector2 dpi = GetWindowScaleDPI();
+
+    Vector2 worldTopLeft = GetScreenToWorld2D(
+        Vector2{ 0.0f, 0.0f },
+        mainCamera
+    );
+
+    Vector2 worldBottomRight = GetScreenToWorld2D(
+        Vector2{
+            static_cast<float>(gameEngine->getWidth()) * dpi.x,
+            static_cast<float>(gameEngine->getHeight()) * dpi.y
+        },
+        mainCamera
+    );
+
+    const float left = std::min(worldTopLeft.x, worldBottomRight.x);
+    const float right = std::max(worldTopLeft.x, worldBottomRight.x);
+    const float top = std::min(worldTopLeft.y, worldBottomRight.y);
+    const float bottom = std::max(worldTopLeft.y, worldBottomRight.y);
+
+    Rectangle visibleArea = {
+        left,
+        top,
+        right - left,
+        bottom - top
+    };
+
+    for (const auto& tile : cachedMapTiles) {
+        if (!CheckCollisionRecs(tile.dest, visibleArea)) {
+            continue;
+        }
+
+        const Texture2D& tilesetTexture = gameEngine->getAssets().getTexture(tile.tilesetName);
+
+        DrawTexturePro(
+            tilesetTexture,
+            tile.src,
+            tile.dest,
+            Vector2{ 0.0f, 0.0f },
+            0.0f,
+            WHITE
+        );
+    }
+}
+
+/*
+* Renders the entire tiled map and caches the tile information.
+* 
+* @param levelPath Path to the Tiled JSON file
+*/
 void ScenePlay::renderTiledMap(const std::string& levelPath) {
+    cachedMapTiles.clear();
+
     tson::Tileson t;
     std::shared_ptr<tson::Map> tiledMap = t.parse(levelPath);
 
@@ -190,14 +267,7 @@ void ScenePlay::renderTiledMap(const std::string& levelPath) {
         return;
     }
 
-    const int mapWidthPixels = tiledMap->getSize().x * gameEngine->getTileSizeX();
-    const int mapHeightPixels = tiledMap->getSize().y * gameEngine->getTileSizeY();
-
-    mapTexture = LoadRenderTexture(mapWidthPixels, mapHeightPixels);
-    mapTextureReady = true;
-
-    BeginTextureMode(mapTexture);
-    ClearBackground(BLANK);
+    cachedMapTiles.reserve(tiledMap->getSize().x * tiledMap->getSize().y);
 
     for (auto& layer : tiledMap->getLayers()) {
         if (layer.getType() != tson::LayerType::TileLayer) {
@@ -209,44 +279,32 @@ void ScenePlay::renderTiledMap(const std::string& levelPath) {
                 continue;
             }
 
-            const int tileX = std::get<0>(tilePos);
-            const int tileY = std::get<1>(tilePos);
-
-            const tson::Rect& srcRect = tile->getDrawingRect();
-
-            Rectangle src = {
-                static_cast<float>(srcRect.x),
-                static_cast<float>(srcRect.y),
-                static_cast<float>(srcRect.width),
-                static_cast<float>(srcRect.height)
-            };
-
-            Rectangle dest = {
-                static_cast<float>(tileX * gameEngine->getTileSizeX()),
-                static_cast<float>(tileY * gameEngine->getTileSizeY()),
-                static_cast<float>(gameEngine->getTileSizeX()),
-                static_cast<float>(gameEngine->getTileSizeY())
-            };
-
             tson::Tileset* tileset = tile->getTileset();
             if (tileset == nullptr) {
                 continue;
             }
 
-            const Texture2D& tilesetTexture = gameEngine->getAssets().getTexture(tileset->getName());
+            const int tileX = std::get<0>(tilePos);
+            const int tileY = std::get<1>(tilePos);
+            const tson::Rect& srcRect = tile->getDrawingRect();
 
-            DrawTexturePro(
-                tilesetTexture,
-                src,
-                dest,
-                Vector2{ 0.0f, 0.0f },
-                0.0f,
-                WHITE
-            );
+            cachedMapTiles.push_back({
+                tileset->getName(),
+                Rectangle{
+                    static_cast<float>(srcRect.x),
+                    static_cast<float>(srcRect.y),
+                    static_cast<float>(srcRect.width),
+                    static_cast<float>(srcRect.height)
+                },
+                Rectangle{
+                    static_cast<float>(tileX * gameEngine->getTileSizeX()),
+                    static_cast<float>(tileY * gameEngine->getTileSizeY()),
+                    static_cast<float>(gameEngine->getTileSizeX()),
+                    static_cast<float>(gameEngine->getTileSizeY())
+                }
+                });
         }
     }
-
-    EndTextureMode();
 }
 
 /**
@@ -498,6 +556,18 @@ void ScenePlay::sCollision() {
                     }
                 }
 
+                if ((de->getID() == "PLAYER" && e->getID() == "EXIT") ||
+                    (de->getID() == "EXIT" && e->getID() == "PLAYER")) {
+                    auto playerEntity = (de->getID() == "PLAYER") ? de : e;
+                    auto exitEntity = (de->getID() == "EXIT") ? de : e;
+
+                    std::string mappath = gameEngine->getAssets().getRandomMap();
+
+                    //UnloadRenderTexture(mapTexture);
+                    gameEngine->stopMusic("TITLEMUSIC");
+					gameEngine->changeScene("PLAY", std::make_shared<ScenePlay>(gameEngine, mappath, playerEntity, false, stage + 1));
+                }
+
                 if ((de->getID() == "INTERACT" && e->getID() == "CHEST") ||
                     (de->getID() == "CHEST" && e->getID() == "INTERACT")) {
                     auto interactEntity = (de->getID() == "INTERACT") ? de : e;
@@ -531,6 +601,7 @@ void ScenePlay::sCollision() {
 						player->getComponent<CItems>().items.push_back(chest->getComponent<CItems>().items[0]);
                         showMessage = true;
                         message = "Found " + chest->getComponent<CItems>().items[0].name +"!";
+                        buildInventoryMenu();
                     }
                     else if (chest->hasComponent<CWeapons>()) {
                         std::vector<WeaponSpec> weaponvec = player->getComponent<CWeapons>().weapons;
@@ -688,53 +759,25 @@ void ScenePlay::sCollision() {
  * Renders the textures, using the camera system
  * 
  */
-void ScenePlay::sRender(){
+void ScenePlay::sRender() {
     BeginDrawing();
     BeginMode2D(mainCamera);
     ClearBackground(BLACK);
 
-    //********** Raylib Drawing Content **********
-
-        if (mapTextureReady && renderTextures) {
-            Rectangle src = {
-                0.0f,
-                0.0f,
-                static_cast<float>(mapTexture.texture.width),
-                -static_cast<float>(mapTexture.texture.height)
-            };
-
-            Rectangle dest = {
-                0.0f,
-                0.0f,
-                static_cast<float>(mapTexture.texture.width),
-                static_cast<float>(mapTexture.texture.height)
-            };
-
-            DrawTexturePro(
-                mapTexture.texture,
-                src,
-                dest,
-                Vector2{ 0.0f, 0.0f },
-                0.0f,
-                WHITE
-            );
-        }
-
-        if(renderTextures){
-            renderTex();
-        }
-        if(renderBoundingBox)
-            renderBB();
-        if(renderGridLines)
-            renderGrid();
-        if(renderVisionDebug){
-            renderAIDebug();
-        }
+    if (renderTextures) {
+        drawVisibleTiledMap();
+        renderTex();
+    }
+    if (renderBoundingBox)
+        renderBB();
+    if (renderGridLines)
+        renderGrid();
+    if (renderVisionDebug) {
+        renderAIDebug();
+    }
 
     EndMode2D();
-        //********** ImGUI Content *********
-        sGUI();
-
+    sGUI();
     EndDrawing();
 }
 
@@ -993,15 +1036,6 @@ void ScenePlay::sGUI(){
 
                     selectTip = inventoryMenuItems[selectedSubMenuItem].description;
 
-                    DrawTextEx(
-                        font,
-                        selectTip.c_str(),
-                        Vector2(contentX, descY),
-                        descFontSize,
-                        spacing,
-                        BLACK
-                    );
-
                     const int startIndex = (selectedSubMenuItem / itemsPerPage) * itemsPerPage;
                     int endIndex = startIndex + itemsPerPage;
                     if (endIndex > inventoryMenuItems.size()) {
@@ -1014,6 +1048,15 @@ void ScenePlay::sGUI(){
                         Color textColor = BLACK;
                         if (subControl) {
                             textColor = (i == selectedSubMenuItem) ? RED : BLACK;
+
+                            DrawTextEx(
+                                font,
+                                selectTip.c_str(),
+                                Vector2(contentX, descY),
+                                descFontSize,
+                                spacing,
+                                BLACK
+                            );
                         }
 
                         DrawTextEx(
@@ -1108,15 +1151,6 @@ void ScenePlay::sGUI(){
 
                     selectTip = spells[selectedSubMenuItem].description;
 
-                    DrawTextEx(
-                        font,
-                        selectTip.c_str(),
-                        Vector2(contentX, descY),
-                        headerFontSize,
-                        spacing,
-                        BLACK
-                    );
-
                     const int startIndex = (selectedSubMenuItem / itemsPerPage) * itemsPerPage;
                     int endIndex = startIndex + itemsPerPage;
                     if (endIndex > spells.size()) {
@@ -1129,6 +1163,15 @@ void ScenePlay::sGUI(){
                         Color textColor = BLACK;
                         if (subControl) {
                             textColor = (i == selectedSubMenuItem) ? RED : BLACK;
+
+                            DrawTextEx(
+                                font,
+                                selectTip.c_str(),
+                                Vector2(contentX, descY),
+                                headerFontSize,
+                                spacing,
+                                BLACK
+                            );
                         }
 
                         DrawTextEx(
@@ -1214,15 +1257,6 @@ void ScenePlay::sGUI(){
 
                     selectTip = weapons[selectedSubMenuItem].description;
 
-                    DrawTextEx(
-                        font,
-                        selectTip.c_str(),
-                        Vector2(contentX, descY),
-                        headerFontSize,
-                        spacing,
-                        BLACK
-                    );
-
                     const int startIndex = (selectedSubMenuItem / itemsPerPage) * itemsPerPage;
                     int endIndex = startIndex + itemsPerPage;
                     if (endIndex > weapons.size()) {
@@ -1235,6 +1269,15 @@ void ScenePlay::sGUI(){
                         Color textColor = BLACK;
                         if (subControl) {
                             textColor = (i == selectedSubMenuItem) ? RED : BLACK;
+
+                            DrawTextEx(
+                                font,
+                                selectTip.c_str(),
+                                Vector2(contentX, descY),
+                                headerFontSize,
+                                spacing,
+                                BLACK
+                            );
                         }
 
                         const bool equipped = (weapons[i].id == currentWeapon.id);
@@ -1393,6 +1436,14 @@ void ScenePlay::sDoAction(const Action& action) {
         if (action.getName() == "VISION") {
             renderVisionDebug = !renderVisionDebug;
         }
+        if (action.getName() == "CAMERA") {
+            if (followCam) {
+                followCam = false;
+            }
+            else {
+                followCam = true;
+			}
+        }
 
         // Standard player control
 
@@ -1480,7 +1531,6 @@ void ScenePlay::sDoAction(const Action& action) {
         else if (subControl) {
             if (action.getName() == "BACK") {
                 subControl = false;
-                subMenu = -1;
                 gameEngine->playSound("BACK");
                 selectedSubMenuItem = 0;
 			}
@@ -1599,7 +1649,7 @@ void ScenePlay::sDoAction(const Action& action) {
 
                     if (selectedSubMenuItem == 0) {
                         gameEngine->changeScene("MENU", std::make_shared<SceneMenu>(gameEngine));
-                        UnloadRenderTexture(mapTexture);
+                        //UnloadRenderTexture(mapTexture);
                     }
                     else {
                         subControl = false;
@@ -1657,6 +1707,7 @@ void ScenePlay::sCamera(){
 
 void ScenePlay::battleReturn(std::shared_ptr<Entity> e) {
     e->destroy();
+    buildInventoryMenu();
 	CInput& input = player->getComponent<CInput>();
     input.up = false;
     input.down = false;
@@ -1687,34 +1738,21 @@ void ScenePlay::spawnPlayer(){
     player->addComponent<CWeapons>();
     player->getComponent<CWeapons>().weapons.push_back(gameEngine->getAssets().getWeapon("ANCIENTBLADE"));
 	player->getComponent<CWeapons>().currentWeapon = player->getComponent<CWeapons>().weapons[0];
-
-	CWeapons& weps = player->getComponent<CWeapons>();
-    weps.weapons.push_back(gameEngine->getAssets().getWeapon("IRONMACE"));
-    weps.weapons.push_back(gameEngine->getAssets().getWeapon("SABRE"));
     
     // Add stats
 
     CItems& items = player->getComponent<CItems>();
 
 	items.items.push_back(gameEngine->getAssets().getItem("SHEAL"));
-    items.items.push_back(gameEngine->getAssets().getItem("SHEAL"));
     items.items.push_back(gameEngine->getAssets().getItem("SMANA"));
-    items.items.push_back(gameEngine->getAssets().getItem("SMANA"));
-    items.items.push_back(gameEngine->getAssets().getItem("MMANA"));
-    items.items.push_back(gameEngine->getAssets().getItem("LMANA"));
-    items.items.push_back(gameEngine->getAssets().getItem("MHEAL"));
-    items.items.push_back(gameEngine->getAssets().getItem("LHEAL"));
 
-    player->getComponent<CHealth>().maxMana = 20;
-	player->getComponent<CHealth>().currentMana = 20;
-
+    player->getComponent<CHealth>().maxMana = 10;
+    player->getComponent<CHealth>().currentMana = 10;
 
     player->addComponent<CMagic>();
     CMagic& magic = player->getComponent<CMagic>();
     magic.magic.push_back(gameEngine->getAssets().getMagic("BURN"));
 	magic.magic.push_back(gameEngine->getAssets().getMagic("SMEND"));
-	magic.magic.push_back(gameEngine->getAssets().getMagic("TOXIN"));
-    magic.magic.push_back(gameEngine->getAssets().getMagic("LOOPHEAL"));
     player->addComponent<CName>("Player");
     player->addComponent<CEffects>();
     player->addComponent<CStats>();

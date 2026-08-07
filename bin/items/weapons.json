@@ -18,7 +18,7 @@
         "id": "IRONMACE",
         "type": "mace",
         "name": "Iron Mace",
-        "damage": 8,
+        "damage": 6,
         "cost": 0,
         "manacost": 0,
         "effect": {
@@ -33,7 +33,7 @@
         "id": "IRONBLADE",
         "type": "sword",
         "name": "Iron Blade",
-        "damage": 8,
+        "damage": 6,
         "cost": 0,
         "manacost": 0,
         "effect": {
@@ -67,11 +67,11 @@
         "cost": 0,
         "manacost": 0,
         "effect": {
-            "id": "SLASH",
+            "id": "STAB",
             "type": "DAMAGE",
             "magnitude": 1
         },
-        "description": "Used in rituals summoning you.",
+        "description": "Used in rituals to summon you.",
         "rarity": 2
     }
 }

@@ -1,4 +1,3 @@
-#pragma once
 #include <string>
 #include <imgui/imgui.h>
 #include <imgui/rlImGui.h>
@@ -10,74 +9,80 @@
 /**
  * Contains the player data from the level definition file. Filled when a scene loads a level.
  */
-struct PlayerConfig{float X=9,Y=6,BX=64,BY=64,SPEED=5,HEALTH=10; std::string WEAPON;};
+struct PlayerConfig { float X = 9, Y = 6, BX = 64, BY = 64, SPEED = 5, HEALTH = 20; std::string WEAPON; };
 
 /**
  * Scene that contains all logic and information for playing a loaded level
  */
-class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay>{
-    private:
-        PlayerConfig playerConfig;      /* Information about the properties of the player for this level */
-        std::string levelPath;          /* Relative path to the level definition file from exe */
-        std::shared_ptr<Entity> player; /* Shared pointer reference to the player entity */
-        std::random_device rd;
-        bool reload=false;              /* If the Scene should be reloaded at the end of the current frame */
-        bool renderHealth=true;         /* If the entity health should be rendered */
-        bool followCam=false;           /* If the locked follow camera should be active, false=room cam */
-        Vec2 room = {0,0};              /* Current (x,y) room. (0,0) is the starting room */
-        Vec2 spawnPoint = {0,0};
-		int stage = 1;					 /* Current stage of the player, used for loot selection */
-        std::string message;
-        bool showMessage = false;
-        bool inventory = false;
-        bool first = true;
+class ScenePlay : public Scene, public std::enable_shared_from_this<ScenePlay> {
+private:
+    struct CachedMapTile {
+        std::string tilesetName;
+        Rectangle src;
+        Rectangle dest;
+    };
 
-        RenderTexture2D mapTexture{};
-        bool mapTextureReady = false;
+    PlayerConfig playerConfig;      /* Information about the properties of the player for this level */
+    std::string levelPath;          /* Relative path to the level definition file from exe */
+    std::shared_ptr<Entity> player; /* Shared pointer reference to the player entity */
+    std::random_device rd;
+    bool reload = false;              /* If the Scene should be reloaded at the end of the current frame */
+    bool renderHealth = true;         /* If the entity health should be rendered */
+    bool followCam = false;           /* If the locked follow camera should be active, false=room cam */
+    Vec2 room = { 0,0 };              /* Current (x,y) room. (0,0) is the starting room */
+    Vec2 spawnPoint = { 0,0 };
+    int stage = 1;                  /* Current stage of the player, used for loot selection */
+    std::string message;
+    bool showMessage = false;
+    bool inventory = false;
+    bool first = true;
 
-        const Texture2D& menuBox = gameEngine->getAssets().getTexture("MENUBOX");
-        const Texture2D& invBox = gameEngine->getAssets().getTexture("INVBOX");
-        const Font& font = gameEngine->getAssets().getFont("alagard");
-        const Texture2D& arrow = gameEngine->getAssets().getTexture("ARROW");
-        const Texture2D& portrait = gameEngine->getAssets().getTexture("OLPORTRAIT");
+    std::vector<CachedMapTile> cachedMapTiles;
 
-        int subMenu = 0;
-        bool subControl = false;
-		int selectedMenuItem = 0;
-        int selectedSubMenuItem = 0;
-        std::vector<std::string> menuStrings;
-		std::string selectTip = "";
-        std::vector<ItemSpec> inventoryMenuItems;
-        std::vector<int> inventoryMenuCounts;
+    const Texture2D& menuBox = gameEngine->getAssets().getTexture("MENUBOX");
+    const Texture2D& invBox = gameEngine->getAssets().getTexture("INVBOX");
+    const Font& font = gameEngine->getAssets().getFont("alagard");
+    const Texture2D& arrow = gameEngine->getAssets().getTexture("ARROW");
+    const Texture2D& portrait = gameEngine->getAssets().getTexture("OLPORTRAIT");
 
-        void init(const std::string& levelPath);
-        void sAnimation();
-        void sMovement();
-        void sCollision();
-        void sRender();
-        void sLifespan();
-        void sGUI();
-        void sDoAction(const Action& action);
-        void sCamera();
-        void spawnPlayer();
-        void interact();
-        void useItem(const ItemSpec& item);
-		void useMagic(const MagicSpec& magic);
-        void equipWeapon(int index);
-        void teleport(std::shared_ptr<Entity> e);
-		void loadMap(const std::string& levelPath);
-        void renderTiledMap(const std::string& levelPath);
-        void buildTiledMap(const std::string& levelPath);
-        std::string selectLoot(std::string type);
-        void buildInventoryMenu();
-        void refreshInventoryMenuCounts();
-        Vec2 getPosition(int rx, int ry, int tx, int ty);
-		Vec2 mouseToWorld(Vec2 windowPos);
-        void renderAIDebug();
-    public:
-        ScenePlay(GameEngine* gameEngine, std::string& levelPath, bool first, int stage);
-        ScenePlay(GameEngine* gameEngine, std::string& levelPath, std::shared_ptr<Entity> player, bool first, int stage);
-        ScenePlay()=default;
-        void battleReturn(std::shared_ptr<Entity> e);
-        void update();
+    int subMenu = 0;
+    bool subControl = false;
+    int selectedMenuItem = 0;
+    int selectedSubMenuItem = 0;
+    std::vector<std::string> menuStrings;
+    std::string selectTip = "";
+    std::vector<ItemSpec> inventoryMenuItems;
+    std::vector<int> inventoryMenuCounts;
+
+    void init(const std::string& levelPath);
+    void sAnimation();
+    void sMovement();
+    void sCollision();
+    void sRender();
+    void sLifespan();
+    void sGUI();
+    void sDoAction(const Action& action);
+    void sCamera();
+    void spawnPlayer();
+    void interact();
+    void useItem(const ItemSpec& item);
+    void useMagic(const MagicSpec& magic);
+    void equipWeapon(int index);
+    void teleport(std::shared_ptr<Entity> e);
+    void loadMap(const std::string& levelPath);
+    void renderTiledMap(const std::string& levelPath);
+    void drawVisibleTiledMap();
+    void buildTiledMap(const std::string& levelPath);
+    std::string selectLoot(std::string type);
+    void buildInventoryMenu();
+    void refreshInventoryMenuCounts();
+    Vec2 getPosition(int rx, int ry, int tx, int ty);
+    Vec2 mouseToWorld(Vec2 windowPos);
+    void renderAIDebug();
+public:
+    ScenePlay(GameEngine* gameEngine, std::string& levelPath, bool first, int stage);
+    ScenePlay(GameEngine* gameEngine, std::string& levelPath, std::shared_ptr<Entity> player, bool first, int stage);
+    ScenePlay() = default;
+    void battleReturn(std::shared_ptr<Entity> e);
+    void update();
 };
