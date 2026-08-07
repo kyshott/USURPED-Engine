@@ -2,7 +2,7 @@
     "BURN": {
         "id": "BURN",
         "name": "Burn",
-        "description": "Singes the target with conjured flame.",
+        "description": "Singes the target with flame.",
         "effect": {
             "type": "DAMAGE",
             "magnitude": 8,
@@ -12,6 +12,152 @@
         "cost": 0,
         "rarity": 0
     },
+    "ZAP": {
+        "id": "ZAP",
+        "name": "Zap",
+        "description": "Zaps the target with lightning.",
+        "effect": {
+            "type": "DAMAGE",
+            "magnitude": 8,
+            "id": "SHOCK"
+        },
+        "manacost": 5,
+        "cost": 0,
+        "rarity": 1
+    },
+    "ICICLE": {
+        "id": "ICICLE",
+        "name": "Icicle",
+        "description": "Hits the target with a shard of ice.",
+        "effect": {
+            "type": "DAMAGE",
+            "magnitude": 8,
+            "id": "ICE"
+        },
+        "manacost": 5,
+        "cost": 0,
+        "rarity": 1
+    },
+    "DARKBOLT": {
+        "id": "DARKBOLT",
+        "name": "Dark Bolt",
+        "description": "Hits the target with dark energy..",
+        "effect": {
+            "type": "DAMAGE",
+            "magnitude": 12,
+            "id": "DARK"
+        },
+        "manacost": 8,
+        "cost": 0,
+        "rarity": 2
+    },
+    "SCORCH": {
+        "id": "SCORCH",
+        "name": "Scorch",
+        "description": "Scorches the target with flame.",
+        "effect": {
+            "type": "DAMAGE",
+            "magnitude": 12,
+            "id": "FIRE"
+        },
+        "manacost": 8,
+        "cost": 0,
+        "rarity": 2
+    },
+    "SHOCK": {
+        "id": "SHOCK",
+        "name": "Shock",
+        "description": "Shocks the target with lightning.",
+        "effect": {
+            "type": "DAMAGE",
+            "magnitude": 12,
+            "id": "SHOCK"
+        },
+        "manacost": 8,
+        "cost": 0,
+        "rarity": 2
+    },
+    "FREEZE": {
+        "id": "FREEZE",
+        "name": "Freeze",
+        "description": "Blasts the target with ice.",
+        "effect": {
+            "type": "DAMAGE",
+            "magnitude": 12,
+            "id": "ICE"
+        },
+        "manacost": 8,
+        "cost": 0,
+        "rarity": 2
+    },
+    "DARKBOMB": {
+        "id": "DARKBOMB",
+        "name": "Dark Bomb",
+        "description": "Blasts the target with dark energy.",
+        "effect": {
+            "type": "DAMAGE",
+            "magnitude": 18,
+            "id": "DARK"
+        },
+        "manacost": 15,
+        "cost": 0,
+        "rarity": 4
+    },
+    "BLAZE": {
+        "id": "BLAZE",
+        "name": "Blaze",
+        "description": "Blazes the target with flame.",
+        "effect": {
+            "type": "DAMAGE",
+            "magnitude": 18,
+            "id": "FIRE"
+        },
+        "manacost": 15,
+        "cost": 0,
+        "rarity": 4
+    },
+    "JOLT": {
+        "id": "JOLT",
+        "name": "Jolt",
+        "description": "Jolts the target with lightning.",
+        "effect": {
+            "type": "DAMAGE",
+            "magnitude": 18,
+            "id": "SHOCK"
+        },
+        "manacost": 15,
+        "cost": 0,
+        "rarity": 4
+    },
+    "FROST": {
+        "id": "FROST",
+        "name": "Frost",
+        "description": "Explodes the target with ice.",
+        "effect": {
+            "type": "DAMAGE",
+            "magnitude": 18,
+            "id": "ICE"
+        },
+        "manacost": 15,
+        "cost": 0,
+        "rarity": 4
+    },
+    "DOOM": {
+        "id": "DOOM",
+        "name": "Doom",
+        "description": "Obliterates the target.",
+        "effect": {
+            "type": "DAMAGE",
+            "magnitude": 50,
+            "id": "DARK"
+        },
+        "manacost": 30,
+        "cost": 0,
+        "rarity": 5
+    },
+
+
+
     "SMEND": {
         "id": "SMEND",
         "name": "Lesser Mend",
@@ -25,6 +171,90 @@
         "cost": 0,
         "rarity": 0
     },
+    "MIDMEND": {
+        "id": "MIDMEND",
+        "name": "Mid-Mend",
+        "description": "Heals the user's HP.",
+        "effect": {
+            "type": "RESTORE",
+            "magnitude": 15,
+            "id": "HEAL"
+        },
+        "manacost": 8,
+        "cost": 0,
+        "rarity": 2
+    },
+    "MEND": {
+        "id": "MEND",
+        "name": "Mend",
+        "description": "Heals a good amount of the user's HP.",
+        "effect": {
+            "type": "RESTORE",
+            "magnitude": 25,
+            "id": "HEAL"
+        },
+        "manacost": 12,
+        "cost": 0,
+        "rarity": 3
+    },
+    "GMEND": {
+        "id": "GMEND",
+        "name": "Greater Mend",
+        "description": "Heals a large amount of the user's HP.",
+        "effect": {
+            "type": "RESTORE",
+            "magnitude": 35,
+            "id": "HEAL"
+        },
+        "manacost": 15,
+        "cost": 0,
+        "rarity": 4
+    },
+    "UMEND": {
+        "id": "UMEND",
+        "name": "Ultimend",
+        "description": "Heals a massive amount of the user's HP.",
+        "effect": {
+            "type": "RESTORE",
+            "magnitude": 50,
+            "id": "HEAL"
+        },
+        "manacost": 20,
+        "cost": 0,
+        "rarity": 5
+    },
+
+
+    "IGNITE": {
+        "id": "IGNITE",
+        "name": "Ignite",
+        "description": "Sets the target aflame over time.",
+        "effect": {
+            "type": "EFFECT",
+            "magnitude": 5,
+            "id": "FIRE",
+            "duration": 4,
+            "effectType": "DAMAGE"
+        },
+        "manacost": 5,
+        "cost": 0,
+        "rarity": 2
+    },
+    "FROSTBITE": {
+        "id": "FROSTBITE",
+        "name": "Frostbite",
+        "description": "Bites the target with ice over time.",
+        "effect": {
+            "type": "EFFECT",
+            "magnitude": 8,
+            "id": "ICE",
+            "duration": 4,
+            "effectType": "DAMAGE"
+        },
+        "manacost": 15,
+        "cost": 0,
+        "rarity": 4
+    },
     "TOXIN": {
         "id": "TOXIN",
         "name": "Toxin",
@@ -33,12 +263,42 @@
             "type": "EFFECT",
             "magnitude": 3,
             "id": "POISON",
-            "duration": 5,
+            "duration": 3,
             "effectType": "DAMAGE"
         },
         "manacost": 5,
         "cost": 0,
         "rarity": 1
+    },
+    "EVENOM": {
+        "id": "EVENOM",
+        "name": "Envenomate",
+        "description": "Poisons the target with a toxin.",
+        "effect": {
+            "type": "EFFECT",
+            "magnitude": 5,
+            "id": "POISON",
+            "duration": 4,
+            "effectType": "DAMAGE"
+        },
+        "manacost": 10,
+        "cost": 0,
+        "rarity": 3
+    },
+    "BANE": {
+        "id": "BANE",
+        "name": "Bane",
+        "description": "Poisons the target with a powerful toxin.",
+        "effect": {
+            "type": "EFFECT",
+            "magnitude": 8,
+            "id": "POISON",
+            "duration": 5,
+            "effectType": "DAMAGE"
+        },
+        "manacost": 20,
+        "cost": 0,
+        "rarity": 5
     },
     "LOOPHEAL": {
         "id": "LOOPHEAL",
@@ -54,5 +314,35 @@
         "manacost": 5,
         "cost": 0,
         "rarity": 1
+    },
+    "RECURHEAL": {
+        "id": "RECURHEAL",
+        "name": "Recur-Heal",
+        "description": "Provides healing every turn.",
+        "effect": {
+            "type": "EFFECT",
+            "magnitude": 15,
+            "id": "HEAL",
+            "duration": 3,
+            "effectType": "HEAL"
+        },
+        "manacost": 10,
+        "cost": 0,
+        "rarity": 3
+    },
+    "INFINIHEAL": {
+        "id": "INFINIHEAL",
+        "name": "Infini-Heal",
+        "description": "Provides great healing every turn.",
+        "effect": {
+            "type": "EFFECT",
+            "magnitude": 25,
+            "id": "HEAL",
+            "duration": 3,
+            "effectType": "HEAL"
+        },
+        "manacost": 18,
+        "cost": 0,
+        "rarity": 5
     }
 }

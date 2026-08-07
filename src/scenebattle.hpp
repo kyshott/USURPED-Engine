@@ -86,7 +86,6 @@ class SceneBattle : public Scene {
 	void playerAct();
 	void enemyAct();
 	void victoryState();
-	void defeatState();
 	void resultsState();
 
 	// Helpers

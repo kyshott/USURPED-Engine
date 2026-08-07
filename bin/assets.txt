@@ -3,20 +3,32 @@ Font alagard ./assets/fonts/alagard.ttf
 Texture Tiles ./assets/tilemaps/FLOOR1.png
 Texture BaseFloors ./assets/tilemaps/BaseFloors.png
 
+Texture BOSSDOOR ./assets/textures/BOSSDOOR.png
 Texture TITLE ./assets/textures/Title.png
 Texture OLPORTRAIT ./assets/textures/OLPORTRAIT.png
 Texture MENUBOX ./assets/textures/MENUBOX.png
 Texture INVBOX ./assets/textures/InvBox.png
 Texture ARROW ./assets/textures/ARROW.png
 Texture FIRE ./assets/textures/FIRE.png
+Texture SHOCK ./assets/textures/SHOCK.png
+Texutre ICE ./assets/textures/ICE.png
+Texture DARK ./assets/textures/DARK.png
 Texture HEAL ./assets/textures/HEAL.png
 Texture POISON ./assets/textures/POISON.png
 Texture HEALM ./assets/textures/HEALM.png
 Texture SLASH ./assets/textures/SLASH.png
 Texture SMASH ./assets/textures/SMASH.png
 Texture STAB ./assets/textures/STAB.png
+Texture SKELETON ./assets/textures/SKELETON.png
+Texture LIVINGARMOR ./assets/textures/LIVINGARMOR.png
 Texture FOOTSOLDIER ./assets/textures/FOOTSOLDIER.png
 Texture PYROMANCER ./assets/textures/PYROMANCER.png
+Texture THIEF ./assets/textures/THIEF.png
+Texture ZOMBIE ./assets/textures/ZOMBIE.png
+Texture CLERIC ./assets/textures/CLERIC.png
+Texture PALADIN ./assets/textures/PALADIN.png
+Texture KNIGHT ./assets/textures/KNIGHT.png
+Texture WIZARD ./assets/textures/WIZARD.png
 Texture OLWALKD ./assets/textures/OLWALKD.png
 Texture OLWALKU ./assets/textures/OLWALKU.png
 Texture OLWALKR ./assets/textures/OLWALKR.png
@@ -56,6 +68,7 @@ Animation ENTRANCE ENTRANCE 1 1 4
 Animation EXIT EXIT 1 1 4
 Animation CHEST CHEST 1 1 4
 Animation CHESTOPEN CHESTOPEN 1 1 4
+Animation BOSSDOOR BOSSDOOR 1 1 4
 Animation MAGICCHEST MAGICCHEST 1 1 4
 Animation MAGICCHESTOPEN MAGICCHESTOPEN 1 1 4
 Animation WEAPONCHEST WEAPONCHEST 1 1 4
@@ -65,6 +78,9 @@ Animation IRONMACE IRONMACE 1 1 5
 Animation IRONBLADE IRONBLADE 1 1 5
 Animation SABRE SABRE 1 1 5
 Animation RITUALDAGGER RITUALDAGGER 1 1 5
+Animation SHOCK SHOCK 3 10 8
+Animation ICE ICE 3 10 8
+Animation DARK DARK 3 10 8
 Animation FIRE FIRE 3 10 8
 Animation HEAL HEAL 3 10 8
 Animation HEALM HEALM 3 10 8
@@ -72,8 +88,16 @@ Animation SLASH SLASH 3 10 8
 Animation SMASH SMASH 3 10 8
 Animation STAB STAB 3 10 8
 Animation POISON POISON 3 10 8
+Animation LIVINGARMOR LIVINGARMOR 1 1 4
 Animation FOOTSOLDIER FOOTSOLDIER 2 20 4
 Animation PYROMANCER PYROMANCER 2 20 4
+Animation WIZARD WIZARD 2 20 4
+Animation KNIGHT KNIGHT 2 20 4
+Animation THIEF THIEF 2 20 4
+Animation SKELETON SKELETON 2 20 4
+Animation CLERIC CLERIC 2 20 4
+Animation ZOMBIE ZOMBIE 2 20 4
+Animation PALADIN PALADIN 2 20 4
 Music BGMUSIC ./assets/sounds/music.wav
 Music BATTLEMUSIC ./assets/sounds/music2.wav
 Music TITLEMUSIC ./assets/sounds/dungeon.wav
@@ -82,6 +106,9 @@ Sound GOTITEM ./assets/sounds/gotitem.wav
 Sound HEAL ./assets/sounds/heal.wav
 Sound POISON ./assets/sounds/poison.wav
 Sound FIRE ./assets/sounds/fire.wav
+Sound SHOCK ./assets/sounds/shock.wav
+Sound ICE ./assets/sounds/ice.wav
+Sound DARK ./assets/sounds/dark.wav
 Sound SMASH ./assets/sounds/smash.wav
 Sound SLASH ./assets/sounds/slash.wav
 Sound STAB ./assets/sounds/stab.wav

@@ -47,7 +47,7 @@ void SceneMenu::init(){
     registerAction(KEY_SPACE, "PLAY");
     registerAction(KEY_ESCAPE, "QUIT");
 
-    gameEngine->playMusic("TITLEMUSIC");
+    gameEngine->stopMusic("TITLEMUSIC");
 }
 
 /**

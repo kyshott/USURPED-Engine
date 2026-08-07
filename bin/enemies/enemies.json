@@ -1,7 +1,7 @@
 {
     "FOOTSOLDIER": {
         "name": "Foot Soldier",
-        "health": 20,
+        "health": 15,
         "mana": 0,
         "strength": 6,
         "damageType": "SLASH",
@@ -22,6 +22,145 @@
         "mapspeed": 2,
         "description": "The lowest ranking soldiers of the empire. Fodder for your wrath."
     },
+    "SKELETON": {
+        "name": "Skeleton",
+        "health": 15,
+        "mana": 0,
+        "strength": 6,
+        "damageType": "SMASH",
+        "defense": 2,
+        "magicDefense": 2,
+        "intelligence": 0,
+        "speed": 2,
+        "ai": "FOLLOW",
+        "weakness": { "id": "SMASH" },
+        "resistance": {},
+        "loot": {
+            "type": "ITEM",
+            "id": "SHEAL",
+            "dropchance": 0.25,
+            "gold": 3,
+            "exp": 5
+        },
+        "mapspeed": 2,
+        "description": "A reanimated inhabitant of the tower that has been dead a while."
+    },
+    "ZOMBIE": {
+        "name": "Zombie",
+        "health": 20,
+        "mana": 20,
+        "strength": 6,
+        "damageType": "SMASH",
+        "defense": 1,
+        "magicDefense": 1,
+        "intelligence": 0,
+        "speed": 2,
+        "ai": "FOLLOW",
+        "magic": {
+            "id": "TOXIN",
+            "castChance": 0.5
+        },
+        "weakness": { "id": "SLASH" },
+        "resistance": {},
+        "loot": {
+            "id": "SMANA",
+            "dropchance": 0.25,
+            "gold": 3,
+            "exp": 5
+        },
+        "mapspeed": 2,
+        "description": "A recently deceased, reanimated inhabitant of the tower."
+    },
+    "THIEF": {
+        "name": "Thief",
+        "health": 15,
+        "mana": 20,
+        "strength": 6,
+        "damageType": "STAB",
+        "defense": 1,
+        "magicDefense": 1,
+        "intelligence": 0,
+        "speed": 5,
+        "ai": "FOLLOW",
+        "magic": {
+            "id": "TOXIN",
+            "castChance": 0.25
+        },
+        "weakness": { "id": "ICE" },
+        "resistance": {},
+        "loot": {
+            "id": "SHEAL",
+            "dropchance": 0.25,
+            "gold": 3,
+            "exp": 5
+        },
+        "mapspeed": 2,
+        "description": "A nimble and cunning member of the empire's forces."
+    },
+    "LIVINGARMOR": {
+        "name": "Living Armor",
+        "health": 20,
+        "mana": 0,
+        "strength": 6,
+        "damageType": "SLASH",
+        "defense": 3,
+        "magicDefense": 1,
+        "intelligence": 0,
+        "speed": 1,
+        "ai": "FOLLOW",
+        "weakness": { "id": "SMASH" },
+        "resistance": { "id": "SLASH" },
+        "loot": {
+            "gold": 10,
+            "exp": 8
+        },
+        "mapspeed": 2,
+        "description": "A suit of armor animated by a malevolent spirit."
+    },
+    "KNIGHT": {
+        "name": "Knight",
+        "health": 25,
+        "mana": 0,
+        "strength": 6,
+        "damageType": "SLASH",
+        "defense": 3,
+        "magicDefense": 2,
+        "intelligence": 0,
+        "speed": 1,
+        "ai": "FOLLOW",
+        "weakness": { "id": "STAB" },
+        "resistance": { "id": "SLASH" },
+        "loot": {
+            "gold": 15,
+            "exp": 12
+        },
+        "mapspeed": 2,
+        "description": "A heavily armored knight of the empire."
+    },
+    "PALADIN": {
+        "name": "Paladin",
+        "health": 40,
+        "mana": 30,
+        "strength": 8,
+        "damageType": "SMASH",
+        "defense": 4,
+        "magicDefense": 3,
+        "intelligence": 0,
+        "speed": 1,
+        "ai": "FOLLOW",
+        "magic": {
+            "id": "LOOPHEAL",
+            "castChance": 0.10
+        },
+        "weakness": { "id": "DARK" },
+        "resistance": { "id": "SLASH" },
+        "loot": {
+            "gold": 30,
+            "exp": 20
+        },
+        "mapspeed": 2,
+        "description": "A stalwart warrior of faith."
+    },
     "PYROMANCER": {
         "name": "Pyromancer",
         "health": 15,
@@ -35,10 +174,10 @@
         "ai": "FOLLOW",
         "magic": {
             "id": "BURN",
-            "castChance":  0.25
+            "castChance": 0.5
         },
-        "weakness": { "id": "SMASH" },
-        "resistance": { "id": "FIRE"},
+        "weakness": { "id": "ICE" },
+        "resistance": { "id": "FIRE" },
         "loot": {
             "type": "ITEM",
             "id": "SMANA",
@@ -48,5 +187,59 @@
         },
         "mapspeed": 2,
         "description": "The empire's designated flame conjurers."
+    },
+    "WIZARD": {
+        "name": "Wizard",
+        "health": 15,
+        "mana": 20,
+        "strength": 4,
+        "damageType": "SMASH",
+        "defense": 1,
+        "magicDefense": 3,
+        "intelligence": 2,
+        "speed": 2,
+        "ai": "FOLLOW",
+        "magic": {
+            "id": "ZAP",
+            "castChance": 0.5
+        },
+        "weakness": { "id": "SLASH" },
+        "resistance": { "id": "SHOCK" },
+        "loot": {
+            "type": "ITEM",
+            "id": "SMANA",
+            "dropchance": 0.25,
+            "gold": 3,
+            "exp": 5
+        },
+        "mapspeed": 2,
+        "description": "The empire's designated conjurers."
+    },
+    "CLERIC": {
+        "name": "Cleric",
+        "health": 15,
+        "mana": 20,
+        "strength": 6,
+        "damageType": "SMASH",
+        "defense": 1,
+        "magicDefense": 3,
+        "intelligence": 2,
+        "speed": 2,
+        "ai": "FOLLOW",
+        "magic": {
+            "id": "MEND",
+            "castChance": 0.25
+        },
+        "weakness": { "id": "DARK" },
+        "resistance": {},
+        "loot": {
+            "type": "ITEM",
+            "id": "MHEAL",
+            "dropchance": 0.5,
+            "gold": 3,
+            "exp": 5
+        },
+        "mapspeed": 2,
+        "description": "The empire's designated healers."
     }
 }

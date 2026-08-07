@@ -14,6 +14,8 @@
  * 
  * @param gameEngine raw pointer to the game engine class
  * @param levelPath Path to level defintion file, relative to exe
+ * @param first Indicator of whether this is the first floor or not
+ * @param stage Indicator of stage level
  */
 ScenePlay::ScenePlay(GameEngine* gameEngine, std::string& levelPath, bool first, int stage):Scene(gameEngine){
     this->levelPath = levelPath;
@@ -22,7 +24,16 @@ ScenePlay::ScenePlay(GameEngine* gameEngine, std::string& levelPath, bool first,
     init(this->levelPath);
 }
 
-ScenePlay::ScenePlay(GameEngine* gameEngine, std::string& levelPath, std::shared_ptr<Entity> player, bool first, int stage) {
+/*
+* Alternative constructor for play scene for subsequent floors.
+* 
+* @param gameEngine raw pointer to the game engine class
+* @param levelPath Path to level definition file, relative to exe
+* @param player Shared pointer to the player entity, passed along to the new scene
+* @param first Indicator of whether this is the first floor or not
+* @param stage Indicator of stage level
+*/
+ScenePlay::ScenePlay(GameEngine* gameEngine, std::string& levelPath, std::shared_ptr<Entity> player, bool first, int stage):Scene(gameEngine) {
     this->levelPath = levelPath;
     this->first = first;
     this->player = player;
@@ -45,6 +56,11 @@ void ScenePlay::init(const std::string& levelPath){
     renderTiledMap(levelPath);
     if (first) {
         spawnPlayer();
+    }
+    else {
+        entityManager.addExistingEntity(player);
+        player->addComponent<CTransform>(spawnPoint, Vec2(0.0f, 0.0f), 0.0f);
+        player->getComponent<CStats>().stage += 1;
     }
 	buildInventoryMenu();
 
@@ -99,6 +115,18 @@ void ScenePlay::loadMap(const std::string& levelPath) {
                            e->getComponent<CFollowPlayer>().base = e->getComponent<CTransform>().position;
                        }
                    }
+                   if (obj.getType() == "BOSS") {
+                       auto e = entityManager.addEntity("DYNAMIC", "BOSS");
+                       e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation(obj.getName()), true);
+                       gameEngine->getAssets().getEnemy(obj.getName(), e, this->stage);
+                       e->addComponent<CTransform>(Vec2(obj.getPosition().x * 4, obj.getPosition().y * 4), Vec2(0.0f, 0.0f), 0.0f);
+                       e->getComponent<CTransform>().prevPosition.x = obj.getPosition().x * 4;
+                       e->getComponent<CTransform>().prevPosition.y = obj.getPosition().y * 4;
+                       e->addComponent<CBoundingBox>(gameEngine->getAssets().getAnimation(obj.getName()).getScaledSize());
+                       if (e->hasComponent<CFollowPlayer>()) {
+                           e->getComponent<CFollowPlayer>().base = e->getComponent<CTransform>().position;
+                       }
+                   }
                    if (obj.getType() == "CHEST") {
 					   auto e = entityManager.addEntity("INTERACTABLE", "CHEST");
                        if (obj.getName() == "CHEST") {
@@ -143,6 +171,12 @@ void ScenePlay::loadMap(const std::string& levelPath) {
                        e->addComponent<CBoundingBox>(gameEngine->getAssets().getAnimation("EXIT").getScaledSize());
                        e->addComponent<CTransform>(Vec2(obj.getPosition().x * 4, obj.getPosition().y * 4), Vec2(0.0f, 0.0f), 0.0f);
                        e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation("EXIT"), true);
+                   }
+                   if (obj.getType() == "BOSSDOOR") {
+                       auto e = entityManager.addEntity("STATIC", "BOSSDOOR");
+                       e->addComponent<CBoundingBox>(gameEngine->getAssets().getAnimation("BOSSDOOR").getScaledSize());
+                       e->addComponent<CTransform>(Vec2(obj.getPosition().x * 4, obj.getPosition().y * 4), Vec2(0.0f, 0.0f), 0.0f);
+					   e->addComponent<CAnimation>(gameEngine->getAssets().getAnimation("BOSSDOOR"), true);
                    }
                }
            }
@@ -548,6 +582,21 @@ void ScenePlay::sCollision() {
 
                     // Allow enemies to push player, not the other way around.
                     if (de->getID() == "ENEMY") {
+                        continue;
+                    }
+
+                    if (!playerEntity->hasComponent<CInvincibility>()) {
+                        gameEngine->changeScene("BATTLE", std::make_shared<SceneBattle>(gameEngine, playerEntity, enemyEntity, shared_from_this()));
+                    }
+                }
+
+                if ((de->getID() == "PLAYER" && e->getID() == "BOSS") ||
+                    (de->getID() == "BOSS" && e->getID() == "PLAYER")) {
+                    auto playerEntity = (de->getID() == "PLAYER") ? de : e;
+                    auto enemyEntity = (de->getID() == "BOSS") ? de : e;
+
+                    // Allow enemies to push player, not the other way around.
+                    if (de->getID() == "BOSS") {
                         continue;
                     }
 
@@ -1648,8 +1697,37 @@ void ScenePlay::sDoAction(const Action& action) {
                     gameEngine->playSound("MENUSELECT");
 
                     if (selectedSubMenuItem == 0) {
+                        std::fstream file("HIGHSCORES.txt");
+                        std::string str;
+                        int num;
+                        int highfloor;
+                        int highlevel;
+
+                        while (file.good()) {
+                            file >> str;
+                            if (str == "FLOOR") {
+                                file >> num;
+                                highfloor = num;
+                            }
+                            if (str == "LEVEL") {
+                                file >> num;
+                                highlevel = num;
+                            }
+                        }
+
+                        file.close();
+
+                        if (player->getComponent<CStats>().stage > highfloor) {
+                            highfloor = player->getComponent<CStats>().stage;
+                            highlevel = player->getComponent<CStats>().level;
+
+                            std::ofstream outFile("HIGHSCORES.txt", std::ios::trunc);
+                            if (outFile.is_open()) {
+                                outFile << "FLOOR " << highfloor << '\n';
+                                outFile << "LEVEL " << highlevel << '\n';
+                            }
+                        }
                         gameEngine->changeScene("MENU", std::make_shared<SceneMenu>(gameEngine));
-                        //UnloadRenderTexture(mapTexture);
                     }
                     else {
                         subControl = false;
@@ -1706,7 +1784,17 @@ void ScenePlay::sCamera(){
 }
 
 void ScenePlay::battleReturn(std::shared_ptr<Entity> e) {
+    
+    if (e->getID() == "BOSS") {
+        for (const auto& entity : entityManager.getEntities()) {
+            if (entity->getID() == "BOSSDOOR") {
+                entity->destroy();
+            }
+        }
+    }
+
     e->destroy();
+
     buildInventoryMenu();
 	CInput& input = player->getComponent<CInput>();
     input.up = false;

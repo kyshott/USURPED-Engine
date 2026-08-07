@@ -1050,7 +1050,14 @@ void SceneBattle::collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<En
 			WeaponSpec weapon = gameEngine->getAssets().getWeapon(loot.lootItem.second);
 			itemDropName = weapon.name;
 			itemDrop = 1;
-			looter->getComponent<CWeapons>().weapons.push_back(weapon);
+			std::vector<WeaponSpec> weaponvec = looter->getComponent<CWeapons>().weapons;
+			auto it = std::find_if(weaponvec.begin(), weaponvec.end(), [&](const WeaponSpec& w) {
+				return w.id == weapon.id;
+				});
+			if (it == weaponvec.end()) {
+				looter->getComponent<CWeapons>().weapons.push_back(weapon);
+			}
+
 		}
 		else if (loot.lootItem.first == "MAGIC") {
 			MagicSpec magic = gameEngine->getAssets().getMagic(loot.lootItem.second);
@@ -1270,7 +1277,7 @@ void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<E
 			else {
 				total = ((spell.effect.magnitude + attacker->getComponent<CStats>().intelligence) * multiplier) - defender->getComponent<CStats>().magicdefense * multiplier;
 			}
-			defender->getComponent<CHealth>().current -= total;
+			defender->getComponent<CHealth>().current -= static_cast<int>(total);
 
 			if (spell.effect.id == "FIRE") {
 				gameEngine->playSound("FIRE");
@@ -1280,9 +1287,13 @@ void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<E
 				gameEngine->playSound("ICE");
 				drawDamageNumber(false, static_cast<int>(total), SKYBLUE);
 			}
-			else if (spell.effect.id == "LIGHTNING") {
-				gameEngine->playSound("LIGHTNING");
+			else if (spell.effect.id == "SHOCK") {
+				gameEngine->playSound("SHOCK");
 				drawDamageNumber(false, static_cast<int>(total), YELLOW);
+			}
+			else if (spell.effect.id == "DARK") {
+				gameEngine->playSound("SHOCK");
+				drawDamageNumber(false, static_cast<int>(total), DARKPURPLE);
 			}
 			else {
 				gameEngine->playSound("HIT");
@@ -1299,7 +1310,12 @@ void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<E
 			if (health.current > health.max) {
 				health.current = health.max;
 			}
-			drawDamageNumber(true, -spell.effect.magnitude, GREEN);
+			if (attacker == enemy) {
+				drawDamageNumber(false, -spell.effect.magnitude, GREEN);
+			}
+			else {
+				drawDamageNumber(true, -spell.effect.magnitude, GREEN);
+			}
 			gameEngine->playSound("HEAL");
 		}
 
@@ -1345,34 +1361,63 @@ void SceneBattle::applyEffect(std::shared_ptr<Entity> target, Effect effect) {
 		target->getComponent<CHealth>().current -= effect.magnitude;
 		spawnEffect(target, effect.id);
 
-
-
-		if (effect.id == "POISON") {
-			gameEngine->playSound("POISON");
-			drawDamageNumber(false, static_cast<int>(effect.magnitude), PURPLE);
-		}
-		else if (effect.id == "BURN") {
-			gameEngine->playSound("BURN");
-			drawDamageNumber(false, static_cast<int>(effect.magnitude), ORANGE);
-		}
-		else if (effect.id == "BLEED") {
-			gameEngine->playSound("BLEED");
-			drawDamageNumber(false, static_cast<int>(effect.magnitude), RED);
+		if (target == enemy) {
+			if (effect.id == "POISON") {
+				gameEngine->playSound("POISON");
+				drawDamageNumber(false, static_cast<int>(effect.magnitude), PURPLE);
+			}
+			else if (effect.id == "ICE") {
+				gameEngine->playSound("ICE");
+				drawDamageNumber(false, static_cast<int>(effect.magnitude), SKYBLUE);
+			}
+			else if (effect.id == "BLEED") {
+				gameEngine->playSound("BLEED");
+				drawDamageNumber(false, static_cast<int>(effect.magnitude), RED);
+			}
+			else {
+				gameEngine->playSound("HIT");
+				drawDamageNumber(false, static_cast<int>(effect.magnitude), WHITE);
+			}
 		}
 		else {
-			gameEngine->playSound("HIT");
-			drawDamageNumber(false, static_cast<int>(effect.magnitude), WHITE);
+			if (effect.id == "POISON") {
+				gameEngine->playSound("POISON");
+				drawDamageNumber(true, static_cast<int>(effect.magnitude), PURPLE);
+			}
+			else if (effect.id == "FIRE") {
+				gameEngine->playSound("FIRE");
+				drawDamageNumber(true, static_cast<int>(effect.magnitude), ORANGE);
+			}
+			else if (effect.id == "ICE") {
+				gameEngine->playSound("ICE");
+				drawDamageNumber(true, static_cast<int>(effect.magnitude), BLUE);
+			}
+			else {
+				gameEngine->playSound("HIT");
+				drawDamageNumber(true, static_cast<int>(effect.magnitude), WHITE);
+			}
 		}
 	}
 
 	if (effect.statusType == "HEAL") {
-		target->getComponent<CHealth>().current += effect.magnitude;
-		if (target->getComponent<CHealth>().current > target->getComponent<CHealth>().max) {
-			target->getComponent<CHealth>().current = target->getComponent<CHealth>().max;
-		}	
-		spawnEffect(target, effect.id);
-		gameEngine->playSound(effect.id);
-		drawDamageNumber(true, -static_cast<int>(effect.magnitude), GREEN);
+		if (target == player) {
+			target->getComponent<CHealth>().current += effect.magnitude;
+			if (target->getComponent<CHealth>().current > target->getComponent<CHealth>().max) {
+				target->getComponent<CHealth>().current = target->getComponent<CHealth>().max;
+			}
+			spawnEffect(target, effect.id);
+			gameEngine->playSound(effect.id);
+			drawDamageNumber(true, -static_cast<int>(effect.magnitude), GREEN);
+		}
+		else {
+			target->getComponent<CHealth>().current += effect.magnitude;
+			if (target->getComponent<CHealth>().current > target->getComponent<CHealth>().max) {
+				target->getComponent<CHealth>().current = target->getComponent<CHealth>().max;
+			}
+			spawnEffect(target, effect.id);
+			gameEngine->playSound(effect.id);
+			drawDamageNumber(false, -static_cast<int>(effect.magnitude), GREEN);
+		}
 	}
 }
 
@@ -1418,7 +1463,7 @@ void SceneBattle::applyDamage(std::shared_ptr<Entity> attacker, std::shared_ptr<
 		else {
 			gameEngine->playSound("HIT");
 		}
-		defender->getComponent<CHealth>().current -= total;
+		defender->getComponent<CHealth>().current -= static_cast<int>(total);
 		spawnEffect(defender, pWeapon.effect.id);
 		drawDamageNumber(false, static_cast<int>(total), WHITE);
 	}
