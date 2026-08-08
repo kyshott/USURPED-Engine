@@ -3,7 +3,7 @@
         "name": "Foot Soldier",
         "health": 15,
         "mana": 0,
-        "strength": 6,
+        "strength": 8,
         "damageType": "SLASH",
         "defense": 2,
         "magicDefense": 2,
@@ -26,7 +26,7 @@
         "name": "Skeleton",
         "health": 15,
         "mana": 0,
-        "strength": 6,
+        "strength": 8,
         "damageType": "SMASH",
         "defense": 2,
         "magicDefense": 2,
@@ -49,7 +49,7 @@
         "name": "Zombie",
         "health": 20,
         "mana": 20,
-        "strength": 6,
+        "strength": 8,
         "damageType": "SMASH",
         "defense": 1,
         "magicDefense": 1,
@@ -75,7 +75,7 @@
         "name": "Thief",
         "health": 15,
         "mana": 20,
-        "strength": 6,
+        "strength": 8,
         "damageType": "STAB",
         "defense": 1,
         "magicDefense": 1,
@@ -101,7 +101,7 @@
         "name": "Living Armor",
         "health": 20,
         "mana": 0,
-        "strength": 6,
+        "strength": 10,
         "damageType": "SLASH",
         "defense": 3,
         "magicDefense": 1,
@@ -117,11 +117,31 @@
         "mapspeed": 2,
         "description": "A suit of armor animated by a malevolent spirit."
     },
+    "GIANTBAT": {
+        "name": "Giant Bat",
+        "health": 15,
+        "mana": 0,
+        "strength": 10,
+        "damageType": "STAB",
+        "defense": 0,
+        "magicDefense": 0,
+        "intelligence": 0,
+        "speed": 5,
+        "ai": "FOLLOW",
+        "weakness": { "id": "SHOCK" },
+        "resistance": {},
+        "loot": {
+            "gold": 10,
+            "exp": 8
+        },
+        "mapspeed": 3,
+        "description": "A bat enlargened by malefic energy."
+    },
     "KNIGHT": {
         "name": "Knight",
         "health": 25,
         "mana": 0,
-        "strength": 6,
+        "strength": 10,
         "damageType": "SLASH",
         "defense": 3,
         "magicDefense": 2,
@@ -140,11 +160,11 @@
     "PALADIN": {
         "name": "Paladin",
         "health": 40,
-        "mana": 30,
-        "strength": 8,
+        "mana": 100,
+        "strength": 15,
         "damageType": "SMASH",
         "defense": 4,
-        "magicDefense": 3,
+        "magicDefense": 2,
         "intelligence": 0,
         "speed": 1,
         "ai": "FOLLOW",
@@ -161,11 +181,107 @@
         "mapspeed": 2,
         "description": "A stalwart warrior of faith."
     },
+    "ARCHMAGE": {
+        "name": "Archmage",
+        "health": 40,
+        "mana": 100,
+        "strength": 10,
+        "damageType": "SMASH",
+        "defense": 1,
+        "magicDefense": 5,
+        "intelligence": 10,
+        "speed": 1,
+        "ai": "FOLLOW",
+        "magic": {
+            "id": "SHOCK",
+            "castChance": 0.65
+        },
+        "weakness": { "id": "SHOCK" },
+        "resistance": { "id": "DARK" },
+        "loot": {
+            "gold": 30,
+            "exp": 20
+        },
+        "mapspeed": 2,
+        "description": "A high-level spellcaster of the empire."
+    },
+    "THIEFLORD": {
+        "name": "Thief Lord",
+        "health": 40,
+        "mana": 100,
+        "strength": 15,
+        "damageType": "STAB",
+        "defense": 1,
+        "magicDefense": 3,
+        "intelligence": 10,
+        "speed": 8,
+        "ai": "FOLLOW",
+        "magic": {
+            "id": "TOXIN",
+            "castChance": 0.3
+        },
+        "weakness": { "id": "SLASH" },
+        "resistance": { "id": "STAB" },
+        "loot": {
+            "gold": 30,
+            "exp": 20
+        },
+        "mapspeed": 2,
+        "description": "An enigmatic veteran thief who has stolen it all."
+    },
+    "SHADOW": {
+        "name": "Shadow",
+        "health": 40,
+        "mana": 100,
+        "strength": 15,
+        "damageType": "SMASH",
+        "defense": 2,
+        "magicDefense": 1,
+        "intelligence": 10,
+        "speed": 1,
+        "ai": "FOLLOW",
+        "magic": {
+            "id": "DOOM",
+            "castChance": 0.05
+        },
+        "weakness": { "id": "STAB" },
+        "resistance": { "id": "DARK" },
+        "loot": {
+            "gold": 30,
+            "exp": 20
+        },
+        "mapspeed": 2,
+        "description": "A shadow from your past."
+    },
+    "SERVITOR": {
+        "name": "Servitor",
+        "health": 40,
+        "mana": 100,
+        "strength": 10,
+        "damageType": "SMASH",
+        "defense": 3,
+        "magicDefense": 3,
+        "intelligence": 10,
+        "speed": 1,
+        "ai": "FOLLOW",
+        "magic": {
+            "id": "DARKBOLT",
+            "castChance": 0.35
+        },
+        "weakness": { "id": "FIRE" },
+        "resistance": { "id": "SLASH" },
+        "loot": {
+            "gold": 30,
+            "exp": 20
+        },
+        "mapspeed": 2,
+        "description": "A mechanized guardian of the tower."
+    },
     "PYROMANCER": {
         "name": "Pyromancer",
         "health": 15,
         "mana": 20,
-        "strength": 4,
+        "strength": 6,
         "damageType": "SMASH",
         "defense": 1,
         "magicDefense": 3,
@@ -188,11 +304,61 @@
         "mapspeed": 2,
         "description": "The empire's designated flame conjurers."
     },
+    "CRYOMANCER": {
+        "name": "Cryomancer",
+        "health": 15,
+        "mana": 20,
+        "strength": 6,
+        "damageType": "SMASH",
+        "defense": 1,
+        "magicDefense": 3,
+        "intelligence": 2,
+        "speed": 2,
+        "ai": "FOLLOW",
+        "magic": {
+            "id": "ICICLE",
+            "castChance": 0.5
+        },
+        "weakness": { "id": "FIRE" },
+        "resistance": { "id": "ICE" },
+        "loot": {
+            "type": "ITEM",
+            "id": "SMANA",
+            "dropchance": 0.25,
+            "gold": 3,
+            "exp": 5
+        },
+        "mapspeed": 2,
+        "description": "The empire's designated ice conjurers."
+    },
+    "MIMIC": {
+        "name": "Mimic",
+        "health": 25,
+        "mana": 20,
+        "strength": 6,
+        "damageType": "STAB",
+        "defense": 3,
+        "magicDefense": 3,
+        "intelligence": 2,
+        "speed": 2,
+        "ai": "FOLLOW",
+        "weakness": { "id": "FIRE" },
+        "resistance": { "id": "DARK" },
+        "loot": {
+            "type": "ITEM",
+            "id": "MMANA",
+            "dropchance": 1.0,
+            "gold": 15,
+            "exp": 15
+        },
+        "mapspeed": 2,
+        "description": "A deceptive creature that mimics treasure chests."
+    },
     "WIZARD": {
         "name": "Wizard",
         "health": 15,
         "mana": 20,
-        "strength": 4,
+        "strength": 6,
         "damageType": "SMASH",
         "defense": 1,
         "magicDefense": 3,
@@ -203,8 +369,8 @@
             "id": "ZAP",
             "castChance": 0.5
         },
-        "weakness": { "id": "SLASH" },
-        "resistance": { "id": "SHOCK" },
+        "weakness": { "id": "SHOCK" },
+        "resistance": {},
         "loot": {
             "type": "ITEM",
             "id": "SMANA",
@@ -219,7 +385,7 @@
         "name": "Cleric",
         "health": 15,
         "mana": 20,
-        "strength": 6,
+        "strength": 8,
         "damageType": "SMASH",
         "defense": 1,
         "magicDefense": 3,
@@ -227,7 +393,7 @@
         "speed": 2,
         "ai": "FOLLOW",
         "magic": {
-            "id": "MEND",
+            "id": "MIDMEND",
             "castChance": 0.25
         },
         "weakness": { "id": "DARK" },

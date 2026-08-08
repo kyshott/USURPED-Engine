@@ -23,6 +23,7 @@ Texture SKELETON ./assets/textures/SKELETON.png
 Texture LIVINGARMOR ./assets/textures/LIVINGARMOR.png
 Texture FOOTSOLDIER ./assets/textures/FOOTSOLDIER.png
 Texture PYROMANCER ./assets/textures/PYROMANCER.png
+Texture CRYOMANCER ./assets/textures/CRYOMANCER.png
 Texture THIEF ./assets/textures/THIEF.png
 Texture ZOMBIE ./assets/textures/ZOMBIE.png
 Texture CLERIC ./assets/textures/CLERIC.png
@@ -48,12 +49,29 @@ Texture MAGICCHEST ./assets/textures/MAGICCHEST.png
 Texture MAGICCHESTOPEN ./assets/textures/MAGICCHESTOPEN.png
 Texture WEAPONCHEST ./assets/textures/WEAPONCHEST.png
 Texture WEAPONCHESTOPEN ./assets/textures/WEAPONCHESTOPEN.png
+Texture ARCHMAGE ./assets/textures/ARCHMAGE.png
+Texture GIANTBAT ./assets/textures/GIANTBAT.png
+Texture MIMIC ./assets/textures/MIMIC.png
+Texture SERVITOR ./assets/textures/SERVITOR.png
+Texture SHADOW ./assets/textures/SHADOW.png
+Texture THIEFLORD ./assets/textures/THIEFLORD.png
 
 Texture ANCIENTBLADE ./assets/textures/ANCIENTBLADE.png
 Texture IRONMACE ./assets/textures/IRONMACE.png
 Texture IRONBLADE ./assets/textures/IRONBLADE.png
+Texture IRONDAGGER ./assets/textures/IRONDAGGER.png
 Texture SABRE ./assets/textures/SABRE.png
 Texture RITUALDAGGER ./assets/textures/RITUALDAGGER.png
+Texture DARKHAMMER ./assets/textures/DARKHAMMER.png
+Texture REBELLION ./assets/textures/REBELLION.png
+Texture NIGHTFALL ./assets/textures/NIGHTFALL.png
+Texture GUNGNIR ./assets/textures/GUNGNIR.png
+Texture BUSTERSWORD ./assets/textures/BUSTERSWORD.png
+Texture GHALMARAZ ./assets/textures/GHALMARAZ.png
+Texture MASTERSWORD ./assets/textures/MASTERSWORD.png
+Texture STING ./assets/textures/STING.png
+Texture ANGFLAIL ./assets/textures/ANGFLAIL.png
+Texture TRIDENT ./assets/textures/TRIDENT.png
 
 Animation OLWALKD OLWALKD 2 8 4
 Animation OLWALKU OLWALKU 2 8 4
@@ -74,10 +92,21 @@ Animation MAGICCHESTOPEN MAGICCHESTOPEN 1 1 4
 Animation WEAPONCHEST WEAPONCHEST 1 1 4
 Animation WEAPONCHESTOPEN WEAPONCHESTOPEN 1 1 4
 Animation ANCIENTBLADE ANCIENTBLADE 1 1 5
+Animation ANGFLAIL ANGFLAIL 1 1 5
 Animation IRONMACE IRONMACE 1 1 5
 Animation IRONBLADE IRONBLADE 1 1 5
+Animation STING STING 1 1 5
+Animation MASTERSWORD MASTERSWORD 1 1 5
 Animation SABRE SABRE 1 1 5
 Animation RITUALDAGGER RITUALDAGGER 1 1 5
+Animation DARKHAMMER DARKHAMMER 1 1 5
+Animation IRONDAGGER IRONDAGGER 1 1 5
+Animation REBELLION REBELLION 1 1 5
+Animation BUSTERSWORD BUSTERSWORD 1 1 5
+Animation NIGHTFALL NIGHTFALL 1 1 5
+Animation GUNGNIR GUNGNIR 1 1 5
+Animation GHALMARAZ GHALMARAZ 1 1 5
+Animation TRIDENT TRIDENT 1 1 5
 Animation SHOCK SHOCK 3 10 8
 Animation ICE ICE 3 10 8
 Animation DARK DARK 3 10 8
@@ -92,12 +121,19 @@ Animation LIVINGARMOR LIVINGARMOR 1 1 4
 Animation FOOTSOLDIER FOOTSOLDIER 2 20 4
 Animation PYROMANCER PYROMANCER 2 20 4
 Animation WIZARD WIZARD 2 20 4
+Animation CRYOMANCER CRYOMANCER 2 20 4
 Animation KNIGHT KNIGHT 2 20 4
 Animation THIEF THIEF 2 20 4
 Animation SKELETON SKELETON 2 20 4
 Animation CLERIC CLERIC 2 20 4
 Animation ZOMBIE ZOMBIE 2 20 4
 Animation PALADIN PALADIN 2 20 4
+Animation ARCHMAGE ARCHMAGE 2 20 4
+Animation GIANTBAT GIANTBAT 2 20 4
+Animation MIMIC MIMIC 2 200 4
+Animation SERVITOR SERVITOR 2 20 4
+Animation SHADOW SHADOW 2 20 4
+Animation THIEFLORD THIEFLORD 2 20 4
 Music BGMUSIC ./assets/sounds/music.wav
 Music BATTLEMUSIC ./assets/sounds/music2.wav
 Music TITLEMUSIC ./assets/sounds/dungeon.wav

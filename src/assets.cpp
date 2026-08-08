@@ -313,9 +313,9 @@ std::shared_ptr<Entity> Assets::getEnemy(std::string name, std::shared_ptr<Entit
 
 	CStats& stats = e->getComponent<CStats>();
     CItems& items = e->getComponent<CItems>();
-	stats.defense = data.value("defense", 0);
-	stats.magicdefense = data.value("magicDefense", 0);
-	stats.speed = data.value("speed", 1);
+	stats.defense = data.value("defense", 0) * stage;
+	stats.magicdefense = data.value("magicDefense", 0) * stage;
+	stats.speed = data.value("speed", 1) * stage;
 	stats.strength = data.value("strength", 1) * stage;
 	stats.baseDamageType = data.value("damageType", "SLASH");
 	stats.intelligence = data.value("intelligence", 0) * stage;

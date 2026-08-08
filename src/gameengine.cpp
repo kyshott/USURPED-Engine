@@ -93,9 +93,12 @@ void GameEngine::run(){
 /**
  * Gathers user input then updates the currently running scene
  */
-void GameEngine::update(){
+void GameEngine::update() {
     sUserInput();
-    sceneMap[currScene]->update();
+
+    auto scene = currentScene();
+    scene->update();
+
     currentFrame++;
 }
 

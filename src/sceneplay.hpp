@@ -23,7 +23,6 @@ private:
     };
 
     PlayerConfig playerConfig;      /* Information about the properties of the player for this level */
-    std::string levelPath;          /* Relative path to the level definition file from exe */
     std::shared_ptr<Entity> player; /* Shared pointer reference to the player entity */
     std::random_device rd;
     bool reload = false;              /* If the Scene should be reloaded at the end of the current frame */
@@ -84,5 +83,6 @@ public:
     ScenePlay(GameEngine* gameEngine, std::string& levelPath, std::shared_ptr<Entity> player, bool first, int stage);
     ScenePlay() = default;
     void battleReturn(std::shared_ptr<Entity> e);
+    std::string levelPath;          /* Relative path to the level definition file from exe */
     void update();
 };

@@ -27,7 +27,6 @@ void SceneBattle::init() {
 	registerAction(KEY_W, "UP");
 	registerAction(KEY_S, "DOWN");
 	registerAction(KEY_SPACE, "SELECT");
-	registerAction(KEY_ESCAPE, "QUIT");
 	registerAction(KEY_BACKSPACE, "BACK");
 	gameEngine->stopMusic("TITLEMUSIC");
 	gameEngine->playMusic("BATTLEMUSIC");
@@ -189,9 +188,6 @@ void SceneBattle::sDoAction(const Action& action) {
 					menu = 1;
 					selectedMenuItem = 0;
 				}
-			}
-			if (action.getName() == "QUIT") {
-				gameEngine->changeScene("PLAY", previousScene);
 			}
 		}
 
@@ -1089,15 +1085,15 @@ void SceneBattle::collectLoot(std::shared_ptr<Entity> looter, std::shared_ptr<En
 		stats.nextlevel = static_cast<int>(stats.nextlevel * 1.5f);
 		stats.speed += 1;
 		if (stats.level % 5 == 0) {
-			stats.defense += 3;
+			stats.defense += 2;
 			stats.intelligence += 2;
-			stats.strength += 3;
+			stats.strength += 2;
 			stats.magicdefense += 2;
 		}
 		else {
-			stats.defense += 2;
+			stats.defense += 1;
 			stats.intelligence += 1;
-			stats.strength += 2;
+			stats.strength += 1;
 			stats.magicdefense += 1;
 		}
 		CHealth& health = looter->getComponent<CHealth>();
@@ -1279,25 +1275,51 @@ void SceneBattle::applyMagic(std::shared_ptr<Entity> attacker, std::shared_ptr<E
 			}
 			defender->getComponent<CHealth>().current -= static_cast<int>(total);
 
-			if (spell.effect.id == "FIRE") {
-				gameEngine->playSound("FIRE");
-				drawDamageNumber(false, static_cast<int>(total), ORANGE);
+			if (defender == enemy) {
+
+				if (spell.effect.id == "FIRE") {
+					gameEngine->playSound("FIRE");
+					drawDamageNumber(false, static_cast<int>(total), ORANGE);
+				}
+				else if (spell.effect.id == "ICE") {
+					gameEngine->playSound("ICE");
+					drawDamageNumber(false, static_cast<int>(total), SKYBLUE);
+				}
+				else if (spell.effect.id == "SHOCK") {
+					gameEngine->playSound("SHOCK");
+					drawDamageNumber(false, static_cast<int>(total), YELLOW);
+				}
+				else if (spell.effect.id == "DARK") {
+					gameEngine->playSound("SHOCK");
+					drawDamageNumber(false, static_cast<int>(total), DARKPURPLE);
+				}
+				else {
+					gameEngine->playSound("HIT");
+					drawDamageNumber(false, static_cast<int>(total), WHITE);
+				}
 			}
-			else if (spell.effect.id == "ICE") {
-				gameEngine->playSound("ICE");
-				drawDamageNumber(false, static_cast<int>(total), SKYBLUE);
-			}
-			else if (spell.effect.id == "SHOCK") {
-				gameEngine->playSound("SHOCK");
-				drawDamageNumber(false, static_cast<int>(total), YELLOW);
-			}
-			else if (spell.effect.id == "DARK") {
-				gameEngine->playSound("SHOCK");
-				drawDamageNumber(false, static_cast<int>(total), DARKPURPLE);
-			}
-			else {
-				gameEngine->playSound("HIT");
-				drawDamageNumber(false, static_cast<int>(total), WHITE);
+
+			if (defender == player) {
+				if (spell.effect.id == "FIRE") {
+					gameEngine->playSound("FIRE");
+					drawDamageNumber(true, static_cast<int>(total), ORANGE);
+				}
+				else if (spell.effect.id == "ICE") {
+					gameEngine->playSound("ICE");
+					drawDamageNumber(true, static_cast<int>(total), SKYBLUE);
+				}
+				else if (spell.effect.id == "SHOCK") {
+					gameEngine->playSound("SHOCK");
+					drawDamageNumber(true, static_cast<int>(total), YELLOW);
+				}
+				else if (spell.effect.id == "DARK") {
+					gameEngine->playSound("SHOCK");
+					drawDamageNumber(true, static_cast<int>(total), DARKPURPLE);
+				}
+				else {
+					gameEngine->playSound("HIT");
+					drawDamageNumber(true, static_cast<int>(total), WHITE);
+				}
 			}
 		}
 

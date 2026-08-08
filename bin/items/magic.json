@@ -44,7 +44,7 @@
         "description": "Hits the target with dark energy..",
         "effect": {
             "type": "DAMAGE",
-            "magnitude": 12,
+            "magnitude": 15,
             "id": "DARK"
         },
         "manacost": 8,
@@ -57,7 +57,7 @@
         "description": "Scorches the target with flame.",
         "effect": {
             "type": "DAMAGE",
-            "magnitude": 12,
+            "magnitude": 15,
             "id": "FIRE"
         },
         "manacost": 8,
@@ -70,7 +70,7 @@
         "description": "Shocks the target with lightning.",
         "effect": {
             "type": "DAMAGE",
-            "magnitude": 12,
+            "magnitude": 15,
             "id": "SHOCK"
         },
         "manacost": 8,
@@ -83,7 +83,7 @@
         "description": "Blasts the target with ice.",
         "effect": {
             "type": "DAMAGE",
-            "magnitude": 12,
+            "magnitude": 15,
             "id": "ICE"
         },
         "manacost": 8,
@@ -96,7 +96,7 @@
         "description": "Blasts the target with dark energy.",
         "effect": {
             "type": "DAMAGE",
-            "magnitude": 18,
+            "magnitude": 40,
             "id": "DARK"
         },
         "manacost": 15,
@@ -109,7 +109,7 @@
         "description": "Blazes the target with flame.",
         "effect": {
             "type": "DAMAGE",
-            "magnitude": 18,
+            "magnitude": 40,
             "id": "FIRE"
         },
         "manacost": 15,
@@ -122,7 +122,7 @@
         "description": "Jolts the target with lightning.",
         "effect": {
             "type": "DAMAGE",
-            "magnitude": 18,
+            "magnitude": 40,
             "id": "SHOCK"
         },
         "manacost": 15,
@@ -135,7 +135,7 @@
         "description": "Explodes the target with ice.",
         "effect": {
             "type": "DAMAGE",
-            "magnitude": 18,
+            "magnitude": 40,
             "id": "ICE"
         },
         "manacost": 15,
@@ -148,7 +148,7 @@
         "description": "Obliterates the target.",
         "effect": {
             "type": "DAMAGE",
-            "magnitude": 50,
+            "magnitude": 100,
             "id": "DARK"
         },
         "manacost": 30,
@@ -231,12 +231,12 @@
         "description": "Sets the target aflame over time.",
         "effect": {
             "type": "EFFECT",
-            "magnitude": 5,
+            "magnitude": 12,
             "id": "FIRE",
-            "duration": 4,
+            "duration": 5,
             "effectType": "DAMAGE"
         },
-        "manacost": 5,
+        "manacost": 8,
         "cost": 0,
         "rarity": 2
     },
@@ -246,7 +246,7 @@
         "description": "Bites the target with ice over time.",
         "effect": {
             "type": "EFFECT",
-            "magnitude": 8,
+            "magnitude": 18,
             "id": "ICE",
             "duration": 4,
             "effectType": "DAMAGE"
@@ -261,7 +261,7 @@
         "description": "Poisons the target with a mild toxin.",
         "effect": {
             "type": "EFFECT",
-            "magnitude": 3,
+            "magnitude": 8,
             "id": "POISON",
             "duration": 3,
             "effectType": "DAMAGE"
@@ -276,7 +276,7 @@
         "description": "Poisons the target with a toxin.",
         "effect": {
             "type": "EFFECT",
-            "magnitude": 5,
+            "magnitude": 18,
             "id": "POISON",
             "duration": 4,
             "effectType": "DAMAGE"
@@ -291,7 +291,7 @@
         "description": "Poisons the target with a powerful toxin.",
         "effect": {
             "type": "EFFECT",
-            "magnitude": 8,
+            "magnitude": 30,
             "id": "POISON",
             "duration": 5,
             "effectType": "DAMAGE"

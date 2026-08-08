@@ -85,7 +85,6 @@ void ScenePlay::init(const std::string& levelPath){
 	registerAction(KEY_BACKSPACE, "BACK");
     
     mainCamera=Camera2D({gameEngine->getWidth()/2.0f*GetWindowScaleDPI().x,gameEngine->getHeight()/2.0f*GetWindowScaleDPI().y},{gameEngine->getWidth()/2.0f,gameEngine->getHeight()/2.0f},0,GetWindowScaleDPI().x);
-
     gameEngine->playMusic("TITLEMUSIC");
 }
 
@@ -563,18 +562,6 @@ void ScenePlay::sCollision() {
 
                 // -------------------- INTERACTION RESOLUTIONS -------------------- 
 
-                if (e->getID() == "HEART" && de->hasComponent<CHealth>() || de->getID() == "HEART" && e->hasComponent<CHealth>()) {
-                    auto heart = (de->getID() == "HEART") ? de : e;
-                    auto entity = (de->getID() == "ENTITY") ? de : e;
-                    if (!(entity->getComponent<CHealth>().current == entity->getComponent<CHealth>().max)) {
-                        entity->getComponent<CHealth>().current += 1;
-                    }
-                    gameEngine->playSound("HEART");
-                    heart->destroy();
-                    skipPos = true;
-                    continue;
-				}
-
                 if ((de->getID() == "PLAYER" && e->getID() == "ENEMY") ||
                     (de->getID() == "ENEMY" && e->getID() == "PLAYER")) {
                     auto playerEntity = (de->getID() == "PLAYER") ? de : e;
@@ -608,13 +595,19 @@ void ScenePlay::sCollision() {
                 if ((de->getID() == "PLAYER" && e->getID() == "EXIT") ||
                     (de->getID() == "EXIT" && e->getID() == "PLAYER")) {
                     auto playerEntity = (de->getID() == "PLAYER") ? de : e;
-                    auto exitEntity = (de->getID() == "EXIT") ? de : e;
 
                     std::string mappath = gameEngine->getAssets().getRandomMap();
 
-                    //UnloadRenderTexture(mapTexture);
+                    for (int i = 0; i < 5 && mappath == levelPath; i++) {
+                        if (mappath != levelPath) {
+                            break;
+                        }
+                        mappath = gameEngine->getAssets().getRandomMap();
+                    }
+
                     gameEngine->stopMusic("TITLEMUSIC");
-					gameEngine->changeScene("PLAY", std::make_shared<ScenePlay>(gameEngine, mappath, playerEntity, false, stage + 1));
+                    gameEngine->changeScene("PLAY", std::make_shared<ScenePlay>(gameEngine, mappath, playerEntity, false, stage + 1));
+                    return;
                 }
 
                 if ((de->getID() == "INTERACT" && e->getID() == "CHEST") ||
@@ -2081,7 +2074,14 @@ std::string ScenePlay::selectLoot(std::string type) {
         return "";
     }
 
-    const int lootTier = std::min(this->stage, 5);
+    int lootTier;
+
+    if (type == "ITEM") {
+        lootTier = std::min(this->stage, 3);
+    }
+    else {
+        lootTier = std::min(this->stage, 5);
+    }
 
     for (const auto& item : j_array) {
         if (item.contains("rarity") && item["rarity"] == lootTier) {

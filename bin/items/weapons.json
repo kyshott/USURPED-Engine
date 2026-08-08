@@ -11,7 +11,7 @@
             "type": "DAMAGE",
             "magnitude": 1
         },
-        "description": "Your old blade, now rusted.",
+        "description": "Your old blade - now rusted and worn.",
         "rarity": 0
     },
     "IRONMACE": {
@@ -41,14 +41,32 @@
             "type": "DAMAGE",
             "magnitude": 1
         },
-        "description": "A versatile yet common blade.",
+        "description": "A common yet versatile blade.",
         "rarity": 1
     },
+    "IRONDAGGER": {
+        "id": "IRONDAGGER",
+        "type": "dagger",
+        "name": "Iron Dagger",
+        "damage": 6,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "STAB",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "A sturdy and reliable dagger.",
+        "rarity": 1
+    },
+
+
+
     "SABRE": {
         "id": "SABRE",
         "type": "sword",
         "name": "Sabre",
-        "damage": 10,
+        "damage": 12,
         "cost": 0,
         "manacost": 0,
         "effect": {
@@ -61,9 +79,9 @@
     },
     "RITUALDAGGER": {
         "id": "RITUALDAGGER",
-        "type": "sword",
+        "type": "dagger",
         "name": "Ritual Dagger",
-        "damage": 10,
+        "damage": 12,
         "cost": 0,
         "manacost": 0,
         "effect": {
@@ -73,5 +91,163 @@
         },
         "description": "Used in rituals to summon you.",
         "rarity": 2
+    },
+    "DARKHAMMER": {
+        "id": "DARKHAMMER",
+        "type": "mace",
+        "name": "Dark Hammer",
+        "damage": 12,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "SMASH",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "A heavy, malevolent hammer.",
+        "rarity": 2
+    },
+
+
+
+    "BUSTERSWORD": {
+        "id": "BUSTERSWORD",
+        "type": "sword",
+        "name": "Buster Sword",
+        "damage": 30,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "SLASH",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "Avalanche's finest.",
+        "rarity": 3
+    },
+    "TRIDENT": {
+        "id": "TRIDENT",
+        "type": "spear",
+        "name": "Trident",
+        "damage": 30,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "STAB",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "Used by those of fire and sea.",
+        "rarity": 3
+    },
+    "GHALMARAZ": {
+        "id": "GHALMARAZ",
+        "type": "mace",
+        "name": "Ghal Maraz",
+        "damage": 30,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "SMASH",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "The great shatterer.",
+        "rarity": 3
+    },
+
+
+    "MASTERSWORD": {
+        "id": "MASTERSWORD",
+        "type": "sword",
+        "name": "Master Sword",
+        "damage": 45,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "SLASH",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "The sword of legend.",
+        "rarity": 4
+    },
+    "STING": {
+        "id": "STING",
+        "type": "dagger",
+        "name": "Sting",
+        "damage": 45,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "STAB",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "It glows when orcs are close.",
+        "rarity": 4
+    },
+    "ANGFLAIL": {
+        "id": "ANGFLAIL",
+        "type": "mace",
+        "name": "Angmar Flail",
+        "damage": 45,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "SMASH",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "Flail of the witch king.",
+        "rarity": 4
+    },
+
+
+
+    "REBELLION": {
+        "id": "REBELLION",
+        "type": "sword",
+        "name": "Rebellion",
+        "damage": 60,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "SLASH",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "The blade of chaos.",
+        "rarity": 5
+    },
+    "NIGHTFALL": {
+        "id": "NIGHTFALL",
+        "type": "mace",
+        "name": "Nightfall",
+        "damage": 60,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "SMASH",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "Destiny. Domination. Deceit.",
+        "rarity": 5
+    },
+    "GUNGNIR": {
+        "id": "GUNGNIR",
+        "type": "spear",
+        "name": "Gungnir",
+        "damage": 60,
+        "cost": 0,
+        "manacost": 0,
+        "effect": {
+            "id": "STAB",
+            "type": "DAMAGE",
+            "magnitude": 1
+        },
+        "description": "The spear of the gods.",
+        "rarity": 5
     }
 }
