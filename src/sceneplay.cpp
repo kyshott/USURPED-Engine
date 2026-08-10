@@ -70,10 +70,6 @@ void ScenePlay::init(const std::string& levelPath){
     menuStrings.push_back("WEAPONS");
     menuStrings.push_back("QUIT");
 
-    registerAction(KEY_B,"BB");
-    registerAction(KEY_G,"GRID");
-    registerAction(KEY_T,"TEX");
-    registerAction(KEY_V,"VISION");
     registerAction(KEY_C, "CAMERA");
 
     registerAction(KEY_W, "UP");
@@ -1466,18 +1462,6 @@ void ScenePlay::sDoAction(const Action& action) {
     CState& state = player->getComponent<CState>();
 
     if ((action.getType() == "PRESS")) {
-        if (action.getName() == "BB") {
-            renderBoundingBox = !renderBoundingBox;
-        }
-        if (action.getName() == "GRID") {
-            renderGridLines = !renderGridLines;
-        }
-        if (action.getName() == "TEX") {
-            renderTextures = !renderTextures;
-        }
-        if (action.getName() == "VISION") {
-            renderVisionDebug = !renderVisionDebug;
-        }
         if (action.getName() == "CAMERA") {
             if (followCam) {
                 followCam = false;
