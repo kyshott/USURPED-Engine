@@ -1818,7 +1818,6 @@ void ScenePlay::spawnPlayer(){
     CMagic& magic = player->getComponent<CMagic>();
     magic.magic.push_back(gameEngine->getAssets().getMagic("BURN"));
 	magic.magic.push_back(gameEngine->getAssets().getMagic("SMEND"));
-    magic.magic.push_back(gameEngine->getAssets().getMagic("TOXIN"));
     player->addComponent<CName>("Player");
     player->addComponent<CEffects>();
     player->addComponent<CStats>();
