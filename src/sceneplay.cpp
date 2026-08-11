@@ -1242,7 +1242,7 @@ void ScenePlay::sGUI(){
                         DrawTexture(
                             arrow,
                             static_cast<int>(arrowX),
-                            static_cast<int>(arrowY),
+                            static_cast<int>(arrowY - 25),
                             WHITE
                         );
                     }
@@ -1264,7 +1264,7 @@ void ScenePlay::sGUI(){
 
                 const float descY = contentY;
                 const float listY = contentY + 40.0f;
-                const float rowHeight = 36.0f;
+                const float rowHeight = 55.0f;
                 const int itemsPerPage = 5;
 
                 if (weapons.empty()) {
@@ -1361,7 +1361,7 @@ void ScenePlay::sGUI(){
                         DrawTexture(
                             arrow,
                             static_cast<int>(arrowX),
-                            static_cast<int>(arrowY),
+                            static_cast<int>(arrowY - 25),
                             WHITE
                         );
                     }
@@ -1818,6 +1818,12 @@ void ScenePlay::spawnPlayer(){
     CMagic& magic = player->getComponent<CMagic>();
     magic.magic.push_back(gameEngine->getAssets().getMagic("BURN"));
 	magic.magic.push_back(gameEngine->getAssets().getMagic("SMEND"));
+    magic.magic.push_back(gameEngine->getAssets().getMagic("SMEND"));
+    magic.magic.push_back(gameEngine->getAssets().getMagic("SMEND"));
+    magic.magic.push_back(gameEngine->getAssets().getMagic("SMEND"));
+    magic.magic.push_back(gameEngine->getAssets().getMagic("SMEND"));
+    magic.magic.push_back(gameEngine->getAssets().getMagic("SMEND"));
+    magic.magic.push_back(gameEngine->getAssets().getMagic("SMEND"));
     player->addComponent<CName>("Player");
     player->addComponent<CEffects>();
     player->addComponent<CStats>();

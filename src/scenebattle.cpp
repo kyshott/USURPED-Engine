@@ -546,6 +546,10 @@ void SceneBattle::enemyAct() {
 }
 
 void SceneBattle::victoryState() {
+	if (playerDefended) {
+		playerDefended = false;
+		player->getComponent<CStats>().defense /= 2;
+	}
 	battleState = BattleState::RESULTS;
 	waitTimer = battlespeed;
 	player->getComponent<CEffects>().effects.clear(); // clear effects for player at the end
