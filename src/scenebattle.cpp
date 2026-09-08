@@ -1392,13 +1392,13 @@ void SceneBattle::applyEffect(std::shared_ptr<Entity> target, Effect effect) {
 				gameEngine->playSound("POISON");
 				drawDamageNumber(false, static_cast<int>(effect.magnitude), PURPLE);
 			}
+			else if (effect.id == "FIRE") {
+				gameEngine->playSound("FIRE");
+				drawDamageNumber(true, static_cast<int>(effect.magnitude), ORANGE);
+			}
 			else if (effect.id == "ICE") {
 				gameEngine->playSound("ICE");
 				drawDamageNumber(false, static_cast<int>(effect.magnitude), SKYBLUE);
-			}
-			else if (effect.id == "BLEED") {
-				gameEngine->playSound("BLEED");
-				drawDamageNumber(false, static_cast<int>(effect.magnitude), RED);
 			}
 			else {
 				gameEngine->playSound("HIT");
