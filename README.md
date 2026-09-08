@@ -97,20 +97,36 @@
 
 ---
 
-<img src="bin/assets/textures/Title.png" width="200">
+<img src="bin/assets/screenshots/screencap7.png" width="600">
 
+### You have been Usurped! Reclaim your dark fortress from the heroes who defeated you.
 
-## 
+### Take the reigns as the dungeon boss and battle your way back to your throne. Collect weapons, magic and items along the way to help in your ambitions.
 
+<img src="bin/assets/textures/OLSTANDD.png" width="200">
 
-## CONTROLS
-SPACE - Select/interact
-<br>
-TAB - Open menu
-<br>
-BACKSPACE - Back
-<br>
-W/A/S/D - Up/Left/Down/Right
-<br>
-C - Change camera view (room/follow)
+---
+
+## How To Play
+
+---
+
+> <kbd>Space</kbd> - Select/interact
+> <br>
+> <kbd>Tab</kbd> - Open menu
+> <br>
+> <kbd>Backspace</kbd> - Back
+> <br>
+> <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> - Up/Left/Down/Right
+> <br>
+> <kbd>C</kbd> - Change camera view (room/follow)
+
+> + Select "Start" to begin a new run.
+> + Select "Test Room" to go into the debug room and test out various engine features.
+> + Select "Quit" to close out of the application.
+
+Once you have started a run, your goal is to reach the highest floor you can. Collect loot from chests and battle enemies to become more powerful. Enemies will get increasingly difficult with each floor, so be ready!
+If your HP drops to 0, the run ends and your progress is reset. Your best run is saved, and can be viewed from the title screen.
+
+---
 
