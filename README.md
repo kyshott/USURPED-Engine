@@ -53,22 +53,27 @@
 > ### [ImGui](https://github.com/ocornut/imgui)
 > **Used for the "Test Room", allowing for UI-based debugging and messing around with different systems.
 
+<br>
+
+> ### [Alagard Font](https://www.dafont.com/alagard.font)
+> **The primary font used for the game itself. Credits to Hewett Tsoi, 2013.**
+
 ---
 
-## Features
+## Engine Features
 
 ---
 
 + <ins>**Almost full ECS**:</ins> With a few exceptions. Every moving part of this engine is an "entity" in the entity component system.
 <br>
 
-+ <ins>**Full 2D AABB collision**:</ins> implemented with custom logic outside of Raylib's default implementation.
++ <ins>**Full 2D AABB collision**:</ins> Implemented with custom logic outside of Raylib's default implementation.
 <br>
 
-+ <ins>**"Room" camera system**:</ins> determines player position based on a room grid and positions the camera accordingly.
++ <ins>**"Room" camera system**:</ins> Determines player position based on a room grid and positions the camera accordingly.
 <br>
 
-+ <ins>**Complete asset loading system**:</ins> for textures, sounds/music and JSON. All assets can be specified in a .txt file, along with any specifics such as size/scale, animation frames, etc.
++ <ins>**Complete asset loading system**:</ins> For textures, sounds/music and JSON. All assets can be specified in a .txt file, along with any specifics such as size/scale, animation frames, etc.
 <br>
 
 + <ins>**Dynamic Entity Management**:</ins> Entities are dynamically created and removed while avoiding iterator invalidation.
@@ -82,13 +87,21 @@
 
 + <ins>**Dynamic rendering**:</ins> Only textures visible by the engine camera are rendered at runtime, saving heavily on memory usage.
 
+---
 
+## The Game
+
+---
+
+### USURPED! is a roguelike dungeon-crawler, inspired by early JRPG games such as Dragon Quest and Final Fantasy.
+
+---
+
+<img src="bin/assets/textures/Title.png" width="200">
 
 
 ## 
 
-## FONT CREDIT:
-"Alagard" by Hewett Tsoi, 2013
 
 ## CONTROLS
 SPACE - Select/interact
