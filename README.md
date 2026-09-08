@@ -107,6 +107,26 @@
 
 ---
 
+## Game Features
+
+---
+
+### An "exploration" scene, where the player travels around the dungeon collecting loot and maneuvering around enemies.
+
+<img src="bin/assets/screenshots/gif1.gif" width="600">
+
+---
+
+### A "battle" scene, where the player must strategically select their actions to defeat enemies.
+
+<img src="bin/assets/screenshots/gif2.gif" width="600">
+
+---
+
+### Enemy raycast pathfinding, complete with re-pathing back to a home location and vision blocking.
+
+<img src="bin/assets/screenshots/gif4.gif" width="600">
+
 ## How To Play
 
 ---
