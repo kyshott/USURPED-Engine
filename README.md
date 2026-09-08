@@ -89,7 +89,7 @@
 
 ---
 
-## The Game
+## USURPED!
 
 ---
 
@@ -107,7 +107,7 @@
 
 ---
 
-## Game Features
+## Game Overview
 
 ---
 
@@ -126,6 +126,42 @@
 ### Enemy raycast pathfinding, complete with re-pathing back to a home location and vision blocking.
 
 <img src="bin/assets/screenshots/gif4.gif" width="600">
+
+---
+
+### Over 25 weapons/spells and 16 different enemy types!
+
+<img src="bin/assets/screenshots/gif3.gif" width="600">
+
+---
+
+## Game Features
+
+---
+
++ <ins>**Turn-based 1-on-1 battles**:</ins> Similarly to Dragon Quest 1, the player battles enemies in a turn-based, 1 on 1 format. Battles use an FSM with a queue to determine what actions happen in battle.
+<br>
+
++ <ins>**Dynamic stat system**:</ins> The player, and enemies, all have stats that determine how much damage they do, how much damage they can take, who goes first and more. 
+<br>
+
++ <ins>**Random floor selection**:</ins> Levels are randomly selected from a pre-generated pool; you can never get the same floor layout twice in a row.
+<br>
+
++ <ins>**Random loot**:</ins> Loot from chests on each floor will always be randomized, selected from a pool of items available for the current floor number. Enemies may also occasionally drop useful items.
+<br>
+
++ <ins>**Scaling difficulty**:</ins> As the player goes higher in the fortress, the enemies get much tougher. However, so does the loot the player can find.
+<br>
+
++ <ins>**Dynamic damage types**:</ins> Both physical weapons and magic attacks have different damage types, which different enemies are susceptible to. Learn each enemy's weakness and master the dark fortress.
+<br>
+
++ <ins>**Special magic**:</ins> Some magic can be used both in and outside of battle to heal the player. Additionally, some spells apply an over-time effect rather than direct damage. 
+<br>
+
++ <ins>**Challenging boss battles**:</ins> There are currently 5 different bosses the player can face. Each boss has their own unique and very challenging battle style.
+<br>
 
 ## How To Play
 
