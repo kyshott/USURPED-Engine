@@ -8,7 +8,7 @@
 
 ## Created using C++ and Raylib, with level creation done in Tiled.
 
-+ ### This project was created/started as part of my final project for the Game Engine Development course at WIT. 
++ ### This project was completed in 4 weeks as my final project for the Game Engine Development course at WIT. 
 
 + ### All assets and code are included in this repository. As of September 2026, this is a preview of what the engine is capable of, demonstrated through a complete demo for a game.
 
